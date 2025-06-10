@@ -1734,7 +1734,6 @@ ui:
     contents: 内容管理
     questions: 问题
     answers: 回答
-    videos: 视频
     users: 用户管理
     badges: 徽章
     flags: 举报管理

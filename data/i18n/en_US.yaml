@@ -1773,7 +1773,6 @@ ui:
     contents: Contents
     questions: Questions
     answers: Answers
-    videos: Videos
     users: Users
     badges: Badges
     flags: Flags
