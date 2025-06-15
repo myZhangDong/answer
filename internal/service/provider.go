@@ -40,7 +40,7 @@ import (
 	"github.com/apache/answer/internal/service/follow"
 	"github.com/apache/answer/internal/service/importer"
 	"github.com/apache/answer/internal/service/meta"
-	"github.com/apache/answer/internal/service/meta_common"
+	metacommon "github.com/apache/answer/internal/service/meta_common"
 	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/notification"
 	notficationcommon "github.com/apache/answer/internal/service/notification_common"
@@ -64,6 +64,7 @@ import (
 	usercommon "github.com/apache/answer/internal/service/user_common"
 	"github.com/apache/answer/internal/service/user_external_login"
 	"github.com/apache/answer/internal/service/user_notification_config"
+	videocommon "github.com/apache/answer/internal/service/video_common"
 	"github.com/google/wire"
 )
 
@@ -128,4 +129,5 @@ var ProviderSetService = wire.NewSet(
 	badge.NewBadgeGroupService,
 	importer.NewImporterService,
 	file_record.NewFileRecordService,
+	videocommon.NewVideoCommon,
 )

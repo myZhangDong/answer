@@ -53,6 +53,7 @@ import (
 	"github.com/apache/answer/internal/repo/user"
 	"github.com/apache/answer/internal/repo/user_external_login"
 	"github.com/apache/answer/internal/repo/user_notification_config"
+	"github.com/apache/answer/internal/repo/video"
 	"github.com/google/wire"
 )
 
@@ -109,4 +110,5 @@ var ProviderSetRepo = wire.NewSet(
 	badge_group.NewBadgeGroupRepo,
 	badge_award.NewBadgeAwardRepo,
 	file_record.NewFileRecordRepo,
+	video.NewVideoRepo,
 )

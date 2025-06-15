@@ -57,6 +57,7 @@ type AnswerAPIRouter struct {
 	metaController          *controller.MetaController
 	badgeController         *controller.BadgeController
 	adminBadgeController    *controller_admin.BadgeController
+	videoController         *controller.VideoController
 }
 
 func NewAnswerAPIRouter(
@@ -90,6 +91,7 @@ func NewAnswerAPIRouter(
 	metaController *controller.MetaController,
 	badgeController *controller.BadgeController,
 	adminBadgeController *controller_admin.BadgeController,
+	videoController *controller.VideoController,
 ) *AnswerAPIRouter {
 	return &AnswerAPIRouter{
 		langController:          langController,
@@ -122,6 +124,7 @@ func NewAnswerAPIRouter(
 		metaController:          metaController,
 		badgeController:         badgeController,
 		adminBadgeController:    adminBadgeController,
+		videoController:         videoController,
 	}
 }
 
@@ -202,6 +205,10 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	r.GET("/badge/user/awards/recent", a.badgeController.GetRecentBadgeAwardListByUsername)
 	r.GET("/badge/user/awards", a.badgeController.GetAllBadgeAwardListByUsername)
 	r.GET("/badges", a.badgeController.GetBadgeList)
+
+	// video
+	r.GET("/video/info", a.videoController.GetVideo)
+	r.GET("/video/page", a.videoController.VideoPage)
 }
 
 func (a *AnswerAPIRouter) RegisterAuthUserWithAnyStatusAnswerAPIRouter(r *gin.RouterGroup) {
@@ -310,6 +317,12 @@ func (a *AnswerAPIRouter) RegisterAnswerAPIRouter(r *gin.RouterGroup) {
 
 	// meta
 	r.PUT("/meta/reaction", a.metaController.AddOrUpdateReaction)
+
+	// video management (admin/authenticated user operations)
+	r.POST("/video/create", a.videoController.CreateVideo)
+	r.PUT("/video/update", a.videoController.UpdateVideo)
+	r.DELETE("/video/delete", a.videoController.DeleteVideo)
+	r.DELETE("/video/batch-delete", a.videoController.BatchDeleteVideo)
 }
 
 func (a *AnswerAPIRouter) RegisterAnswerAdminAPIRouter(r *gin.RouterGroup) {
