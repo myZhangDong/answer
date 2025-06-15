@@ -231,6 +231,15 @@ const routes: RouteNode[] = [
             path: '/badges/:badge_id',
             page: 'pages/Badges/Detail/index',
           },
+          // video pages
+          {
+            path: '/video',
+            page: 'pages/Video/index',
+          },
+          {
+            path: '/video/:id',
+            page: 'pages/Video/Detail',
+          },
         ],
       },
       {
@@ -345,6 +354,14 @@ const routes: RouteNode[] = [
           {
             path: 'answers',
             page: 'pages/Admin/Answers',
+          },
+          {
+            path: 'videos',
+            page: 'pages/Admin/Videos',
+          },
+          {
+            path: 'videos/edit/:id',
+            page: 'pages/Admin/Videos/Edit',
           },
           {
             path: 'themes',

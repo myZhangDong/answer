@@ -92,7 +92,7 @@ export const ADMIN_NAV_MENUS = [
   {
     name: 'contents',
     icon: 'file-earmark-text-fill',
-    children: [{ name: 'questions' }, { name: 'answers' }],
+    children: [{ name: 'questions' }, { name: 'answers' }, { name: 'videos' }],
   },
   {
     name: 'users',

@@ -44,6 +44,15 @@ const Index: FC = () => {
       </NavLink>
 
       <NavLink
+        to="/video"
+        className={({ isActive }) =>
+          isActive || pathname === '/video' ? 'nav-link active' : 'nav-link'
+        }>
+        <Icon name="play-circle-fill" className="me-2" />
+        <span>{t('header.nav.video')}</span>
+      </NavLink>
+
+      <NavLink
         to="/tags"
         className={() =>
           pathname === '/tags' ? 'nav-link active' : 'nav-link'
