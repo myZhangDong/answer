@@ -54,8 +54,10 @@ var (
 		constant.AvatarThumbSubPath,
 		constant.PostSubPath,
 		constant.BrandingSubPath,
+		constant.ProjectSubPath,
 		constant.FilesPostSubPath,
 		constant.DeletedSubPath,
+		constant.VideoSubPath,
 	}
 	supportedThumbFileExtMapping = map[string]imaging.Format{
 		".jpg":  imaging.JPEG,
@@ -70,6 +72,8 @@ type UploaderService interface {
 	UploadPostFile(ctx *gin.Context, userID string) (url string, err error)
 	UploadPostAttachment(ctx *gin.Context, userID string) (url string, err error)
 	UploadBrandingFile(ctx *gin.Context, userID string) (url string, err error)
+	UploadProjectFile(ctx *gin.Context, userID string) (url string, err error)
+	UploadVideoFile(ctx *gin.Context, userID string) (url string, err error)
 	AvatarThumbFile(ctx *gin.Context, fileName string, size int) (url string, err error)
 }
 
@@ -295,6 +299,77 @@ func (us *uploaderService) UploadBrandingFile(ctx *gin.Context, userID string) (
 	us.fileRecordService.AddFileRecord(ctx, userID, avatarFilePath, url, string(plugin.AdminBranding))
 	return url, nil
 
+}
+
+func (us *uploaderService) UploadProjectFile(ctx *gin.Context, userID string) (
+	url string, err error) {
+	url, err = us.tryToUploadByPlugin(ctx, plugin.AdminProject)
+	if err != nil {
+		return "", err
+	}
+	if len(url) > 0 {
+		return url, nil
+	}
+
+	siteWrite, err := us.siteInfoService.GetSiteWrite(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, siteWrite.GetMaxImageSize())
+	file, fileHeader, err := ctx.Request.FormFile("file")
+	if err != nil {
+		return "", errors.BadRequest(reason.RequestFormatError).WithError(err)
+	}
+	defer file.Close()
+	fileExt := strings.ToLower(path.Ext(fileHeader.Filename))
+	if _, ok := plugin.DefaultFileTypeCheckMapping[plugin.AdminProject][fileExt]; !ok {
+		return "", errors.BadRequest(reason.RequestFormatError).WithError(err)
+	}
+
+	newFilename := fmt.Sprintf("%s%s", uid.IDStr12(), fileExt)
+	projectFilePath := path.Join(constant.ProjectSubPath, newFilename)
+	url, err = us.uploadImageFile(ctx, fileHeader, projectFilePath)
+	if err != nil {
+		return "", err
+	}
+	us.fileRecordService.AddFileRecord(ctx, userID, projectFilePath, url, string(plugin.AdminProject))
+	return url, nil
+}
+
+func (us *uploaderService) UploadVideoFile(ctx *gin.Context, userID string) (url string, err error) {
+	url, err = us.tryToUploadByPlugin(ctx, plugin.AdminVideo)
+	if err != nil {
+		return "", err
+	}
+	if len(url) > 0 {
+		return url, nil
+	}
+
+	siteWrite, err := us.siteInfoService.GetSiteWrite(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, siteWrite.GetMaxImageSize())
+	file, fileHeader, err := ctx.Request.FormFile("file")
+	if err != nil {
+		return "", errors.BadRequest(reason.RequestFormatError).WithError(err)
+	}
+	defer file.Close()
+	fileExt := strings.ToLower(path.Ext(fileHeader.Filename))
+	if _, ok := plugin.DefaultFileTypeCheckMapping[plugin.AdminVideo][fileExt]; !ok {
+		return "", errors.BadRequest(reason.RequestFormatError).WithError(err)
+	}
+
+	newFilename := fmt.Sprintf("%s%s", uid.IDStr12(), fileExt)
+	videoFilePath := path.Join(constant.VideoSubPath, newFilename)
+	url, err = us.uploadImageFile(ctx, fileHeader, videoFilePath)
+	if err != nil {
+		return "", err
+	}
+	us.fileRecordService.AddFileRecord(ctx, userID, videoFilePath, url, string(plugin.AdminVideo))
+	return url, nil
 }
 
 func (us *uploaderService) uploadImageFile(ctx *gin.Context, file *multipart.FileHeader, fileSubPath string) (

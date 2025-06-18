@@ -24,6 +24,8 @@ const (
 	AvatarThumbSubPath = "avatar_thumb"
 	PostSubPath        = "post"
 	BrandingSubPath    = "branding"
+	ProjectSubPath     = "project"
+	VideoSubPath       = "video"
 	FilesPostSubPath   = "files/post"
 	DeletedSubPath     = "deleted"
 )

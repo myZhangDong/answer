@@ -1,6 +1,8 @@
 import { FC, useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 
+import { UploadImg } from '@/components';
+
 interface VideoFormData {
   title: string;
   category: string;
@@ -150,11 +152,34 @@ const VideoForm: FC<VideoFormProps> = ({
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>视频图片</Form.Label>
+              <div className="mb-2">
+                <UploadImg
+                  type="video"
+                  uploadCallback={(url) => handleFormChange('cover', url)}>
+                  选择文件
+                </UploadImg>
+                <span className="ms-2 text-muted">
+                  {formData.cover ? '已选择文件' : '未选择任何文件'}
+                </span>
+              </div>
+              <div className="text-center p-4 border rounded bg-light">
+                {formData.cover ? (
+                  <img
+                    src={formData.cover}
+                    alt="视频封面"
+                    style={{ maxWidth: '200px', maxHeight: '150px' }}
+                    className="img-fluid"
+                  />
+                ) : (
+                  <div className="text-muted">暂无图片</div>
+                )}
+              </div>
               <Form.Control
                 type="text"
                 value={formData.cover}
                 onChange={(e) => handleFormChange('cover', e.target.value)}
-                placeholder="请输入视频封面图片URL"
+                placeholder="或直接输入图片URL"
+                className="mt-2"
               />
             </Form.Group>
           </Col>

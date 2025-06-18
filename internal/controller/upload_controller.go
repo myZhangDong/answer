@@ -39,6 +39,10 @@ const (
 	fileFromAvatar = "avatar"
 	// file is logo/icon images
 	fileFromBranding = "branding"
+	// file is project cover images
+	fileFromProject = "project"
+	// file is video cover images
+	fileFromVideo = "video"
 )
 
 // UploadController upload controller
@@ -59,7 +63,7 @@ func NewUploadController(uploaderService uploader.UploaderService) *UploadContro
 // @Tags Upload
 // @Accept multipart/form-data
 // @Security ApiKeyAuth
-// @Param source formData string true "identify the source of the file upload" Enums(post, post_attachment, avatar, branding)
+// @Param source formData string true "identify the source of the file upload" Enums(post, post_attachment, avatar, branding, project, video)
 // @Param file formData file true "file"
 // @Success 200 {object} handler.RespBody{data=string}
 // @Router /answer/api/v1/file [post]
@@ -84,6 +88,10 @@ func (uc *UploadController) UploadFile(ctx *gin.Context) {
 		url, err = uc.uploaderService.UploadBrandingFile(ctx, userID)
 	case fileFromPostAttachment:
 		url, err = uc.uploaderService.UploadPostAttachment(ctx, userID)
+	case fileFromProject:
+		url, err = uc.uploaderService.UploadProjectFile(ctx, userID)
+	case fileFromVideo:
+		url, err = uc.uploaderService.UploadVideoFile(ctx, userID)
 	default:
 		handler.HandleResponse(ctx, errors.BadRequest(reason.UploadFileSourceUnsupported), nil)
 		return

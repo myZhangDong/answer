@@ -26,6 +26,8 @@ const (
 	UserPost           UploadSource = "user_post"
 	UserPostAttachment UploadSource = "user_post_attachment"
 	AdminBranding      UploadSource = "admin_branding"
+	AdminProject       UploadSource = "admin_project"
+	AdminVideo         UploadSource = "admin_video"
 )
 
 var (
@@ -48,6 +50,18 @@ var (
 			".jpeg": true,
 			".png":  true,
 			".ico":  true,
+		},
+		AdminProject: {
+			".jpg":  true,
+			".jpeg": true,
+			".png":  true,
+			".webp": true,
+		},
+		AdminVideo: {
+			".jpg":  true,
+			".jpeg": true,
+			".png":  true,
+			".webp": true,
 		},
 	}
 )

@@ -173,7 +173,13 @@ export interface UserInfoRes extends UserInfoBase {
   [prop: string]: any;
 }
 
-export type UploadType = 'post' | 'avatar' | 'branding' | 'post_attachment';
+export type UploadType =
+  | 'post'
+  | 'avatar'
+  | 'branding'
+  | 'post_attachment'
+  | 'project'
+  | 'video';
 export interface UploadReq {
   file: FormData;
 }
