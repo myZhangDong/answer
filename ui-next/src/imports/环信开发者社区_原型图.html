@@ -1,0 +1,837 @@
+<html style="margin: 0; padding: 0; width: 100%; height: 100%;"><head>
+        <meta charset="uft-8">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    
+      
+    <script id="he-diagram-proxy" class="__helper-box">
+      
+  function escape(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag));
+    }
+    
+  function unescape(str) {
+    const map = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&#39;': "'",
+      '&quot;': '"'
+    };
+    return str.replace(/&(amp|lt|gt|#39|quot);/g, 
+      match => map[match]);
+  }
+  
+  function sendMessage2Parent(action) {
+    window.parent.postMessage(action, '*');
+  }
+
+      
+      const cdn = 'https://lf-coze-web-cdn.coze.cn/obj/coze-web-cn/coze-drawio/index.26b84e9.html';
+      
+      
+    document.addEventListener('DOMContentLoaded', () => {
+        const diagramDivs = document.querySelectorAll('div[data-he-diagram]');
+        diagramDivs.forEach(diagramDiv => {
+          const iframe = diagramDiv.querySelector('iframe[data-he-frame]');
+          const codeDiv = diagramDiv.querySelector('div[data-he-code]');
+         
+          if (iframe && codeDiv) {
+            // 发送消息方法，与use-message保持一致
+            const sendMessage = (action) => {
+              if (!iframe.contentWindow) {
+                console.warn('Iframe not ready');
+                return;
+              }
+
+              try {
+                const message = JSON.stringify(action);
+                iframe.contentWindow.postMessage(
+                  message,
+                  cdn
+                );
+              } catch (error) {
+                console.error('Failed to send message to draw.io:', error);
+              }
+            };
+            
+            // 为iframe添加唯一标识
+            const iframeId = Math.random().toString(36).substring(2);
+            iframe.dataset.iframeId = iframeId;
+            codeDiv.dataset.iframeId = iframeId;
+
+            // 处理init事件
+            const handleInit = () => {
+              const xml = unescape(codeDiv.innerHTML);
+              sendMessage({
+                action: 'load',
+                xml: xml,
+                autosave: 1
+              });
+            };
+            
+            const handleConfigure = () => {
+              sendMessage({
+                action: 'configure',
+                config: {
+                  defaultFonts: ['Arial', 'Helvetica', 'sans-serif'],
+                  css: `
+.geEditor > .geTabContainer {
+  display: none;
+}
+
+.geSidebarFooter {
+  display: none;
+}
+
+.geMenubarContainer {
+  display: none;
+}
+
+.geMenubar {
+  display: none;
+}
+
+.geToolbarContainer {
+  background: rgba(255, 255, 255, 1);
+  border-top: none !important;
+  border-color: rgba(82, 100, 154, 0.13) !important;
+}
+.geDiagramContainer {
+  background: rgba(255, 255, 255, 1);
+}
+
+`,
+                }
+              });
+            };
+            
+            const handleLoad = () => {
+              sendMessage2Parent({
+                event: 'drawio_loaded',
+                data: {
+                 iframeId,
+                }
+              });         
+            }
+
+            // 处理autosave事件
+            const handleAutosave = (data) => {
+              const targetCodeDiv = diagramDiv.querySelector(
+                `div[data-he-code][data-iframe-id="${iframeId}"]`
+              );
+              
+              
+              if (targetCodeDiv) {
+                const innerHTML = escape(data.xml);
+                
+                sendMessage2Parent({
+                  event: 'drawio_autosave',
+                  data: {
+                   iframeId,
+                   innerHTML,
+                  }
+                });
+                
+                sendMessage({
+                  action: 'status',
+                  message: 'Saved',
+                  modified: false,
+                });
+              }
+            };
+            
+            const handleExport = (data) => {
+              sendMessage2Parent({
+                event: 'drawio_export',
+                data: data
+              });
+            }
+
+            // 监听消息
+            window.addEventListener('message', (event) => {
+              if (event.source !== iframe.contentWindow) {
+                return;
+              }
+            
+              const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+              switch(data.event) {
+                case 'init':
+                  handleInit();
+                  break;
+                case 'load':
+                  handleLoad();
+                  break;
+                case 'configure':
+                  handleConfigure();
+                  break;
+                case 'autosave':
+                  handleAutosave(data);
+                  break;
+                case 'export':
+                  handleExport(data);
+                  break;
+              }
+            });
+          }
+        });
+      })
+  
+      
+      
+  window.addEventListener('message', (event) => {
+    if(typeof event.data ==='object' && event.data.iframeID) { 
+      const targetIframe = document.querySelector(`div[data-he-diagram] iframe[data-he-frame][data-iframe-id="${event.data.iframeID}"]`);
+      
+      if(!targetIframe) {
+        return;
+      }
+      
+      switch(event.data.event) {
+        case 'drawio_export':
+          targetIframe.contentWindow?.postMessage(
+            event.data.message,
+            cdn
+          )
+          break;
+          
+        default:
+          targetIframe.contentWindow?.postMessage(
+            event.data.message,
+            cdn
+          )
+          break;
+      }
+    }
+  })
+
+    </script>
+  
+      </head>
+    
+    <body style="margin: 0; padding: 0; width: 100%; height: 100%;">
+      <div data-he-diagram="true" style="width: 100%; height: 100%; overflow: hidden;" id="diagram-1">
+       <div data-he-code="true" style="display: none;" data-iframe-id="69qlexgfppa">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;mxfile host="app.diagrams.net" version="24.0.0"&gt;
+  &lt;diagram id="community-wireframes" name="环信开发者社区原型图"&gt;
+    &lt;mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="2800" background="#ffffff" math="0" shadow="0"&gt;
+      &lt;root&gt;
+        &lt;mxCell id="0" /&gt;
+        &lt;mxCell id="1" parent="0" /&gt;
+
+        
+        &lt;mxCell id="page1_container" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#CCCCCC;strokeWidth=2;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="40" width="1520" height="880" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_title" value="首页 - 环信开发者社区" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="10" width="300" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_nav" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="40" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_nav_logo" value="环信Logo + 社区名称" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="55" width="180" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_nav_title" value="环信开发者社区" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="250" y="55" width="180" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_nav_search" value="搜索框" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=none;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="480" y="52" width="300" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_nav_register" value="注册" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1420" y="52" width="100" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_sidebar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="100" width="240" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_sidebar_hot" value="热门文章" style="text;html=1;strokeColor=none;fillColor=#E6F3FF;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="110" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_sidebar_video" value="视频教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="160" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_sidebar_code" value="开源项目" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="210" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_sidebar_tags" value="标签" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="260" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_content" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="280" y="100" width="880" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_content_label" value="技术文章列表 (默认20条)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="110" width="200" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_article1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=10;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="140" width="860" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article1_title" value="怎样集成Web SDK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="155" width="400" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article1_author" value="zhangdong1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="180" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article1_date" value="发布于 2025年06月23日" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="180" width="180" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article1_tag" value="web" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#3366CC;fontSize=11;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="640" y="178" width="60" height="24" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article1_views" value="17次浏览" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1010" y="180" width="80" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        &lt;mxCell id="page1_article2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=10;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="250" width="860" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article2_title" value="如何修改会话列表中系统消息的头像" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="265" width="450" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article2_author" value="zhangdong1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="290" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article2_date" value="发布于 2025年06月23日" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="290" width="180" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article2_tag" value="ios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#3366CC;fontSize=11;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="640" y="288" width="60" height="24" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article2_views" value="3次浏览" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1010" y="290" width="80" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        &lt;mxCell id="page1_article3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=10;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="360" width="860" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article3_title" value="消息发出多长时间可以撤回?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="375" width="350" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article3_author" value="zhangdong1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="400" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article3_date" value="发布于 2025年06月23日" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="400" width="180" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article3_tag" value="web" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#3366CC;fontSize=11;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="640" y="398" width="60" height="24" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article3_views" value="1次浏览" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1010" y="400" width="80" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        &lt;mxCell id="page1_article4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=10;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="470" width="860" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article4_title" value="环信IM uni-app SDK集成教程(群组篇)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="485" width="400" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article4_author" value="飞鹏" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="510" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article4_date" value="发布于 2025年06月23日" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="510" width="180" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article4_tag" value="uniapp" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#3366CC;fontSize=11;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="640" y="508" width="80" height="24" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_article4_views" value="8次浏览" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1010" y="510" width="80" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        &lt;mxCell id="page1_more" value="更多 + 展开更多文章" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="540" y="820" width="360" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_rightbar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1160" y="100" width="400" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_ad" value="图片广告位 (推荐位)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4E6;strokeColor=#FF9900;verticalAlign=middle;fontSize=13;fontColor=#FF6600;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="110" width="380" height="120" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_hot_title" value="周热门文章" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="240" width="120" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_hot_line" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#CCCCCC;strokeColor=none;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="270" width="380" height="1" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_hot1" value="1. 怎样集成Web SDK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="280" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_hot2" value="2. 消息撤回时间设置" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="305" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_hot3" value="3. 系统消息头像修改" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="330" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_hot4" value="4. uni-app集成教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="355" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_demo_title" value="热门Demo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="390" width="100" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo_line" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#CCCCCC;strokeColor=none;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="420" width="380" height="1" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;align=left;verticalAlign=middle;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="430" width="380" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo1_name" value="ChatDemo (聊天Demo)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1180" y="436" width="200" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo1_views" value="256访问" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1300" y="436" width="140" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        &lt;mxCell id="page1_demo2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;align=left;verticalAlign=middle;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="475" width="380" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo2_name" value="VideoCallDemo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1180" y="481" width="200" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_demo2_views" value="198访问" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1300" y="481" width="140" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page1_tutorial_title" value="热门教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="535" width="100" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_tutorial_line" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#CCCCCC;strokeColor=none;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="565" width="380" height="1" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_tutorial1" value="视频: 环信IM uni-app SDK集成教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="575" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_tutorial2" value="视频: AI驱动的IM解决方案" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="600" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_tutorial3" value="视频: 千人千面专属对话" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="625" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page1_tutorial4" value="视频: 离线唤醒提升粘性" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="650" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_container" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#CCCCCC;strokeWidth=2;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="940" width="1520" height="880" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_title" value="文章详情页" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="910" width="200" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_nav" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="940" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_nav_title" value="环信开发者社区" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="955" width="180" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_nav_search" value="搜索框" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=none;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="480" y="952" width="300" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_nav_register" value="注册" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1420" y="952" width="100" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_sidebar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1000" width="240" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_sidebar_hot" value="热门文章" style="text;html=1;strokeColor=none;fillColor=#E6F3FF;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1010" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_sidebar_video" value="视频教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1060" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_sidebar_code" value="开源项目" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1110" width="240" height="40" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_content" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="280" y="1000" width="880" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_article_title" value="怎样集成Web SDK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1015" width="860" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_article_meta" value="发布于 2025年06月23日 · 作者: zhangdong1 · 17次浏览" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1055" width="500" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_article_tag" value="web" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F3FF;strokeColor=#3366CC;fontSize=11;fontColor=#3366CC;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1080" width="60" height="24" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_article_body" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=20;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1110" width="860" height="400" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_body_text1" value="本文将详细介绍如何集成环信Web SDK,包括环境准备、安装步骤、初始化配置等..." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="1130" width="840" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_body_code" value="// 初始化SDK const client = new EC.connection({ appKey: 'your_appkey' }); client.open({ user: 'user1', accessToken: 'token' });" style="text;html=1;strokeColor=none;fillColor=#2D2D2D;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=11;fontColor=#D4D4D4;fontFamily=Courier New;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="1160" width="840" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_body_text2" value="SDK提供丰富的API接口,支持单聊、群聊、聊天室等功能,同时集成AI能力,提供智能对话、消息过滤等特性..." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="300" y="1270" width="840" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_cta" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4E6;strokeColor=#FF9900;strokeWidth=2;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1520" width="860" height="100" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_cta_title" value="立即注册环信账号,获取API密钥" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#FF6600;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1535" width="860" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_cta_desc" value="免费体验 · 支持IM+AI+RTC · 5分钟快速接入 · 99.99%服务可用性" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="290" y="1570" width="860" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page2_rightbar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1160" y="1000" width="400" height="820" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc_title" value="文章目录" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1010" width="100" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc_line" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#CCCCCC;strokeColor=none;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1040" width="380" height="1" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc1" value="1. 环境准备" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1050" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc2" value="2. 安装SDK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1075" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc3" value="3. 初始化配置" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1100" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc4" value="4. 连接登录" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1125" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc5" value="5. 发送消息" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1150" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page2_toc6" value="6. AI功能集成" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1170" y="1175" width="380" height="25" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_container" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#CCCCCC;strokeWidth=2;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1840" width="1520" height="880" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_title" value="视频教程页" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1810" width="150" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_nav" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1840" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_nav_title" value="环信开发者社区 - 视频教程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="1855" width="250" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_nav_search" value="搜索视频..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=none;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="480" y="1852" width="300" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_nav_register" value="注册" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1420" y="1852" width="100" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_categories" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1900" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_cat1" value="全部" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="1915" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_cat2" value="基础篇" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="150" y="1915" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_cat3" value="进阶篇" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="240" y="1915" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_cat4" value="群组篇" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="330" y="1915" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_cat5" value="AI篇" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="420" y="1915" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_videos" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="1960" width="1520" height="760" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_video1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="1975" width="360" height="300" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video1_thumb" value="视频缩略图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2D2D2D;strokeColor=#666666;fontColor=#999999;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="1990" width="340" height="180" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video1_title" value="【环信IM uni-app SDK集成教程】第6期: 群组篇" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2180" width="340" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video1_meta" value="飞鹏 · 8 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2215" width="340" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_video2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="440" y="1975" width="360" height="300" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video2_thumb" value="视频缩略图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2D2D2D;strokeColor=#666666;fontColor=#999999;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="1990" width="340" height="180" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video2_title" value="当前社交产品的痛点分析" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="2180" width="340" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video2_meta" value="飞鹏 · 5 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="2215" width="340" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_video3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="820" y="1975" width="360" height="300" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video3_thumb" value="视频缩略图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2D2D2D;strokeColor=#666666;fontColor=#999999;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="830" y="1990" width="340" height="180" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video3_title" value="AI驱动的痛点解决方案(C端)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="830" y="2180" width="340" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video3_meta" value="飞鹏 · 3 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="830" y="2215" width="340" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_video4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="2305" width="360" height="300" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video4_thumb" value="视频缩略图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2D2D2D;strokeColor=#666666;fontColor=#999999;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2320" width="340" height="180" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video4_title" value="打造千人千面专属对话" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2510" width="340" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video4_meta" value="飞鹏 · 2 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2545" width="340" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page3_video5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="440" y="2305" width="360" height="300" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video5_thumb" value="视频缩略图" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2D2D2D;strokeColor=#666666;fontColor=#999999;fontSize=12;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="2320" width="340" height="180" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video5_title" value="离线唤醒有力提升粘性" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="2510" width="340" height="35" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page3_video5_meta" value="飞鹏 · 1 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="450" y="2545" width="340" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_container" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#CCCCCC;strokeWidth=2;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="2740" width="1520" height="880" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_title" value="开源项目页" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="2710" width="150" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_nav" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="2740" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_nav_title" value="环信开发者社区 - 开源项目" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontColor=#FFFFFF;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="2755" width="250" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_nav_search" value="搜索" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=none;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="480" y="2752" width="300" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_nav_register" value="注册" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1420" y="2752" width="100" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_tags" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="2800" width="1520" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_tag1" value="全部" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3366CC;strokeColor=#3366CC;fontColor=#FFFFFF;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="2815" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_tag2" value="社交" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="150" y="2815" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_tag3" value="教育" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="240" y="2815" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_tag4" value="直播" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="330" y="2815" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_tag5" value="电商" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3366CC;fontColor=#3366CC;fontSize=13;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="420" y="2815" width="80" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_projects" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CCCCCC;strokeWidth=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="40" y="2860" width="1520" height="760" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_project1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="2875" width="720" height="160" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_icon" value="" style="process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#3366CC;strokeColor=#3366CC;fontSize=10;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2890" width="60" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_name" value="10:1++" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="2885" width="150" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_desc" value="集成Web SDK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="2915" width="250" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_detail" value="使用Go语言封装的环信IM的Server API接口" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2940" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_meta" value="zhangdong · 20 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="2965" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project1_demo" value="- 获取Demo演示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="540" y="2890" width="230" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_project2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="800" y="2875" width="720" height="160" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_icon" value="" style="process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#82B366;strokeColor=#82B366;fontSize=10;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="2890" width="60" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_name" value="ChatDemo-iOS" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="880" y="2885" width="150" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_desc" value="iOS聊天Demo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="880" y="2915" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_detail" value="完整的IM功能演示,支持单聊、群聊、聊天室" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="2940" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_meta" value="飞鹏 · 15 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="2965" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project2_demo" value="- 获取Demo演示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1280" y="2890" width="230" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_project3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="3055" width="720" height="160" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_icon" value="" style="process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#B85450;strokeColor=#B85450;fontSize=10;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3070" width="60" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_name" value="VideoCall-Android" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="3065" width="180" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_desc" value="Android音视频通话Demo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="3095" width="180" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_detail" value="基于环信RTC SDK的音视频通话完整示例" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3120" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_meta" value="飞鹏 · 12 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3145" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project3_demo" value="- 获取Demo演示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="540" y="3070" width="230" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_project4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="800" y="3055" width="720" height="160" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_icon" value="" style="process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#D6B656;strokeColor=#D6B656;fontSize=10;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="3070" width="60" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_name" value="AI-Chat-Web" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="880" y="3065" width="150" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_desc" value="AI聊天Web Demo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="880" y="3095" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_detail" value="集成环信AI能力,提供智能对话和内容审核功能" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="3120" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_meta" value="飞鹏 · 8 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="810" y="3145" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project4_demo" value="- 获取Demo演示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="1280" y="3070" width="230" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+        
+        &lt;mxCell id="page4_project5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#EEEEEE;verticalAlign=top;align=left;spacingTop=15;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="60" y="3235" width="720" height="160" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_icon" value="" style="process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#999999;strokeColor=#999999;fontSize=10;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3250" width="60" height="60" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_name" value="Mini-Program-IM" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#333333;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="3245" width="180" height="30" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_desc" value="小程序IM Demo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="140" y="3275" width="150" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_detail" value="微信小程序IM集成方案,支持消息推送和离线存储" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3300" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_meta" value="飞鹏 · 5 views · 2025/6/23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#999999;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="70" y="3325" width="710" height="20" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+        &lt;mxCell id="page4_project5_demo" value="- 获取Demo演示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#FF9900;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="1"&gt;
+          &lt;mxGeometry x="540" y="3250" width="230" height="36" as="geometry" /&gt;
+        &lt;/mxCell&gt;
+
+      &lt;/root&gt;
+    &lt;/mxGraphModel&gt;
+  &lt;/diagram&gt;
+&lt;/mxfile&gt;</div>
+      <iframe data-he-frame="true" src="https://lf-coze-web-cdn.coze.cn/obj/coze-web-cn/coze-drawio/index.26b84e9.html?embed=1&amp;noSplash=1&amp;spin=0&amp;noExitBtn=1&amp;noSaveBtn=1&amp;configure=1&amp;lang=zh&amp;saveAndExit=0&amp;mode=side&amp;readonly=0&amp;proto=json&amp;dev=1&amp;dark=0&amp;plugins=1&amp;p=toggle&amp;toggleLeft=0&amp;toggleRight=0" class="__helper-box" style="width: 100%; height: 100%; border: none;" data-iframe-id="69qlexgfppa"></iframe></div>
+    
+    
+
+  </body></html>

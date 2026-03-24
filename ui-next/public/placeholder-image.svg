@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" rx="24" fill="#F1F5F9"/>
+  <rect x="32" y="32" width="576" height="416" rx="18" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="4"/>
+  <path d="M120 340L220 240L290 300L390 180L520 340V380H120V340Z" fill="#94A3B8"/>
+  <circle cx="214" cy="160" r="38" fill="#CBD5E1"/>
+  <text x="320" y="424" text-anchor="middle" fill="#475569" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    Placeholder Image
+  </text>
+</svg>
