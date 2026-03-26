@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { RouterProvider } from "react-router";
+import { AdminAuthProvider } from "./auth/AdminAuthContext";
 import { router } from "./routes";
 
 const faviconImg = "/placeholder-favicon.svg";
@@ -17,5 +18,9 @@ export default function App() {
     }
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <AdminAuthProvider>
+      <RouterProvider router={router} />
+    </AdminAuthProvider>
+  );
 }

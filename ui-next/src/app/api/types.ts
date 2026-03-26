@@ -18,13 +18,7 @@ export interface ApiResponse<T = void> {
 }
 
 /** 文章/视频分类标签 */
-export type ArticleTag =
-  | "Web"
-  | "iOS"
-  | "Android"
-  | "Server"
-  | "Uniapp"
-  | "React Native";
+export type ArticleTag = string;
 
 /** 视频教程分类 */
 export type VideoCategory = "基础篇" | "进阶篇" | "群组篇" | "AI篇";

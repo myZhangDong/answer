@@ -3,11 +3,10 @@
  * @description 超级管理员内容上传接口层（服务桩 / Stub）。
  *
  * 【研发对接说明】
- * 1. 将每个函数体中的 TODO 注释替换为真实的 HTTP 请求（fetch / axios）或
- *    Supabase 客户端调用。
+ * 1. 将每个函数体中的 TODO 注释替换为真实的 HTTP 请求。
  * 2. 所有函数签名、入参类型、返回类型均已锁定，前端调用方无需修改。
  * 3. 文件上传统一走 `uploadFile`，获得 URL 后再填入对应 Payload。
- * 4. 认证 Token 建议统一在此文件的 `getAuthHeaders()` 中注入。
+ * 4. 认证继续复用现有后端 Cookie / Session，会话由统一请求层自动携带。
  *
  * 覆盖范围：
  *   - 文章   : createArticle / updateArticle / deleteArticle
@@ -19,40 +18,145 @@
 
 import type {
   ApiResponse,
-  Article,
   ArticleUploadPayload,
   Banner,
   BannerSlot,
   BannerUploadPayload,
-  Project,
-  ProjectUploadPayload,
   UploadAssetType,
   UploadedFile,
-  Video,
-  VideoUploadPayload,
 } from "./types";
+import { apiRequest } from "./client";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 配置区（研发填写）
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * 后端 API 基础地址。
- * 生产环境建议通过环境变量注入：import.meta.env.VITE_API_BASE_URL
- */
-const API_BASE_URL = "https://your-api-base-url.example.com"; // TODO: 替换为真实地址
-
-/**
- * 获取认证请求头。
- * 对接时替换为从 localStorage / Cookie / 状态管理中读取的 JWT Token。
- */
-function getAuthHeaders(): HeadersInit {
-  const token = ""; // TODO: 从认证系统获取 Token，例如 localStorage.getItem("admin_token")
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+export interface AdminTagOption {
+  slug_name: string;
+  display_name: string;
+  recommend?: boolean;
+  reserved?: boolean;
 }
+
+export interface AdminArticleSummary {
+  id: string;
+  urlTitle: string;
+  title: string;
+  author: string;
+  date: string;
+  tag: string;
+  excerpt: string;
+  views: number;
+  likes: number;
+}
+
+export interface AdminArticleDetail extends AdminArticleSummary {
+  content: string;
+  html: string;
+  tags: AdminTagOption[];
+}
+
+export interface AdminArticleListResult {
+  count: number;
+  list: AdminArticleSummary[];
+}
+
+export interface ArticleWriteResult {
+  id: string;
+  urlTitle: string;
+  waitForReview: boolean;
+}
+
+export interface AdminVideoSummary {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  category: string;
+  duration: string;
+  views: number;
+  cover: string;
+  description: string;
+  isRecommend: boolean;
+  isShow: boolean;
+}
+
+export interface AdminVideoDetail extends AdminVideoSummary {
+  content: string;
+  authorAvatar: string;
+  authorIntro: string;
+  externalLink: string;
+  embedCode: string;
+  durationSeconds: number;
+}
+
+export interface AdminVideoListResult {
+  count: number;
+  list: AdminVideoSummary[];
+}
+
+export interface VideoWritePayload {
+  title: string;
+  category: string;
+  cover: string;
+  isRecommend: boolean;
+  isShow: boolean;
+  duration: number;
+  description: string;
+  content: string;
+  authorAvatar: string;
+  authorName: string;
+  authorIntro: string;
+  embedCode: string;
+  externalLink: string;
+}
+
+export interface VideoWriteResult {
+  id: string;
+}
+
+export interface AdminProjectSummary {
+  id: string;
+  title: string;
+  description: string;
+  codeType: number;
+  codeTypeName: string;
+  tags: string[];
+  repo: string;
+  cover: string;
+  views: number;
+  likes: number;
+  createdAt: string;
+}
+
+export interface AdminProjectDetail extends AdminProjectSummary {
+  content: string;
+  repoUrlMap: Record<string, string>;
+  questionId: string;
+}
+
+export interface AdminProjectListResult {
+  count: number;
+  list: AdminProjectSummary[];
+}
+
+export interface ProjectWritePayload {
+  title: string;
+  description: string;
+  cover: string;
+  content: string;
+  repoUrlMap: Record<string, string>;
+  codeType: number;
+  tags: string[];
+  questionId?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 说明
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * 当前 `ui-next` 后台请求层已复用 `apiRequest`：
+ * - 自动处理 `VITE_API_BASE_URL`
+ * - 自动附带 `credentials: "include"`
+ * - 默认按现有后端 `/answer/api/v1/*` 返回结构解析
+ */
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 辅助：统一请求封装
@@ -62,17 +166,309 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  // TODO: 替换为真实 fetch 调用
-  // 示例：
-  // const res = await fetch(`${API_BASE_URL}${path}`, {
-  //   ...options,
-  //   headers: { ...getAuthHeaders(), ...options.headers },
-  // });
-  // if (!res.ok) return { success: false, error: await res.text() };
-  // return { success: true, data: await res.json() };
+  try {
+    const data = await apiRequest<T>(path, options);
+    return { success: true, data };
+  } catch (error) {
+    console.warn("[adminApi] Request failed:", options.method ?? "GET", path, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "接口未实现，请研发对接后端后替换此逻辑。",
+    };
+  }
+}
 
-  console.warn("[adminApi] Stub called:", options.method ?? "GET", path);
-  return { success: false, error: "接口未实现，请研发对接后端后替换此 stub。" };
+function normalizeTagSlug(tag: string) {
+  return tag.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function findTagOption(tag: string, options: AdminTagOption[]) {
+  const normalized = normalizeTagSlug(tag);
+  return options.find((item) => {
+    return item.slug_name === normalized || item.display_name.toLowerCase() === tag.trim().toLowerCase();
+  });
+}
+
+interface BackendQuestionWriteResp {
+  id: string;
+  url_title: string;
+  wait_for_review?: boolean;
+}
+
+interface BackendPaged<T> {
+  count: number;
+  list: T[];
+}
+
+interface BackendUserInfo {
+  username?: string;
+  display_name?: string;
+}
+
+interface BackendQuestionTag {
+  slug_name: string;
+  display_name: string;
+  recommend?: boolean;
+  reserved?: boolean;
+}
+
+interface BackendQuestionInfo {
+  id: string;
+  url_title: string;
+  title: string;
+  content?: string;
+  html?: string;
+  description?: string;
+  tags?: BackendQuestionTag[];
+  view_count?: number;
+  vote_count?: number;
+  create_time?: number | string;
+  created_at?: number | string;
+  user_info?: BackendUserInfo;
+}
+
+interface BackendVideoInfo {
+  id: string;
+  title: string;
+  is_recommend?: boolean;
+  is_show?: boolean;
+  cover?: string;
+  description?: string;
+  content?: string;
+  author_avatar?: string;
+  author_name?: string;
+  author_intro?: string;
+  external_link?: string;
+  code?: string;
+  duration?: number;
+  type?: string;
+  datetime?: number | string;
+  view_count?: number;
+  created_at?: number | string;
+  updated_at?: number | string;
+}
+
+interface BackendVideoWriteResp {
+  id: string;
+}
+
+interface BackendProjectInfo {
+  id: string;
+  title: string;
+  description?: string;
+  cover?: string;
+  content?: string;
+  repo_url?: Record<string, string>;
+  code_type?: number;
+  code_type_name?: string;
+  tags?: string[];
+  question_id?: string;
+  view_count?: number;
+  vote_count?: number;
+  created_at?: number | string;
+  updated_at?: number | string;
+}
+
+function formatDate(value?: number | string) {
+  if (value === undefined || value === null || value === "") {
+    return "";
+  }
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    return value.slice(0, 10);
+  }
+
+  const numeric =
+    typeof value === "number"
+      ? value
+      : /^\d+$/.test(value)
+        ? Number(value)
+        : Number.NaN;
+
+  if (!Number.isNaN(numeric)) {
+    const ms = numeric > 1_000_000_000_000 ? numeric : numeric * 1000;
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toISOString().slice(0, 10);
+}
+
+function stripHtml(value = "") {
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function formatDuration(seconds?: number) {
+  if (!seconds || seconds <= 0) {
+    return "00:00";
+  }
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function excerptFromText(value = "", maxLength = 120) {
+  const text = stripHtml(value);
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength)}...`;
+}
+
+function getAuthor(user?: BackendUserInfo) {
+  return user?.display_name || user?.username || "管理员";
+}
+
+function getPrimaryTag(tags?: BackendQuestionTag[]) {
+  return tags?.[0]?.display_name || tags?.[0]?.slug_name || "未分类";
+}
+
+function mapAdminArticleSummary(item: BackendQuestionInfo): AdminArticleSummary {
+  return {
+    id: item.id,
+    urlTitle: item.url_title,
+    title: item.title,
+    author: getAuthor(item.user_info),
+    date: formatDate(item.created_at || item.create_time),
+    tag: getPrimaryTag(item.tags),
+    excerpt: item.description || excerptFromText(item.content || item.html || ""),
+    views: item.view_count || 0,
+    likes: item.vote_count || 0,
+  };
+}
+
+function mapAdminArticleDetail(item: BackendQuestionInfo): AdminArticleDetail {
+  return {
+    ...mapAdminArticleSummary(item),
+    content: item.content || "",
+    html: item.html || "",
+    tags:
+      item.tags?.map((tag) => ({
+        slug_name: tag.slug_name,
+        display_name: tag.display_name,
+        recommend: tag.recommend,
+        reserved: tag.reserved,
+      })) || [],
+  };
+}
+
+function getPrimaryRepo(repoUrlMap?: Record<string, string>) {
+  if (!repoUrlMap) {
+    return "";
+  }
+  return repoUrlMap.github || repoUrlMap.gitee || Object.values(repoUrlMap)[0] || "";
+}
+
+function mapAdminVideoSummary(item: BackendVideoInfo): AdminVideoSummary {
+  return {
+    id: item.id,
+    title: item.title,
+    author: item.author_name || "管理员",
+    date: formatDate(item.datetime || item.created_at),
+    category: item.type || "未分类",
+    duration: formatDuration(item.duration),
+    views: item.view_count || 0,
+    cover: item.cover || "",
+    description: item.description || excerptFromText(item.content || ""),
+    isRecommend: Boolean(item.is_recommend),
+    isShow: Boolean(item.is_show),
+  };
+}
+
+function mapAdminVideoDetail(item: BackendVideoInfo): AdminVideoDetail {
+  return {
+    ...mapAdminVideoSummary(item),
+    content: item.content || "",
+    authorAvatar: item.author_avatar || "",
+    authorIntro: item.author_intro || "",
+    externalLink: item.external_link || "",
+    embedCode: item.code || "",
+    durationSeconds: item.duration || 0,
+  };
+}
+
+function mapAdminProjectSummary(item: BackendProjectInfo): AdminProjectSummary {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description || "",
+    codeType: item.code_type || 1,
+    codeTypeName: item.code_type_name || "Web",
+    tags: item.tags || [],
+    repo: getPrimaryRepo(item.repo_url),
+    cover: item.cover || "",
+    views: Number(item.view_count || 0),
+    likes: item.vote_count || 0,
+    createdAt: formatDate(item.created_at),
+  };
+}
+
+function mapAdminProjectDetail(item: BackendProjectInfo): AdminProjectDetail {
+  return {
+    ...mapAdminProjectSummary(item),
+    content: item.content || "",
+    repoUrlMap: item.repo_url || {},
+    questionId: item.question_id || "",
+  };
+}
+
+export async function getArticleTagOptions(query = ""): Promise<ApiResponse<AdminTagOption[]>> {
+  return request<AdminTagOption[]>(
+    `/answer/api/v1/question/tags?tag=${encodeURIComponent(query)}`,
+    { method: "GET" },
+  );
+}
+
+export async function getAdminArticles(params?: {
+  page?: number;
+  pageSize?: number;
+  order?: string;
+  tag?: string;
+}): Promise<ApiResponse<AdminArticleListResult>> {
+  const query = new URLSearchParams();
+  query.set("page", String(params?.page || 1));
+  query.set("page_size", String(params?.pageSize || 10));
+  query.set("order", params?.order || "newest");
+  query.set("content_type", "2");
+  if (params?.tag) {
+    query.set("tag", params.tag);
+  }
+
+  try {
+    const data = await apiRequest<BackendPaged<BackendQuestionInfo>>(
+      `/answer/api/v1/content/page?${query.toString()}`,
+      { method: "GET" },
+    );
+    return {
+      success: true,
+      data: {
+        count: data.count || 0,
+        list: (data.list || []).map(mapAdminArticleSummary),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "文章列表加载失败，请稍后重试。",
+    };
+  }
+}
+
+export async function getAdminArticleDetail(id: string): Promise<ApiResponse<AdminArticleDetail>> {
+  try {
+    const data = await apiRequest<BackendQuestionInfo>(
+      `/answer/api/v1/question/info?id=${encodeURIComponent(id)}`,
+      { method: "GET" },
+    );
+    return { success: true, data: mapAdminArticleDetail(data) };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "文章详情加载失败，请稍后重试。",
+    };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -108,8 +504,7 @@ export async function uploadFile(
   // const form = new FormData();
   // form.append("file", file);
   // form.append("assetType", assetType);
-  // const res = await fetch(`${API_BASE_URL}/upload`, { method: "POST", body: form,
-  //   headers: { Authorization: `Bearer ${token}` } });
+  // const res = await fetch(`/answer/api/v1/file`, { method: "POST", body: form, credentials: "include" });
   // return res.json();
 
   console.warn("[adminApi] uploadFile stub:", { name: file.name, assetType });
@@ -138,12 +533,55 @@ export async function uploadFile(
  */
 export async function createArticle(
   payload: ArticleUploadPayload
-): Promise<ApiResponse<Article>> {
-  // TODO: POST /admin/articles
-  return request<Article>("/admin/articles", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+): Promise<ApiResponse<ArticleWriteResult>> {
+  const tagOptionsResp = await getArticleTagOptions(payload.tag);
+  if (!tagOptionsResp.success || !tagOptionsResp.data) {
+    return {
+      success: false,
+      error: tagOptionsResp.error || "文章标签加载失败，请稍后重试。",
+    };
+  }
+
+  const matchedTag = findTagOption(payload.tag, tagOptionsResp.data);
+  if (!matchedTag) {
+    return {
+      success: false,
+      error: `标签“${payload.tag}”不存在，请先选择后端已有标签。`,
+    };
+  }
+
+  try {
+    const data = await apiRequest<BackendQuestionWriteResp>("/answer/api/v1/question", {
+      method: "POST",
+      body: JSON.stringify({
+        title: payload.title,
+        url_title: payload.title,
+        content: payload.content,
+        type: 2,
+        tags: [
+          {
+            slug_name: matchedTag.slug_name,
+            display_name: matchedTag.display_name,
+            original_text: "",
+          },
+        ],
+      }),
+    });
+
+    return {
+      success: true,
+      data: {
+        id: data.id,
+        urlTitle: data.url_title,
+        waitForReview: Boolean(data.wait_for_review),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "文章发布失败，请稍后重试。",
+    };
+  }
 }
 
 /**
@@ -152,14 +590,56 @@ export async function createArticle(
  * PUT /admin/articles/:id
  */
 export async function updateArticle(
-  id: number,
-  payload: Partial<ArticleUploadPayload>
-): Promise<ApiResponse<Article>> {
-  // TODO: PUT /admin/articles/:id
-  return request<Article>(`/admin/articles/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  id: string,
+  payload: ArticleUploadPayload
+): Promise<ApiResponse<ArticleWriteResult>> {
+  const tagOptionsResp = await getArticleTagOptions(payload.tag);
+  if (!tagOptionsResp.success || !tagOptionsResp.data) {
+    return {
+      success: false,
+      error: tagOptionsResp.error || "文章标签加载失败，请稍后重试。",
+    };
+  }
+
+  const matchedTag = findTagOption(payload.tag, tagOptionsResp.data);
+  if (!matchedTag) {
+    return {
+      success: false,
+      error: `标签“${payload.tag}”不存在，请先选择后端已有标签。`,
+    };
+  }
+
+  try {
+    const data = await apiRequest<BackendQuestionWriteResp>("/answer/api/v1/question", {
+      method: "PUT",
+      body: JSON.stringify({
+        id,
+        title: payload.title,
+        content: payload.content,
+        tags: [
+          {
+            slug_name: matchedTag.slug_name,
+            display_name: matchedTag.display_name,
+            original_text: "",
+          },
+        ],
+      }),
+    });
+
+    return {
+      success: true,
+      data: {
+        id: data.id,
+        urlTitle: data.url_title,
+        waitForReview: Boolean(data.wait_for_review),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "文章更新失败，请稍后重试。",
+    };
+  }
 }
 
 /**
@@ -167,9 +647,11 @@ export async function updateArticle(
  *
  * DELETE /admin/articles/:id
  */
-export async function deleteArticle(id: number): Promise<ApiResponse> {
-  // TODO: DELETE /admin/articles/:id
-  return request(`/admin/articles/${id}`, { method: "DELETE" });
+export async function deleteArticle(id: string): Promise<ApiResponse> {
+  return request("/answer/api/v1/question", {
+    method: "DELETE",
+    body: JSON.stringify({ id }),
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,14 +673,85 @@ export async function deleteArticle(id: number): Promise<ApiResponse> {
  * const { data: vid }   = await uploadFile(videoFile, "video-file");
  * await createVideo({ ...fields, thumbnail: thumb.url, videoUrl: vid.url });
  */
+export async function getAdminVideos(params?: {
+  page?: number;
+  pageSize?: number;
+  order?: string;
+}): Promise<ApiResponse<AdminVideoListResult>> {
+  const query = new URLSearchParams();
+  query.set("page", String(params?.page || 1));
+  query.set("page_size", String(params?.pageSize || 10));
+  query.set("order", params?.order || "newest");
+
+  try {
+    const data = await apiRequest<BackendPaged<BackendVideoInfo>>(
+      `/answer/api/v1/video/page?${query.toString()}`,
+      { method: "GET" },
+    );
+    return {
+      success: true,
+      data: {
+        count: data.count || 0,
+        list: (data.list || []).map(mapAdminVideoSummary),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "视频列表加载失败，请稍后重试。",
+    };
+  }
+}
+
+export async function getAdminVideoDetail(id: string): Promise<ApiResponse<AdminVideoDetail>> {
+  try {
+    const data = await apiRequest<BackendVideoInfo>(
+      `/answer/api/v1/video/info?id=${encodeURIComponent(id)}`,
+      { method: "GET" },
+    );
+    return { success: true, data: mapAdminVideoDetail(data) };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "视频详情加载失败，请稍后重试。",
+    };
+  }
+}
+
 export async function createVideo(
-  payload: VideoUploadPayload
-): Promise<ApiResponse<Video>> {
-  // TODO: POST /admin/videos
-  return request<Video>("/admin/videos", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  payload: VideoWritePayload
+): Promise<ApiResponse<VideoWriteResult>> {
+  try {
+    const data = await apiRequest<BackendVideoWriteResp>("/answer/api/v1/video/create", {
+      method: "POST",
+      body: JSON.stringify({
+        title: payload.title,
+        category: payload.category,
+        cover: payload.cover,
+        is_recommend: payload.isRecommend,
+        is_show: payload.isShow,
+        duration: payload.duration,
+        description: payload.description,
+        content: payload.content,
+        author_avatar: payload.authorAvatar,
+        author_name: payload.authorName,
+        author_intro: payload.authorIntro,
+        embed_code: payload.embedCode,
+        external_link: payload.externalLink,
+      }),
+    });
+    return {
+      success: true,
+      data: {
+        id: data.id,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "视频创建失败，请稍后重试。",
+    };
+  }
 }
 
 /**
@@ -207,14 +760,41 @@ export async function createVideo(
  * PUT /admin/videos/:id
  */
 export async function updateVideo(
-  id: number,
-  payload: Partial<VideoUploadPayload>
-): Promise<ApiResponse<Video>> {
-  // TODO: PUT /admin/videos/:id
-  return request<Video>(`/admin/videos/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  id: string,
+  payload: VideoWritePayload
+): Promise<ApiResponse<VideoWriteResult>> {
+  try {
+    const data = await apiRequest<BackendVideoWriteResp>("/answer/api/v1/video/update", {
+      method: "PUT",
+      body: JSON.stringify({
+        id,
+        title: payload.title,
+        category: payload.category,
+        cover: payload.cover,
+        is_recommend: payload.isRecommend,
+        is_show: payload.isShow,
+        duration: payload.duration,
+        description: payload.description,
+        content: payload.content,
+        author_avatar: payload.authorAvatar,
+        author_name: payload.authorName,
+        author_intro: payload.authorIntro,
+        embed_code: payload.embedCode,
+        external_link: payload.externalLink,
+      }),
+    });
+    return {
+      success: true,
+      data: {
+        id: data.id,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "视频更新失败，请稍后重试。",
+    };
+  }
 }
 
 /**
@@ -222,9 +802,11 @@ export async function updateVideo(
  *
  * DELETE /admin/videos/:id
  */
-export async function deleteVideo(id: number): Promise<ApiResponse> {
-  // TODO: DELETE /admin/videos/:id
-  return request(`/admin/videos/${id}`, { method: "DELETE" });
+export async function deleteVideo(id: string): Promise<ApiResponse> {
+  return request("/answer/api/v1/video/delete", {
+    method: "DELETE",
+    body: JSON.stringify({ id }),
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -250,13 +832,66 @@ export async function deleteVideo(id: number): Promise<ApiResponse> {
  *   iconUrl: "https://...",
  * });
  */
+export async function getAdminProjects(params?: {
+  page?: number;
+  pageSize?: number;
+  order?: string;
+}): Promise<ApiResponse<AdminProjectListResult>> {
+  const query = new URLSearchParams();
+  query.set("page", String(params?.page || 1));
+  query.set("page_size", String(params?.pageSize || 10));
+  query.set("order", params?.order || "newest");
+
+  try {
+    const data = await apiRequest<BackendPaged<BackendProjectInfo>>(
+      `/answer/api/v1/project/page?${query.toString()}`,
+      { method: "GET" },
+    );
+    return {
+      success: true,
+      data: {
+        count: data.count || 0,
+        list: (data.list || []).map(mapAdminProjectSummary),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "项目列表加载失败，请稍后重试。",
+    };
+  }
+}
+
+export async function getAdminProjectDetail(id: string): Promise<ApiResponse<AdminProjectDetail>> {
+  try {
+    const data = await apiRequest<BackendProjectInfo>(
+      `/answer/api/v1/project/info?id=${encodeURIComponent(id)}`,
+      { method: "GET" },
+    );
+    return { success: true, data: mapAdminProjectDetail(data) };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "项目详情加载失败，请稍后重试。",
+    };
+  }
+}
+
 export async function createProject(
-  payload: ProjectUploadPayload
-): Promise<ApiResponse<Project>> {
-  // TODO: POST /admin/projects
-  return request<Project>("/admin/projects", {
+  payload: ProjectWritePayload
+): Promise<ApiResponse> {
+  return request("/answer/api/v1/project", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      title: payload.title,
+      description: payload.description,
+      cover: payload.cover,
+      content: payload.content,
+      repo_url: payload.repoUrlMap,
+      code_type: payload.codeType,
+      tags: payload.tags,
+      question_id: payload.questionId,
+    }),
   });
 }
 
@@ -266,13 +901,21 @@ export async function createProject(
  * PUT /admin/projects/:id
  */
 export async function updateProject(
-  id: number,
-  payload: Partial<ProjectUploadPayload>
-): Promise<ApiResponse<Project>> {
-  // TODO: PUT /admin/projects/:id
-  return request<Project>(`/admin/projects/${id}`, {
+  id: string,
+  payload: ProjectWritePayload
+): Promise<ApiResponse> {
+  return request("/answer/api/v1/project", {
     method: "PUT",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      id,
+      title: payload.title,
+      description: payload.description,
+      cover: payload.cover,
+      content: payload.content,
+      repo_url: payload.repoUrlMap,
+      code_type: payload.codeType,
+      tags: payload.tags,
+    }),
   });
 }
 
@@ -281,9 +924,11 @@ export async function updateProject(
  *
  * DELETE /admin/projects/:id
  */
-export async function deleteProject(id: number): Promise<ApiResponse> {
-  // TODO: DELETE /admin/projects/:id
-  return request(`/admin/projects/${id}`, { method: "DELETE" });
+export async function deleteProject(id: string): Promise<ApiResponse> {
+  return request("/answer/api/v1/project", {
+    method: "DELETE",
+    body: JSON.stringify({ id }),
+  });
 }
 
 // ──────────────────────────────────────────────────���──────────────────────────

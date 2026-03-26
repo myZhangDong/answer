@@ -1,4 +1,4 @@
-import { Clock, Eye, Tag, ChevronLeft, ChevronRight, TrendingUp, Sparkles, ArrowRight, Rocket, ThumbsUp } from "lucide-react";
+import { Clock, Eye, Tag, ChevronLeft, ChevronRight, TrendingUp, Sparkles, ArrowRight, PlayCircle, ThumbsUp } from "lucide-react";
 import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useEffect, useMemo, useState } from "react";
@@ -127,13 +127,19 @@ export function Home() {
           </div>
           
           <div className="flex flex-row items-center gap-3 shrink-0 w-full md:w-auto mt-2 md:mt-0">
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#009EFF] dark:bg-[#33B1FF] text-white text-[14px] font-medium hover:bg-[#008AE6] dark:hover:bg-[#33B1FF]/90 transition-all shadow-[0_0_20px_rgba(0,158,255,0.2)] dark:shadow-[0_0_20px_rgba(51,177,255,0.2)] hover:shadow-[0_0_30px_rgba(0,158,255,0.35)] dark:hover:shadow-[0_0_30px_rgba(51,177,255,0.35)] whitespace-nowrap">
-              <Rocket className="w-4 h-4" />
-              快速开始
-            </button>
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white/[0.03] text-white text-[14px] font-medium border border-white/[0.08] hover:bg-white/[0.08] backdrop-blur-md transition-all whitespace-nowrap">
-              查看指南 <ArrowRight className="w-4 h-4" />
-            </button>
+            <Link
+              to="/videos"
+              className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#009EFF] px-6 py-3 text-[14px] font-medium text-white transition-all shadow-[0_0_20px_rgba(0,158,255,0.2)] hover:bg-[#008AE6] hover:shadow-[0_0_30px_rgba(0,158,255,0.35)] dark:bg-[#33B1FF] dark:shadow-[0_0_20px_rgba(51,177,255,0.2)] dark:hover:bg-[#33B1FF]/90 dark:hover:shadow-[0_0_30px_rgba(51,177,255,0.35)] md:flex-none"
+            >
+              <PlayCircle className="w-4 h-4" />
+              浏览视频
+            </Link>
+            <Link
+              to="/projects"
+              className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-[14px] font-medium text-white backdrop-blur-md transition-all hover:bg-white/[0.08] md:flex-none"
+            >
+              查看项目 <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>

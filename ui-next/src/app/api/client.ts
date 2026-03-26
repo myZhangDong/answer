@@ -5,6 +5,20 @@ interface LegacyApiResponse<T> {
   data: T;
 }
 
+export const LOGGED_TOKEN_STORAGE_KEY = "_a_ltk_";
+
+export class ApiError extends Error {
+  status: number;
+  payload?: LegacyApiResponse<unknown> | null;
+
+  constructor(status: number, message: string, payload?: LegacyApiResponse<unknown> | null) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
   /\/$/,
   "",
@@ -26,7 +40,14 @@ export async function apiRequest<T>(
   init: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(init.headers || {});
+  const accessToken =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem(LOGGED_TOKEN_STORAGE_KEY) || ""
+      : "";
   headers.set("Accept-Language", ACCEPT_LANGUAGE);
+  if (accessToken && !headers.has("Authorization")) {
+    headers.set("Authorization", accessToken);
+  }
 
   if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -47,13 +68,13 @@ export async function apiRequest<T>(
     body = (await response.json()) as LegacyApiResponse<T>;
   } catch (error) {
     if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
+      throw new ApiError(response.status, `Request failed with status ${response.status}`);
     }
     throw error;
   }
 
   if (!response.ok) {
-    throw new Error(body?.msg || `Request failed with status ${response.status}`);
+    throw new ApiError(response.status, body?.msg || `Request failed with status ${response.status}`, body);
   }
 
   return body.data;
