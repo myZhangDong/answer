@@ -82,6 +82,19 @@ func (sc *SiteInfoController) GetSiteBranding(ctx *gin.Context) {
 	handler.HandleResponse(ctx, err, resp)
 }
 
+// GetSiteHomepage get site homepage config
+// @Summary get site homepage config
+// @Description get site homepage config
+// @Security ApiKeyAuth
+// @Tags admin
+// @Produce json
+// @Success 200 {object} handler.RespBody{data=schema.SiteHomepageResp}
+// @Router /answer/admin/api/siteinfo/homepage [get]
+func (sc *SiteInfoController) GetSiteHomepage(ctx *gin.Context) {
+	resp, err := sc.siteInfoService.GetSiteHomepage(ctx)
+	handler.HandleResponse(ctx, err, resp)
+}
+
 // GetSiteWrite get site interface
 // @Summary get site interface
 // @Description get site interface
@@ -286,6 +299,24 @@ func (sc *SiteInfoController) UpdateBranding(ctx *gin.Context) {
 	}
 	saveErr := sc.siteInfoService.SaveSiteBranding(ctx, req)
 	handler.HandleResponse(ctx, saveErr, nil)
+}
+
+// UpdateSiteHomepage update site homepage config
+// @Summary update site homepage config
+// @Description update site homepage config
+// @Security ApiKeyAuth
+// @Tags admin
+// @Produce json
+// @Param data body schema.SiteHomepageReq true "homepage info"
+// @Success 200 {object} handler.RespBody{}
+// @Router /answer/admin/api/siteinfo/homepage [put]
+func (sc *SiteInfoController) UpdateSiteHomepage(ctx *gin.Context) {
+	req := &schema.SiteHomepageReq{}
+	if handler.BindAndCheck(ctx, req) {
+		return
+	}
+	err := sc.siteInfoService.SaveSiteHomepage(ctx, req)
+	handler.HandleResponse(ctx, err, nil)
 }
 
 // UpdateSiteWrite update site write info

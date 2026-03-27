@@ -490,25 +490,38 @@ export async function uploadFile(
   file: File,
   assetType: UploadAssetType
 ): Promise<ApiResponse<UploadedFile>> {
-  // TODO: 构造 FormData 并 POST 到文件上传端点
-  // 示例（Supabase Storage）：
-  // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  // const ext = file.name.split(".").pop();
-  // const filePath = `${assetType}/${Date.now()}.${ext}`;
-  // const { error } = await supabase.storage.from("community-assets").upload(filePath, file);
-  // if (error) return { success: false, error: error.message };
-  // const { data } = supabase.storage.from("community-assets").getPublicUrl(filePath);
-  // return { success: true, data: { url: data.publicUrl, path: filePath } };
+  const sourceMap: Record<UploadAssetType, string> = {
+    "branding-image": "branding",
+    "article-cover": "post",
+    "video-thumbnail": "video",
+    "video-file": "video",
+    "project-icon": "project",
+    "banner-image": "branding",
+  };
 
-  // 示例（自建后端）：
-  // const form = new FormData();
-  // form.append("file", file);
-  // form.append("assetType", assetType);
-  // const res = await fetch(`/answer/api/v1/file`, { method: "POST", body: form, credentials: "include" });
-  // return res.json();
+  const form = new FormData();
+  form.append("file", file);
+  form.append("source", sourceMap[assetType]);
 
-  console.warn("[adminApi] uploadFile stub:", { name: file.name, assetType });
-  return { success: false, error: "uploadFile 未实现" };
+  try {
+    const url = await apiRequest<string>("/answer/api/v1/file", {
+      method: "POST",
+      body: form,
+    });
+
+    return {
+      success: true,
+      data: {
+        url,
+        path: url,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "文件上传失败，请稍后重试。",
+    };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

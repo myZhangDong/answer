@@ -1,23 +1,12 @@
-import { Clock, Eye, Tag, ChevronLeft, ChevronRight, TrendingUp, Sparkles, ArrowRight, PlayCircle, ThumbsUp } from "lucide-react";
+import { Clock, Eye, Tag, ChevronLeft, ChevronRight, TrendingUp, ThumbsUp } from "lucide-react";
 import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { HotDemosWidget, HotTutorialsWidget } from "../components/SidebarWidgets";
-import { ContentArticle, fetchArticles } from "../api/contentApi";
+import { ContentArticle, ContentHomepageSettings, fetchArticles, fetchHomepageSettings } from "../api/contentApi";
 
 const CATEGORIES = ["全部", "Web", "iOS", "Android", "Server", "Uniapp", "React Native"];
-
-const HOT_ARTICLES = [
-  "怎样集成Web SDK",
-  "消息撤回时间设置",
-  "系统消息头像修改",
-  "Uniapp集成教程",
-  "Server端离线推送配置",
-  "Flutter SDK 快速入门",
-  "群组权限管理最佳实践",
-  "音视频通话卡顿排查"
-];
 
 const HOT_DEMOS = [
   { name: "ChatDemo (聊天Demo)", views: 256, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=ChatDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
@@ -33,6 +22,7 @@ export function Home() {
   const [hotPage, setHotPage] = useState(0);
   const [visibleCount, setVisibleCount] = useState(8);
   const [articles, setArticles] = useState<ContentArticle[]>([]);
+  const [homepageSettings, setHomepageSettings] = useState<ContentHomepageSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -42,8 +32,26 @@ export function Home() {
     const load = async () => {
       setLoading(true);
       setError("");
+      const [articlesResult, homepageResult] = await Promise.allSettled([
+        fetchArticles({ page: 1, pageSize: 100, order: "newest" }),
+        fetchHomepageSettings(),
+      ]);
+
+      if (!active) {
+        return;
+      }
+
+      if (homepageResult.status === "fulfilled") {
+        setHomepageSettings(homepageResult.value);
+      } else {
+        setHomepageSettings(null);
+      }
+
       try {
-        const resp = await fetchArticles({ page: 1, pageSize: 100, order: "newest" });
+        if (articlesResult.status !== "fulfilled") {
+          throw articlesResult.reason;
+        }
+        const resp = articlesResult.value;
         if (!active) {
           return;
         }
@@ -90,59 +98,47 @@ export function Home() {
   const prevHotPage = () => setHotPage((p) => (p - 1 + totalHotPages) % totalHotPages);
   const displayedArticles = processedArticles.slice(0, visibleCount);
   const hasMore = visibleCount < processedArticles.length;
+  const homeBanner = homepageSettings?.homeBanner;
+  const hotArticlesAd = homepageSettings?.hotArticlesAd;
+
+  const renderLinkedImage = (imageUrl: string, linkUrl: string, alt: string, className: string) => {
+    const image = (
+      <ImageWithFallback
+        src={imageUrl}
+        alt={alt}
+        className={className}
+      />
+    );
+
+    if (!linkUrl) {
+      return image;
+    }
+
+    const isExternal = /^https?:\/\//.test(linkUrl);
+    return (
+      <a
+        href={linkUrl}
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noreferrer" : undefined}
+        className="block h-full w-full"
+      >
+        {image}
+      </a>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      {/* Trendy AI-Style Hero Banner */}
-      <div className="relative w-full min-h-[180px] md:min-h-[220px] rounded-2xl overflow-hidden bg-[#020617] border border-white/5 shadow-2xl flex items-center group">
-        {/* Pure CSS Premium Background Effects (MiniMax/Vercel Style) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Subtle noise texture for high-end grain effect */}
-          <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
-          
-          {/* Glowing Fluid Orbs in Easemob Blue */}
-          <div className="absolute -top-[30%] -right-[10%] w-[60%] h-[80%] bg-[#009EFF] dark:bg-[#33B1FF] rounded-full mix-blend-screen opacity-20 blur-[100px] group-hover:opacity-30 transition-opacity duration-700" />
-          <div className="absolute bottom-[10%] -right-[20%] w-[50%] h-[60%] bg-[#0040FF] rounded-full mix-blend-screen opacity-20 blur-[120px]" />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[70%] bg-[#009EFF] dark:bg-[#33B1FF] rounded-full mix-blend-screen opacity-[0.15] blur-[100px]" />
-          
-          {/* Subtle Developer Dot Grid fading out towards bottom-right */}
-          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:linear-gradient(to_bottom_right,black_20%,transparent_70%)] opacity-40" />
+      {homeBanner?.enabled && homeBanner.imageUrl && (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-800">
+          {renderLinkedImage(
+            homeBanner.imageUrl,
+            homeBanner.linkUrl,
+            "首页 Banner",
+            "h-auto min-h-[160px] w-full object-cover md:min-h-[220px]",
+          )}
         </div>
-        
-        {/* Banner Content */}
-        <div className="relative z-10 px-6 md:px-10 py-8 md:py-12 flex flex-col md:flex-row items-start md:items-end justify-between w-full gap-6 md:gap-8">
-          <div className="flex flex-col flex-1 max-w-[640px]">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.08] backdrop-blur-md w-fit mb-4 cursor-pointer hover:bg-white/[0.08] transition-colors">
-              <Sparkles className="w-4 h-4 text-[#009EFF] dark:text-[#33B1FF]" />
-              <span className="text-[13px] md:text-sm font-medium text-[#E2E8F0] tracking-wide">环信 IM 5.0 全新发布</span>
-            </div>
-            
-            <h1 className="text-[32px] md:text-[40px] lg:text-[44px] font-bold text-white mb-4 tracking-tight leading-[1.2]">
-              构建下一代 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#009EFF] dark:from-[#33B1FF] to-[#4DB8FF]">实时交互</span> 体验
-            </h1>
-            
-            <p className="text-[#94A3B8] text-sm md:text-[15px] leading-relaxed line-clamp-2 md:line-clamp-none max-w-[540px]">
-              千万级并发架构，全面升级的音视频与消息 SDK。不仅仅是极简集成的通讯能力，更助力开发者快速构建全场景 AI 实时对话应用。
-            </p>
-          </div>
-          
-          <div className="flex flex-row items-center gap-3 shrink-0 w-full md:w-auto mt-2 md:mt-0">
-            <Link
-              to="/videos"
-              className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#009EFF] px-6 py-3 text-[14px] font-medium text-white transition-all shadow-[0_0_20px_rgba(0,158,255,0.2)] hover:bg-[#008AE6] hover:shadow-[0_0_30px_rgba(0,158,255,0.35)] dark:bg-[#33B1FF] dark:shadow-[0_0_20px_rgba(51,177,255,0.2)] dark:hover:bg-[#33B1FF]/90 dark:hover:shadow-[0_0_30px_rgba(51,177,255,0.35)] md:flex-none"
-            >
-              <PlayCircle className="w-4 h-4" />
-              浏览视频
-            </Link>
-            <Link
-              to="/projects"
-              className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-[14px] font-medium text-white backdrop-blur-md transition-all hover:bg-white/[0.08] md:flex-none"
-            >
-              查看项目 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Main Layout Area */}
       <div className="flex gap-8 items-start">
@@ -261,18 +257,16 @@ export function Home() {
         </main>
 
         <aside className="w-[300px] shrink-0 hidden xl:flex flex-col gap-6">
-          {/* Ad Banner - 宽度固定，高度随图片比例自适应 */}
-          <div className="rounded-2xl overflow-hidden shadow-sm ring-1 ring-slate-100 dark:ring-slate-800 relative group cursor-pointer h-[140px]">
-            <ImageWithFallback 
-              src="https://images.unsplash.com/photo-1592758080692-b6a5dbe9c725?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWNoJTIwY29uZmVyZW5jZSUyMHN0YWdlfGVufDF8fHx8MTc3MzMxMzY3NXww&ixlib=rb-4.1.0&q=80&w=1080" 
-              alt="RTE 2025 Developer Conference" 
-              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700 ease-out" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent flex flex-col justify-end p-5">
-              <span className="text-[#009EFF] dark:text-[#33B1FF] text-xs font-bold mb-1.5 tracking-wider uppercase">推荐活动</span>
-              <span className="text-white font-semibold text-base leading-snug">2025 RTE 开发者大会 · 立即报名</span>
+          {hotArticlesAd?.enabled && hotArticlesAd.imageUrl && (
+            <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100 dark:ring-slate-800">
+              {renderLinkedImage(
+                hotArticlesAd.imageUrl,
+                hotArticlesAd.linkUrl,
+                "周热门文章广告位",
+                "h-[140px] w-full object-cover transition-transform duration-500 ease-out hover:scale-[1.02]",
+              )}
             </div>
-          </div>
+          )}
 
           {/* Hot Articles */}
           <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700/80 p-6">

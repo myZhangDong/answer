@@ -17,6 +17,8 @@ import { AdminVideos } from "./pages/AdminVideos";
 import { AdminVideoEditor } from "./pages/AdminVideoEditor";
 import { AdminProjects } from "./pages/AdminProjects";
 import { AdminProjectEditor } from "./pages/AdminProjectEditor";
+import { AdminUsers } from "./pages/AdminUsers";
+import { AdminSiteSettings } from "./pages/AdminSiteSettings";
 
 function AdminIndexRedirect() {
   return <Navigate to="/admin/articles" replace />;
@@ -67,12 +69,20 @@ export const router = createBrowserRouter([
             Component: AdminProjects,
           },
           {
+            path: "users",
+            Component: AdminUsers,
+          },
+          {
             path: "projects/new",
             Component: AdminProjectEditor,
           },
           {
             path: "projects/:id/edit",
             Component: AdminProjectEditor,
+          },
+          {
+            path: "site-settings",
+            Component: AdminSiteSettings,
           },
         ],
       },

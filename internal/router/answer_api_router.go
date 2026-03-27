@@ -139,6 +139,7 @@ func (a *AnswerAPIRouter) RegisterMustUnAuthAnswerAPIRouter(authUserMiddleware *
 	// siteinfo
 	r.GET("/siteinfo", a.siteInfoController.GetSiteInfo)
 	r.GET("/siteinfo/legal", a.siteInfoController.GetSiteLegalInfo)
+	r.GET("/siteinfo/homepage", a.siteInfoController.GetSiteHomepage)
 
 	// user
 	r.GET("/user/info", a.userController.GetUserInfoByUserID)
@@ -376,6 +377,8 @@ func (a *AnswerAPIRouter) RegisterAnswerAdminAPIRouter(r *gin.RouterGroup) {
 	r.PUT("/siteinfo/interface", a.adminSiteInfoController.UpdateInterface)
 	r.GET("/siteinfo/branding", a.adminSiteInfoController.GetSiteBranding)
 	r.PUT("/siteinfo/branding", a.adminSiteInfoController.UpdateBranding)
+	r.GET("/siteinfo/homepage", a.adminSiteInfoController.GetSiteHomepage)
+	r.PUT("/siteinfo/homepage", a.adminSiteInfoController.UpdateSiteHomepage)
 	r.GET("/siteinfo/write", a.adminSiteInfoController.GetSiteWrite)
 	r.PUT("/siteinfo/write", a.adminSiteInfoController.UpdateSiteWrite)
 	r.GET("/siteinfo/legal", a.adminSiteInfoController.GetSiteLegal)

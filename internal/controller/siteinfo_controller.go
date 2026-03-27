@@ -64,6 +64,10 @@ func (sc *SiteInfoController) GetSiteInfo(ctx *gin.Context) {
 	if err != nil {
 		log.Error(err)
 	}
+	resp.Homepage, err = sc.siteInfoService.GetSiteHomepage(ctx)
+	if err != nil {
+		log.Error(err)
+	}
 
 	resp.Login, err = sc.siteInfoService.GetSiteLogin(ctx)
 	if err != nil {
@@ -96,6 +100,18 @@ func (sc *SiteInfoController) GetSiteInfo(ctx *gin.Context) {
 	}
 
 	handler.HandleResponse(ctx, nil, resp)
+}
+
+// GetSiteHomepage get site homepage config
+// @Summary get site homepage config
+// @Description get site homepage config
+// @Tags site
+// @Produce json
+// @Success 200 {object} handler.RespBody{data=schema.SiteHomepageResp}
+// @Router /answer/api/v1/siteinfo/homepage [get]
+func (sc *SiteInfoController) GetSiteHomepage(ctx *gin.Context) {
+	resp, err := sc.siteInfoService.GetSiteHomepage(ctx)
+	handler.HandleResponse(ctx, err, resp)
 }
 
 // GetSiteLegalInfo get site legal info

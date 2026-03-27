@@ -156,6 +156,7 @@ export interface BannerUploadPayload {
 
 /** uploadFile 的资源类型（用于后端选择存储桶/路径） */
 export type UploadAssetType =
+  | "branding-image"    // 站点品牌与运营位图片
   | "article-cover"     // 文章封面图
   | "video-thumbnail"   // 视频封面图
   | "video-file"        // 视频文件

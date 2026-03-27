@@ -184,6 +184,17 @@ type SiteSeoReq struct {
 	Robots    string `validate:"required" form:"robots" json:"robots"`
 }
 
+type SiteHomepageBannerReq struct {
+	Enabled  bool   `json:"enabled"`
+	ImageURL string `validate:"omitempty,lte=512" json:"image_url"`
+	LinkURL  string `validate:"omitempty,lte=1024" json:"link_url"`
+}
+
+type SiteHomepageReq struct {
+	HomeBanner   *SiteHomepageBannerReq `json:"home_banner"`
+	HotArticlesAd *SiteHomepageBannerReq `json:"hot_articles_ad"`
+}
+
 func (s *SiteSeoResp) IsShortLink() bool {
 	return s.Permalink == constant.PermalinkQuestionIDAndTitleByShortID ||
 		s.Permalink == constant.PermalinkQuestionIDByShortID
@@ -246,11 +257,15 @@ type SiteLegalSimpleResp struct {
 // SiteSeoResp site write response
 type SiteSeoResp SiteSeoReq
 
+// SiteHomepageResp site homepage response
+type SiteHomepageResp SiteHomepageReq
+
 // SiteInfoResp get site info response
 type SiteInfoResp struct {
 	General       *SiteGeneralResp       `json:"general"`
 	Interface     *SiteInterfaceResp     `json:"interface"`
 	Branding      *SiteBrandingResp      `json:"branding"`
+	Homepage      *SiteHomepageResp      `json:"homepage"`
 	Login         *SiteLoginResp         `json:"login"`
 	Theme         *SiteThemeResp         `json:"theme"`
 	CustomCssHtml *SiteCustomCssHTMLResp `json:"custom_css_html"`

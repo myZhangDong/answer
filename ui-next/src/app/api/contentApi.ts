@@ -68,6 +68,17 @@ interface BackendProjectInfo {
   updated_at?: number | string;
 }
 
+interface BackendHomepageBanner {
+  enabled?: boolean;
+  image_url?: string;
+  link_url?: string;
+}
+
+interface BackendHomepageSettings {
+  home_banner?: BackendHomepageBanner;
+  hot_articles_ad?: BackendHomepageBanner;
+}
+
 export interface ContentArticle {
   id: string;
   title: string;
@@ -113,6 +124,17 @@ export interface ContentProject {
   iconUrl: string;
   content: string;
   createdAt: string;
+}
+
+export interface ContentHomepageBanner {
+  enabled: boolean;
+  imageUrl: string;
+  linkUrl: string;
+}
+
+export interface ContentHomepageSettings {
+  homeBanner: ContentHomepageBanner;
+  hotArticlesAd: ContentHomepageBanner;
 }
 
 export interface FetchListParams {
@@ -262,6 +284,14 @@ function mapProject(item: BackendProjectInfo): ContentProject {
   };
 }
 
+function mapHomepageBanner(item?: BackendHomepageBanner): ContentHomepageBanner {
+  return {
+    enabled: Boolean(item?.enabled),
+    imageUrl: item?.image_url || "",
+    linkUrl: item?.link_url || "",
+  };
+}
+
 export async function fetchArticles(
   params: FetchListParams = {},
 ): Promise<BackendPaged<ContentArticle>> {
@@ -337,4 +367,12 @@ export async function fetchProjectDetail(id: string) {
     `/answer/api/v1/project/info?id=${encodeURIComponent(id)}`,
   );
   return mapProject(resp);
+}
+
+export async function fetchHomepageSettings(): Promise<ContentHomepageSettings> {
+  const resp = await apiRequest<BackendHomepageSettings>("/answer/api/v1/siteinfo/homepage");
+  return {
+    homeBanner: mapHomepageBanner(resp.home_banner),
+    hotArticlesAd: mapHomepageBanner(resp.hot_articles_ad),
+  };
 }

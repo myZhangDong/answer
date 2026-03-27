@@ -47,6 +47,7 @@ type SiteInfoCommonService interface {
 	GetSiteGeneral(ctx context.Context) (resp *schema.SiteGeneralResp, err error)
 	GetSiteInterface(ctx context.Context) (resp *schema.SiteInterfaceResp, err error)
 	GetSiteBranding(ctx context.Context) (resp *schema.SiteBrandingResp, err error)
+	GetSiteHomepage(ctx context.Context) (resp *schema.SiteHomepageResp, err error)
 	GetSiteUsers(ctx context.Context) (resp *schema.SiteUsersResp, err error)
 	FormatAvatar(ctx context.Context, originalAvatarData, email string, userStatus int) *schema.AvatarInfo
 	FormatListAvatar(ctx context.Context, userList []*entity.User) (userID2AvatarMapping map[string]*schema.AvatarInfo)
@@ -91,6 +92,21 @@ func (s *siteInfoCommonService) GetSiteBranding(ctx context.Context) (resp *sche
 	resp = &schema.SiteBrandingResp{}
 	if err = s.GetSiteInfoByType(ctx, constant.SiteTypeBranding, resp); err != nil {
 		return nil, err
+	}
+	return resp, nil
+}
+
+// GetSiteHomepage get site homepage config
+func (s *siteInfoCommonService) GetSiteHomepage(ctx context.Context) (resp *schema.SiteHomepageResp, err error) {
+	resp = &schema.SiteHomepageResp{}
+	if err = s.GetSiteInfoByType(ctx, constant.SiteTypeHomepage, resp); err != nil {
+		return nil, err
+	}
+	if resp.HomeBanner == nil {
+		resp.HomeBanner = &schema.SiteHomepageBannerReq{}
+	}
+	if resp.HotArticlesAd == nil {
+		resp.HotArticlesAd = &schema.SiteHomepageBannerReq{}
 	}
 	return resp, nil
 }

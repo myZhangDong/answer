@@ -26,6 +26,10 @@
   - 用于单独跟踪 `ui-next` 管理员登录、会话恢复、后台路由守卫，以及对现有后端鉴权的复用
 - `specs/ui-next-admin-auth-tasks.md`
   - 用于单独跟踪 `ui-next` 管理员登录独立规格的执行步骤与验收状态
+- `specs/003-ui-next-admin-site-settings-spec.md`
+  - 用于单独跟踪 `ui-next` 网站设置迁移、首页 Banner 配置和“周热门文章”广告位配置
+- `specs/003-ui-next-admin-site-settings-tasks.md`
+  - 用于单独跟踪 `003` 规格的执行步骤、阶段验收和后续迁移衔接
 
 ## 文件职责
 

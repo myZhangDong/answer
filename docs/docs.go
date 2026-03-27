@@ -1069,6 +1069,77 @@ const docTemplate = `{
                 }
             }
         },
+        "/answer/admin/api/siteinfo/homepage": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get site homepage config",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "get site homepage config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.SiteHomepageResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "update site homepage config",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "update site homepage config",
+                "parameters": [
+                    {
+                        "description": "homepage info",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.SiteHomepageReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
         "/answer/admin/api/siteinfo/interface": {
             "get": {
                 "security": [
@@ -5925,6 +5996,38 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/schema.SiteInfoResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/siteinfo/homepage": {
+            "get": {
+                "description": "get site homepage config",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "site"
+                ],
+                "summary": "get site homepage config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.SiteHomepageResp"
                                         }
                                     }
                                 }
@@ -11408,6 +11511,44 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.SiteHomepageBannerReq": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image_url": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "link_url": {
+                    "type": "string",
+                    "maxLength": 1024
+                }
+            }
+        },
+        "schema.SiteHomepageReq": {
+            "type": "object",
+            "properties": {
+                "home_banner": {
+                    "$ref": "#/definitions/schema.SiteHomepageBannerReq"
+                },
+                "hot_articles_ad": {
+                    "$ref": "#/definitions/schema.SiteHomepageBannerReq"
+                }
+            }
+        },
+        "schema.SiteHomepageResp": {
+            "type": "object",
+            "properties": {
+                "home_banner": {
+                    "$ref": "#/definitions/schema.SiteHomepageBannerReq"
+                },
+                "hot_articles_ad": {
+                    "$ref": "#/definitions/schema.SiteHomepageBannerReq"
+                }
+            }
+        },
         "schema.SiteInfoResp": {
             "type": "object",
             "properties": {
@@ -11419,6 +11560,9 @@ const docTemplate = `{
                 },
                 "general": {
                     "$ref": "#/definitions/schema.SiteGeneralResp"
+                },
+                "homepage": {
+                    "$ref": "#/definitions/schema.SiteHomepageResp"
                 },
                 "interface": {
                     "$ref": "#/definitions/schema.SiteInterfaceResp"

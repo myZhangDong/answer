@@ -99,6 +99,11 @@ func (s *SiteInfoService) GetSiteBranding(ctx context.Context) (resp *schema.Sit
 	return s.siteInfoCommonService.GetSiteBranding(ctx)
 }
 
+// GetSiteHomepage get site homepage config
+func (s *SiteInfoService) GetSiteHomepage(ctx context.Context) (resp *schema.SiteHomepageResp, err error) {
+	return s.siteInfoCommonService.GetSiteHomepage(ctx)
+}
+
 // GetSiteUsers get site info about users
 func (s *SiteInfoService) GetSiteUsers(ctx context.Context) (resp *schema.SiteUsersResp, err error) {
 	return s.siteInfoCommonService.GetSiteUsers(ctx)
@@ -182,6 +187,17 @@ func (s *SiteInfoService) SaveSiteBranding(ctx context.Context, req *schema.Site
 		Status:  1,
 	}
 	return s.siteInfoRepo.SaveByType(ctx, constant.SiteTypeBranding, data)
+}
+
+// SaveSiteHomepage save homepage configuration
+func (s *SiteInfoService) SaveSiteHomepage(ctx context.Context, req *schema.SiteHomepageReq) (err error) {
+	content, _ := json.Marshal(req)
+	data := &entity.SiteInfo{
+		Type:    constant.SiteTypeHomepage,
+		Content: string(content),
+		Status:  1,
+	}
+	return s.siteInfoRepo.SaveByType(ctx, constant.SiteTypeHomepage, data)
 }
 
 // SaveSiteWrite save site configuration about write
