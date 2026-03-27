@@ -585,6 +585,7 @@ ui:
       logout: Log out
       admin: Admin
       review: Review
+      project: Project
     search:
       placeholder: Search
   footer:

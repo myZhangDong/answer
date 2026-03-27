@@ -32,6 +32,7 @@ import (
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/action"
 	"github.com/apache/answer/internal/service/content"
+	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/permission"
 	"github.com/apache/answer/internal/service/rank"
 	"github.com/apache/answer/internal/service/siteinfo_common"
@@ -43,12 +44,13 @@ import (
 
 // QuestionController question controller
 type QuestionController struct {
-	questionService     *content.QuestionService
-	answerService       *content.AnswerService
-	rankService         *rank.RankService
-	siteInfoService     siteinfo_common.SiteInfoCommonService
-	actionService       *action.CaptchaService
-	rateLimitMiddleware *middleware.RateLimitMiddleware
+	questionService      *content.QuestionService
+	answerService        *content.AnswerService
+	rankService          *rank.RankService
+	siteInfoService      siteinfo_common.SiteInfoCommonService
+	actionService        *action.CaptchaService
+	rateLimitMiddleware  *middleware.RateLimitMiddleware
+	contentReviewService *content_review.ContentReviewService
 }
 
 // NewQuestionController new controller
@@ -59,14 +61,16 @@ func NewQuestionController(
 	siteInfoService siteinfo_common.SiteInfoCommonService,
 	actionService *action.CaptchaService,
 	rateLimitMiddleware *middleware.RateLimitMiddleware,
+	contentReviewService *content_review.ContentReviewService,
 ) *QuestionController {
 	return &QuestionController{
-		questionService:     questionService,
-		answerService:       answerService,
-		rankService:         rankService,
-		siteInfoService:     siteInfoService,
-		actionService:       actionService,
-		rateLimitMiddleware: rateLimitMiddleware,
+		questionService:      questionService,
+		answerService:        answerService,
+		rankService:          rankService,
+		siteInfoService:      siteInfoService,
+		actionService:        actionService,
+		rateLimitMiddleware:  rateLimitMiddleware,
+		contentReviewService: contentReviewService,
 	}
 }
 
@@ -342,6 +346,34 @@ func (qc *QuestionController) QuestionPage(ctx *gin.Context) {
 	handler.HandleResponse(ctx, nil, pager.NewPageModel(total, questions))
 }
 
+// ContentPage get content (questions and articles) by page
+// @Summary get content (questions and articles) by page
+// @Description get content (questions and articles) by page
+// @Tags Question
+// @Accept  json
+// @Produce  json
+// @Param data body schema.ContentPageReq  true "ContentPageReq"
+// @Success 200 {object} handler.RespBody{data=pager.PageModel{list=[]schema.ContentPageResp}}
+// @Router /answer/api/v1/content/page [get]
+func (qc *QuestionController) ContentPage(ctx *gin.Context) {
+	req := &schema.ContentPageReq{}
+	if handler.BindAndCheck(ctx, req) {
+		return
+	}
+	req.LoginUserID = middleware.GetLoginUserIDFromContext(ctx)
+
+	content, total, err := qc.questionService.GetContentPage(ctx, req)
+	if err != nil {
+		handler.HandleResponse(ctx, err, nil)
+		return
+	}
+	if pager.ValPageOutOfRange(total, req.Page, req.PageSize) {
+		handler.HandleResponse(ctx, errors.NotFound(reason.RequestFormatError), nil)
+		return
+	}
+	handler.HandleResponse(ctx, nil, pager.NewPageModel(total, content))
+}
+
 // QuestionRecommendPage get recommend questions by page
 // @Summary get recommend questions by page
 // @Description get recommend questions by page
@@ -399,6 +431,13 @@ func (qc *QuestionController) AddQuestion(ctx *gin.Context) {
 	}()
 
 	req.UserID = middleware.GetLoginUserIDFromContext(ctx)
+
+	// 内容审核 - 在保存问题前进行审核
+	if err := qc.contentReviewService.ReviewContent(ctx, req.Title, req.Content, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
+		return
+	}
+
 	canList, requireRanks, err := qc.rankService.CheckOperationPermissionsForRanks(ctx, req.UserID, []string{
 		permission.QuestionAdd,
 		permission.QuestionEdit,
@@ -504,6 +543,12 @@ func (qc *QuestionController) AddQuestionByAnswer(ctx *gin.Context) {
 	}
 	req.UserID = middleware.GetLoginUserIDFromContext(ctx)
 
+	// 内容审核 - 在保存问题前进行审核
+	if err := qc.contentReviewService.ReviewContent(ctx, req.Title, req.Content, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
+		return
+	}
+
 	canList, err := qc.rankService.CheckOperationPermissions(ctx, req.UserID, []string{
 		permission.QuestionAdd,
 		permission.QuestionEdit,
@@ -581,6 +626,12 @@ func (qc *QuestionController) AddQuestionByAnswer(ctx *gin.Context) {
 	//add the question id to the answer
 	questionInfo, ok := resp.(*schema.QuestionInfoResp)
 	if ok {
+		// 内容审核 - 审核答案内容
+		if err := qc.contentReviewService.ReviewContent(ctx, "", req.AnswerContent, req.UserID); err != nil {
+			handler.HandleResponse(ctx, err, nil)
+			return
+		}
+
 		answerReq := &schema.AnswerAddReq{}
 		answerReq.QuestionID = uid.DeShortID(questionInfo.ID)
 		answerReq.UserID = middleware.GetLoginUserIDFromContext(ctx)
@@ -685,6 +736,12 @@ func (qc *QuestionController) UpdateQuestion(ctx *gin.Context) {
 		lang := handler.GetLang(ctx)
 		msg := translator.TrWithData(lang, reason.NoEnoughRankToOperate, &schema.PermissionTrTplData{Rank: requireRanks[4]})
 		handler.HandleResponse(ctx, errors.Forbidden(reason.NoEnoughRankToOperate).WithMsg(msg), nil)
+		return
+	}
+
+	// 内容审核 - 审核问题内容
+	if err := qc.contentReviewService.ReviewContent(ctx, req.Title, req.Content, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
 		return
 	}
 

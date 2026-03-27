@@ -40,7 +40,17 @@ const Index: FC = () => {
           isActive || pathname === '/' ? 'nav-link active' : 'nav-link'
         }>
         <Icon name="question-circle-fill" className="me-2" />
-        <span>{t('header.nav.question')}</span>
+        {/* <span>{t('header.nav.question')}</span> */}
+        <span>常见问题</span>
+      </NavLink>
+
+      <NavLink
+        to="/articles"
+        className={({ isActive }) =>
+          isActive || pathname === '/articles' ? 'nav-link active' : 'nav-link'
+        }>
+        <Icon name="file-text-fill" className="me-2" />
+        <span>技术文章</span>
       </NavLink>
 
       <NavLink
@@ -49,7 +59,17 @@ const Index: FC = () => {
           isActive || pathname === '/video' ? 'nav-link active' : 'nav-link'
         }>
         <Icon name="play-circle-fill" className="me-2" />
-        <span>{t('header.nav.video')}</span>
+        {/* <span>{t('header.nav.video')}</span> */}
+        <span>视频教程</span>
+      </NavLink>
+
+      <NavLink
+        to="/projects"
+        className={({ isActive }) =>
+          isActive || pathname === '/projects' ? 'nav-link active' : 'nav-link'
+        }>
+        <Icon name="folder-fill" className="me-2" />
+        <span>{t('header.nav.project')}</span>
       </NavLink>
 
       <NavLink

@@ -32,6 +32,10 @@ const (
 	QuestionPin             = 2
 	QuestionShow            = 1
 	QuestionHide            = 2
+
+	// Content types
+	ContentTypeQuestion = 1 // 问题
+	ContentTypeArticle  = 2 // 文章
 )
 
 var AdminQuestionSearchStatus = map[string]int{
@@ -48,6 +52,11 @@ var AdminQuestionSearchStatusIntToString = map[int]string{
 	QuestionStatusPending:   "pending",
 }
 
+var ContentTypeMapping = map[int]string{
+	ContentTypeQuestion: "question",
+	ContentTypeArticle:  "article",
+}
+
 // Question question
 type Question struct {
 	ID               string    `xorm:"not null pk BIGINT(20) id"`
@@ -62,6 +71,7 @@ type Question struct {
 	Pin              int       `xorm:"not null default 1 INT(11) pin"`
 	Show             int       `xorm:"not null default 1 INT(11) show"`
 	Status           int       `xorm:"not null default 1 INT(11) status"`
+	Type             int       `xorm:"not null default 1 INT(11) type"`
 	ViewCount        int       `xorm:"not null default 0 INT(11) view_count"`
 	UniqueViewCount  int       `xorm:"not null default 0 INT(11) unique_view_count"`
 	VoteCount        int       `xorm:"not null default 0 INT(11) vote_count"`

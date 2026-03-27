@@ -59,10 +59,24 @@ const answerLanding = (params: {
   return `${questionLandingUrl}/${params.answerId}`;
 };
 
+const articleLanding = (articleId: string = '', slugTitle: string = '') => {
+  const { seo } = seoSettingStore.getState();
+  if (!articleId) {
+    return slugTitle ? `/articles/null/${slugTitle}` : '/articles/null';
+  }
+  // @ts-ignore
+  if (/[13]/.test(seo.permalink) && slugTitle) {
+    return `/articles/${articleId}/${encodeURIComponent(slugTitle)}`;
+  }
+
+  return `/articles/${articleId}`;
+};
+
 export const pathFactory = {
   tagLanding,
   tagInfo,
   tagEdit,
   questionLanding,
   answerLanding,
+  articleLanding,
 };

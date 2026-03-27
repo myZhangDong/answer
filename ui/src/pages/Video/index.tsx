@@ -87,7 +87,7 @@ const Video: FC = () => {
       <Row>
         <Col lg={12}>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>{t('header.nav.video')}</h1>
+            <h5>视频教程</h5>
           </div>
 
           {/* 搜索和排序控件 */}

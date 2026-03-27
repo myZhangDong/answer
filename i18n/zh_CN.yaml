@@ -1155,7 +1155,7 @@ ui:
     tag_required_text: 必选标签（至少一个）
   header:
     nav:
-      question: 问题
+      question: 集成问题
       tag: 标签
       user: 用户
       badges: 徽章
@@ -1166,7 +1166,8 @@ ui:
       review: 审查
       bookmark: 收藏夹
       moderation: 管理
-      video: 视频
+      video: 视频教程
+      project: 开源项目
     search:
       placeholder: 搜索
   footer:
@@ -1732,9 +1733,10 @@ ui:
   nav_menus:
     dashboard: 后台管理
     contents: 内容管理
-    questions: 问题
+    questions: 常见问题
     answers: 回答
-    videos: 视频
+    videos: 视频教程
+    projects: 开源项目
     users: 用户管理
     badges: 徽章
     flags: 举报管理

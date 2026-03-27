@@ -347,6 +347,12 @@ func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.Question
 	question.PostUpdateTime = now
 	question.Pin = entity.QuestionUnPin
 	question.Show = entity.QuestionShow
+	// 设置内容类型，默认为问题类型
+	if req.Type > 0 {
+		question.Type = req.Type
+	} else {
+		question.Type = entity.ContentTypeQuestion
+	}
 	//question.UpdatedAt = nil
 	err = qs.questionRepo.AddQuestion(ctx, question)
 	if err != nil {
@@ -1684,4 +1690,156 @@ func (qs *QuestionService) GetQuestionLink(ctx context.Context, req *schema.GetQ
 		return nil, 0, err
 	}
 	return questions, total, nil
+}
+
+// GetContentPage get content (questions and articles) page
+func (qs *QuestionService) GetContentPage(ctx context.Context, req *schema.ContentPageReq) (
+	resp []*schema.ContentPageResp, total int64, err error) {
+
+	userID := req.LoginUserID
+
+	tagIDs := make([]string, 0)
+	if len(req.Tag) > 0 {
+		tagInfo, exist, err := qs.tagCommon.GetTagBySlugName(ctx, strings.ToLower(req.Tag))
+		if err != nil {
+			return nil, 0, err
+		}
+		if exist {
+			tagIDs = append(tagIDs, tagInfo.ID)
+		}
+	}
+
+	userIDBeSearched := ""
+	if len(req.Username) > 0 {
+		userInfo, exist, err := qs.userCommon.GetUserBasicInfoByUserName(ctx, req.Username)
+		if err != nil {
+			return nil, 0, err
+		}
+		if exist {
+			userIDBeSearched = userInfo.ID
+		}
+	}
+
+	contentList, total, err := qs.questionRepo.GetContentPage(ctx, req.Page, req.PageSize,
+		tagIDs, userIDBeSearched, req.OrderCond, req.InDays, req.ContentType, false, false)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	resp, err = qs.FormatContentPage(ctx, contentList, userID, req.OrderCond)
+	if err != nil {
+		return nil, 0, err
+	}
+	return resp, total, nil
+}
+
+// FormatContentPage format content page
+func (qs *QuestionService) FormatContentPage(
+	ctx context.Context, contentList []*entity.Question, loginUserID string, orderCond string) (
+	formattedContent []*schema.ContentPageResp, err error) {
+	formattedContent = make([]*schema.ContentPageResp, 0)
+	contentIDs := make([]string, 0)
+	userIDs := make([]string, 0)
+	for _, contentInfo := range contentList {
+		t := &schema.ContentPageResp{
+			ID:               contentInfo.ID,
+			CreatedAt:        contentInfo.CreatedAt.Unix(),
+			Title:            contentInfo.Title,
+			UrlTitle:         htmltext.UrlTitle(contentInfo.Title),
+			Description:      htmltext.FetchExcerpt(contentInfo.ParsedText, "...", 240),
+			Status:           contentInfo.Status,
+			Type:             contentInfo.Type,
+			TypeName:         entity.ContentTypeMapping[contentInfo.Type],
+			ViewCount:        contentInfo.ViewCount,
+			UniqueViewCount:  contentInfo.UniqueViewCount,
+			VoteCount:        contentInfo.VoteCount,
+			AnswerCount:      contentInfo.AnswerCount,
+			CollectionCount:  contentInfo.CollectionCount,
+			FollowCount:      contentInfo.FollowCount,
+			AcceptedAnswerID: contentInfo.AcceptedAnswerID,
+			LastAnswerID:     contentInfo.LastAnswerID,
+			Pin:              contentInfo.Pin,
+			Show:             contentInfo.Show,
+			Operator:         &schema.QuestionPageRespOperator{ID: contentInfo.UserID},
+		}
+
+		contentIDs = append(contentIDs, contentInfo.ID)
+		userIDs = append(userIDs, contentInfo.UserID)
+		haveEdited, haveAnswered := false, false
+		if checker.IsNotZeroString(contentInfo.LastEditUserID) {
+			haveEdited = true
+			userIDs = append(userIDs, contentInfo.LastEditUserID)
+		}
+		if checker.IsNotZeroString(contentInfo.LastAnswerID) {
+			haveAnswered = true
+
+			answerInfo, exist, err := qs.answerRepo.GetAnswer(ctx, contentInfo.LastAnswerID)
+			if err == nil && exist {
+				if answerInfo.LastEditUserID != "0" {
+					t.LastAnsweredUserID = answerInfo.LastEditUserID
+				} else {
+					t.LastAnsweredUserID = answerInfo.UserID
+				}
+				t.LastAnsweredAt = answerInfo.CreatedAt
+				userIDs = append(userIDs, t.LastAnsweredUserID)
+			}
+		}
+
+		// The default operation is to ask questions/post articles
+		if contentInfo.Type == entity.ContentTypeQuestion {
+			t.OperationType = schema.QuestionPageRespOperationTypeAsked
+		} else {
+			t.OperationType = "posted" // 文章发布
+		}
+		t.OperatedAt = contentInfo.CreatedAt.Unix()
+		t.Operator = &schema.QuestionPageRespOperator{ID: contentInfo.UserID}
+
+		// If the order is active, the last operation time is the last edit or answer time if it exists
+		if orderCond == schema.QuestionOrderCondActive {
+			if haveEdited {
+				t.OperationType = schema.QuestionPageRespOperationTypeModified
+				t.OperatedAt = contentInfo.UpdatedAt.Unix()
+				t.Operator = &schema.QuestionPageRespOperator{ID: contentInfo.LastEditUserID}
+			}
+			// 文章类型不考虑回答操作
+			if haveAnswered && contentInfo.Type == entity.ContentTypeQuestion {
+				if t.LastAnsweredAt.Unix() > t.OperatedAt {
+					t.OperationType = schema.QuestionPageRespOperationTypeAnswered
+					t.OperatedAt = t.LastAnsweredAt.Unix()
+					t.Operator = &schema.QuestionPageRespOperator{ID: t.LastAnsweredUserID}
+				}
+			}
+		}
+
+		formattedContent = append(formattedContent, t)
+	}
+
+	tagsMap, err := qs.tagCommon.BatchGetObjectTag(ctx, contentIDs)
+	if err != nil {
+		return formattedContent, err
+	}
+	userInfoMap, err := qs.userCommon.BatchUserBasicInfoByID(ctx, userIDs)
+	if err != nil {
+		return formattedContent, err
+	}
+
+	for _, item := range formattedContent {
+		tags, ok := tagsMap[item.ID]
+		if ok {
+			item.Tags = tags
+		} else {
+			item.Tags = make([]*schema.TagResp, 0)
+		}
+		userInfo, ok := userInfoMap[item.Operator.ID]
+		if ok {
+			if userInfo != nil {
+				item.Operator.DisplayName = userInfo.DisplayName
+				item.Operator.Username = userInfo.Username
+				item.Operator.Rank = userInfo.Rank
+				item.Operator.Status = userInfo.Status
+				item.Operator.Avatar = userInfo.Avatar
+			}
+		}
+	}
+	return formattedContent, nil
 }

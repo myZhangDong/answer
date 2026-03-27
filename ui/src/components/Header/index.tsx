@@ -18,9 +18,9 @@
  */
 
 import { FC, memo, useState, useEffect } from 'react';
-import { Navbar, Nav, Button } from 'react-bootstrap';
+import { Navbar, Nav, Button, Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useLocation, useMatch } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import classnames from 'classnames';
 
@@ -53,14 +53,6 @@ const Header: FC = () => {
   const [showMobileSideNav, setShowMobileSideNav] = useState(false);
 
   const [showMobileSearchInput, setShowMobileSearchInput] = useState(false);
-  /**
-   * Automatically append `tag` information when creating a question
-   */
-  const tagMatch = useMatch('/tags/:slugName');
-  let askUrl = '/questions/ask';
-  if (tagMatch && tagMatch.params.slugName) {
-    askUrl = `${askUrl}?tags=${encodeURIComponent(tagMatch.params.slugName)}`;
-  }
 
   useEffect(() => {
     updateReview({
@@ -164,20 +156,46 @@ const Header: FC = () => {
         {user?.username ? (
           <Nav className="d-flex align-items-center flex-nowrap flex-row">
             <Nav.Item className="me-2 d-block d-xl-none">
-              <NavLink
-                to={askUrl}
-                className="d-block icon-link nav-link text-center">
-                <Icon name="plus-lg" className="lh-1 fs-4" />
-              </NavLink>
+              <Dropdown align="end">
+                <Dropdown.Toggle
+                  as="a"
+                  role="button"
+                  className="d-block icon-link nav-link text-center no-toggle">
+                  <Icon name="plus-lg" className="lh-1 fs-4" />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/questions/ask">
+                    <Icon name="patch-question" className="me-2" />
+                    创建问题
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/articles/create">
+                    <Icon name="file-earmark-text" className="me-2" />
+                    创建文章
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </Nav.Item>
 
             <Nav.Item className="me-2 d-none d-xl-block">
-              <NavLink
-                to={askUrl}
-                className="nav-link d-flex align-items-center text-capitalize text-nowrap">
-                <Icon name="plus-lg" className="me-2 lh-1 fs-4" />
-                <span>{t('btns.create')}</span>
-              </NavLink>
+              <Dropdown align="end">
+                <Dropdown.Toggle
+                  as="a"
+                  role="button"
+                  className="nav-link d-flex align-items-center text-capitalize text-nowrap no-toggle">
+                  <Icon name="plus-lg" className="me-2 lh-1 fs-4" />
+                  <span>{t('btns.create')}</span>
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/questions/ask">
+                    <Icon name="patch-question" className="me-2" />
+                    创建问题
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/articles/create">
+                    <Icon name="file-earmark-text" className="me-2" />
+                    创建文章
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </Nav.Item>
 
             <NavItems redDot={redDot} userInfo={user} logOut={handleLogout} />

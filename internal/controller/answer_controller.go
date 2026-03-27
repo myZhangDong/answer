@@ -32,6 +32,7 @@ import (
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/action"
 	"github.com/apache/answer/internal/service/content"
+	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/permission"
 	"github.com/apache/answer/internal/service/rank"
 	"github.com/apache/answer/internal/service/siteinfo_common"
@@ -47,6 +48,7 @@ type AnswerController struct {
 	actionService         *action.CaptchaService
 	siteInfoCommonService siteinfo_common.SiteInfoCommonService
 	rateLimitMiddleware   *middleware.RateLimitMiddleware
+	contentReviewService  *content_review.ContentReviewService
 }
 
 // NewAnswerController new controller
@@ -56,6 +58,7 @@ func NewAnswerController(
 	actionService *action.CaptchaService,
 	siteInfoCommonService siteinfo_common.SiteInfoCommonService,
 	rateLimitMiddleware *middleware.RateLimitMiddleware,
+	contentReviewService *content_review.ContentReviewService,
 ) *AnswerController {
 	return &AnswerController{
 		answerService:         answerService,
@@ -63,6 +66,7 @@ func NewAnswerController(
 		actionService:         actionService,
 		siteInfoCommonService: siteInfoCommonService,
 		rateLimitMiddleware:   rateLimitMiddleware,
+		contentReviewService:  contentReviewService,
 	}
 }
 
@@ -263,6 +267,12 @@ func (ac *AnswerController) Add(ctx *gin.Context) {
 	req.UserAgent = ctx.GetHeader("User-Agent")
 	req.IP = ctx.ClientIP()
 
+	// 内容审核 - 审核答案内容
+	if err := ac.contentReviewService.ReviewContent(ctx, "", req.Content, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
+		return
+	}
+
 	answerID, err := ac.answerService.Insert(ctx, req)
 	if err != nil {
 		handler.HandleResponse(ctx, err, nil)
@@ -338,6 +348,12 @@ func (ac *AnswerController) Update(ctx *gin.Context) {
 	req.NoNeedReview = canList[1] || objectOwner
 	if !req.CanEdit {
 		handler.HandleResponse(ctx, errors.Forbidden(reason.RankFailToMeetTheCondition), nil)
+		return
+	}
+
+	// 内容审核 - 审核答案内容
+	if err := ac.contentReviewService.ReviewContent(ctx, "", req.Content, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
 		return
 	}
 

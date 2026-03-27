@@ -3080,6 +3080,67 @@
                 }
             }
         },
+        "/answer/api/v1/content/page": {
+            "get": {
+                "description": "get content (questions and articles) by page",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "get content (questions and articles) by page",
+                "parameters": [
+                    {
+                        "description": "ContentPageReq",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.ContentPageReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/pager.PageModel"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/schema.ContentPageResp"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/answer/api/v1/embed/config": {
             "get": {
                 "description": "get embed plugin config",
@@ -3139,7 +3200,9 @@
                             "post",
                             "post_attachment",
                             "avatar",
-                            "branding"
+                            "branding",
+                            "project",
+                            "video"
                         ],
                         "type": "string",
                         "description": "identify the source of the file upload",
@@ -4170,6 +4233,275 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/project": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "更新项目",
+                "parameters": [
+                    {
+                        "description": "project",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UpdateProjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "添加项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "添加项目",
+                "parameters": [
+                    {
+                        "description": "project",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.CreateProjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "删除项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "删除项目",
+                "parameters": [
+                    {
+                        "description": "project",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.RemoveProjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/project/batch-delete": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量删除项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "批量删除项目",
+                "parameters": [
+                    {
+                        "description": "project ids",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.BatchRemoveProjectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/project/info": {
+            "get": {
+                "description": "获取项目详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取项目详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.ProjectResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/project/page": {
+            "get": {
+                "description": "获取项目分页列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取项目分页列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "code type",
+                        "name": "code_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags",
+                        "name": "tags",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "order",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.ProjectPageResp"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -8352,6 +8684,21 @@
                 "BadgeStatusInactive"
             ]
         },
+        "schema.BatchRemoveProjectReq": {
+            "type": "object",
+            "required": [
+                "ids"
+            ],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "schema.CloseQuestionReq": {
             "type": "object",
             "required": [
@@ -8501,6 +8848,182 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "schema.ContentPageReq": {
+            "type": "object",
+            "properties": {
+                "content_type": {
+                    "description": "1: question, 2: article, 0: all",
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2
+                    ]
+                },
+                "in_days": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "order": {
+                    "type": "string",
+                    "enum": [
+                        "newest",
+                        "active",
+                        "hot",
+                        "score",
+                        "frequent"
+                    ]
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "tag": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
+        },
+        "schema.ContentPageResp": {
+            "type": "object",
+            "properties": {
+                "accepted_answer_id": {
+                    "type": "string"
+                },
+                "answer_count": {
+                    "type": "integer"
+                },
+                "collection_count": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "follow_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_answer_id": {
+                    "type": "string"
+                },
+                "last_answered_at": {
+                    "type": "string"
+                },
+                "last_answered_user_info": {
+                    "$ref": "#/definitions/schema.UserBasicInfo"
+                },
+                "operated_at": {
+                    "type": "integer"
+                },
+                "operation_type": {
+                    "type": "string"
+                },
+                "operator": {
+                    "$ref": "#/definitions/schema.QuestionPageRespOperator"
+                },
+                "pin": {
+                    "type": "integer"
+                },
+                "show": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.TagResp"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "type_name": {
+                    "type": "string"
+                },
+                "unique_view_count": {
+                    "type": "integer"
+                },
+                "url_title": {
+                    "type": "string"
+                },
+                "view_count": {
+                    "type": "integer"
+                },
+                "vote_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "schema.CreateProjectReq": {
+            "type": "object",
+            "required": [
+                "code_type",
+                "content",
+                "description",
+                "question_id",
+                "repo_url",
+                "title"
+            ],
+            "properties": {
+                "code_type": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "content": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "repo_url": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },
@@ -10005,6 +10528,82 @@
                 }
             }
         },
+        "schema.ProjectPageResp": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.ProjectResp"
+                    }
+                }
+            }
+        },
+        "schema.ProjectResp": {
+            "type": "object",
+            "properties": {
+                "answer_count": {
+                    "type": "integer"
+                },
+                "code_type": {
+                    "type": "integer"
+                },
+                "code_type_name": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "repo_url": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "user_info": {
+                    "$ref": "#/definitions/schema.UserBasicInfo"
+                },
+                "view_count": {
+                    "type": "integer"
+                },
+                "vote_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "schema.QuestionAdd": {
             "type": "object",
             "required": [
@@ -10038,6 +10637,14 @@
                     "type": "string",
                     "maxLength": 150,
                     "minLength": 6
+                },
+                "type": {
+                    "description": "content type (1: question, 2: article)",
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2
+                    ]
                 }
             }
         },
@@ -10130,7 +10737,6 @@
             "type": "object",
             "properties": {
                 "accepted_answer_id": {
-                    "description": "answer information",
                     "type": "string"
                 },
                 "answer_count": {
@@ -10154,8 +10760,13 @@
                 "last_answer_id": {
                     "type": "string"
                 },
+                "last_answered_at": {
+                    "type": "string"
+                },
+                "last_answered_user_info": {
+                    "$ref": "#/definitions/schema.UserBasicInfo"
+                },
                 "operated_at": {
-                    "description": "operator information",
                     "type": "integer"
                 },
                 "operation_type": {
@@ -10165,11 +10776,9 @@
                     "$ref": "#/definitions/schema.QuestionPageRespOperator"
                 },
                 "pin": {
-                    "description": "1: unpin, 2: pin",
                     "type": "integer"
                 },
                 "show": {
-                    "description": "0: show, 1: hide",
                     "type": "integer"
                 },
                 "status": {
@@ -10191,7 +10800,6 @@
                     "type": "string"
                 },
                 "view_count": {
-                    "description": "question statistical information",
                     "type": "integer"
                 },
                 "vote_count": {
@@ -10405,6 +11013,17 @@
                 },
                 "comment_id": {
                     "description": "comment id",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.RemoveProjectReq": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }
@@ -11504,6 +12123,59 @@
                             "$ref": "#/definitions/schema.PrivilegeLevel"
                         }
                     ]
+                }
+            }
+        },
+        "schema.UpdateProjectReq": {
+            "type": "object",
+            "required": [
+                "code_type",
+                "content",
+                "description",
+                "id",
+                "repo_url",
+                "title"
+            ],
+            "properties": {
+                "code_type": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "content": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 1
+                },
+                "id": {
+                    "type": "string"
+                },
+                "repo_url": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },

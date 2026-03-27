@@ -28,7 +28,7 @@ import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 import fm from 'front-matter';
 
-import { usePageTags, usePromptWithUnload } from '@/hooks';
+import { usePageTags, usePromptWithUnload, useToast } from '@/hooks';
 import { Editor, EditorRef, TagSelector } from '@/components';
 import type * as Type from '@/common/interface';
 import { DRAFT_QUESTION_STORAGE_KEY } from '@/common/constants';
@@ -91,6 +91,7 @@ const Ask = () => {
     },
   };
   const { t } = useTranslation('translation', { keyPrefix: 'ask' });
+  const toast = useToast();
   const [formData, setFormData] = useState<FormDataItem>(initFormData);
   const [immData, setImmData] = useState<FormDataItem>(initFormData);
   const [checked, setCheckState] = useState(false);
@@ -350,6 +351,12 @@ const Ask = () => {
             const ele = document.getElementById(err.list[0].error_field);
             scrollToElementTop(ele);
           }
+        } else if (err.msg) {
+          // 显示内容审核错误提示
+          toast.onShow({
+            msg: err.msg,
+            variant: 'danger',
+          });
         }
       });
     } else {
@@ -362,6 +369,12 @@ const Ask = () => {
             const ele = document.getElementById(err.list[0].error_field);
             scrollToElementTop(ele);
           }
+        } else if (err.msg) {
+          // 显示内容审核错误提示
+          toast.onShow({
+            msg: err.msg,
+            variant: 'danger',
+          });
         }
       });
     }

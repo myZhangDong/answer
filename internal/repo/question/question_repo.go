@@ -406,6 +406,8 @@ func (qr *questionRepo) GetQuestionPage(ctx context.Context, page, pageSize int,
 	}
 	session.Select("question.*")
 	session.In("question.status", status)
+	// 只查询问题类型，不查询文章
+	session.And("question.type = ?", entity.ContentTypeQuestion)
 	if len(tagIDs) > 0 {
 		session.Join("LEFT", "tag_rel", "question.id = tag_rel.object_id")
 		session.In("tag_rel.tag_id", tagIDs)
@@ -448,12 +450,87 @@ func (qr *questionRepo) GetQuestionPage(ctx context.Context, page, pageSize int,
 	if err != nil {
 		err = errors.InternalServer(reason.DatabaseError).WithError(err).WithStack()
 	}
+
 	if handler.GetEnableShortID(ctx) {
 		for _, item := range questionList {
 			item.ID = uid.EnShortID(item.ID)
 		}
 	}
+
 	return questionList, total, err
+}
+
+// GetContentPage query content (questions and articles) page
+func (qr *questionRepo) GetContentPage(ctx context.Context, page, pageSize int,
+	tagIDs []string, userID, orderCond string, inDays int, contentType int, showHidden, showPending bool) (
+	contentList []*entity.Question, total int64, err error) {
+	contentList = make([]*entity.Question, 0)
+	session := qr.data.DB.Context(ctx)
+	status := []int{entity.QuestionStatusAvailable}
+	if orderCond != "unanswered" {
+		status = append(status, entity.QuestionStatusClosed)
+	}
+	if showPending {
+		status = append(status, entity.QuestionStatusPending)
+	}
+	session.Select("question.*")
+	session.In("question.status", status)
+
+	// 根据内容类型过滤
+	if contentType > 0 {
+		session.And("question.type = ?", contentType)
+	}
+
+	if len(tagIDs) > 0 {
+		session.Join("LEFT", "tag_rel", "question.id = tag_rel.object_id")
+		session.In("tag_rel.tag_id", tagIDs)
+		session.And("tag_rel.status = ?", entity.TagRelStatusAvailable)
+	}
+	if len(userID) > 0 {
+		session.And("question.user_id = ?", userID)
+		if !showHidden {
+			session.And("question.show = ?", entity.QuestionShow)
+		}
+	} else {
+		session.And("question.show = ?", entity.QuestionShow)
+	}
+	if inDays > 0 {
+		session.And("question.created_at > ?", time.Now().AddDate(0, 0, -inDays))
+	}
+
+	switch orderCond {
+	case "newest":
+		session.OrderBy("question.pin desc,question.created_at DESC")
+	case "active":
+		if inDays == 0 {
+			session.And("question.created_at > ?", time.Now().AddDate(0, 0, -180))
+		}
+		session.And("question.post_update_time > ?", time.Now().AddDate(0, 0, -90))
+		session.OrderBy("question.pin desc,question.post_update_time DESC, question.updated_at DESC")
+	case "hot":
+		session.OrderBy("question.pin desc,question.hot_score DESC")
+	case "score":
+		session.OrderBy("question.pin desc,question.vote_count DESC, question.view_count DESC")
+	case "unanswered":
+		session.Where("question.answer_count = 0")
+		session.OrderBy("question.pin desc,question.created_at DESC")
+	case "frequent":
+		session.OrderBy("question.pin DESC, question.linked_count DESC, question.updated_at DESC")
+	}
+
+	session.GroupBy("question.id")
+	total, err = pager.Help(page, pageSize, &contentList, &entity.Question{}, session)
+	if err != nil {
+		err = errors.InternalServer(reason.DatabaseError).WithError(err).WithStack()
+	}
+
+	if handler.GetEnableShortID(ctx) {
+		for _, item := range contentList {
+			item.ID = uid.EnShortID(item.ID)
+		}
+	}
+
+	return contentList, total, err
 }
 
 // GetRecommendQuestionPageByTags get recommend question page by tags

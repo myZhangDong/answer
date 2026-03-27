@@ -33,6 +33,7 @@ import (
 	"github.com/apache/answer/internal/service/comment_common"
 	"github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/content"
+	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/dashboard"
 	"github.com/apache/answer/internal/service/event_queue"
 	"github.com/apache/answer/internal/service/export"
@@ -46,6 +47,7 @@ import (
 	notficationcommon "github.com/apache/answer/internal/service/notification_common"
 	"github.com/apache/answer/internal/service/object_info"
 	"github.com/apache/answer/internal/service/plugin_common"
+	projectcommon "github.com/apache/answer/internal/service/project_common"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
 	"github.com/apache/answer/internal/service/rank"
 	"github.com/apache/answer/internal/service/reason"
@@ -130,4 +132,6 @@ var ProviderSetService = wire.NewSet(
 	importer.NewImporterService,
 	file_record.NewFileRecordService,
 	videocommon.NewVideoCommon,
+	projectcommon.NewProjectCommon,
+	content_review.NewContentReviewService,
 )

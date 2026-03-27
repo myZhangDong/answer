@@ -83,6 +83,7 @@ export interface QuestionParams extends ImgCodeReq {
   url_title?: string;
   content: string;
   tags: Tag[];
+  type?: number; // 内容类型：1=问题，2=文章
 }
 
 export interface QuestionWithAnswer extends QuestionParams {

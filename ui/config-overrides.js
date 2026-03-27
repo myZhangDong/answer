@@ -29,7 +29,7 @@ const path = require("path");
 const i18nPath = path.resolve(__dirname, "../i18n");
 
 module.exports = {
-  webpack: function(config, env) {
+  webpack: function (config, env) {
     addWebpackAlias({
       "@": path.resolve(__dirname, "src"),
       "@i18n": i18nPath,
@@ -133,8 +133,8 @@ module.exports = {
 
     return config;
   },
-  devServer: function(configFunction) {
-    return function(proxy, allowedHost) {
+  devServer: function (configFunction) {
+    return function (proxy, allowedHost) {
       const config = configFunction(proxy, allowedHost);
       config.proxy = [
         {

@@ -18,7 +18,7 @@
  */
 
 export const DEFAULT_SITE_NAME = 'Answer';
-export const DEFAULT_LANG = 'en_US';
+export const DEFAULT_LANG = 'zh_CN';
 export const CURRENT_LANG_STORAGE_KEY = '_a_lang_';
 export const LANG_RESOURCE_STORAGE_KEY = '_a_lang_r_';
 export const LOGGED_TOKEN_STORAGE_KEY = '_a_ltk_';
@@ -92,7 +92,12 @@ export const ADMIN_NAV_MENUS = [
   {
     name: 'contents',
     icon: 'file-earmark-text-fill',
-    children: [{ name: 'questions' }, { name: 'answers' }, { name: 'videos' }],
+    children: [
+      { name: 'questions' },
+      { name: 'answers' },
+      { name: 'videos' },
+      { name: 'projects' },
+    ],
   },
   {
     name: 'users',

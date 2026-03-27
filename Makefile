@@ -1,4 +1,4 @@
-.PHONY: build clean ui
+.PHONY: build clean ui build-plugin-local
 
 VERSION=1.5.1
 BIN=answer
@@ -12,6 +12,12 @@ GO=$(GO_ENV) "$(shell which go)"
 
 build: generate
 	@$(GO) build $(GO_FLAGS) -o $(BIN) $(DIR_SRC)
+
+# Build with plugins using local source code
+build-plugin-local:
+	@echo "Building with plugins using local source code..."
+	@chmod +x ./script/build_plugin_local.sh
+	@./script/build_plugin_local.sh
 
 # https://dev.to/thewraven/universal-macos-binaries-with-go-1-16-3mm3
 universal: generate

@@ -58,6 +58,7 @@ type AnswerAPIRouter struct {
 	badgeController         *controller.BadgeController
 	adminBadgeController    *controller_admin.BadgeController
 	videoController         *controller.VideoController
+	projectController       *controller.ProjectController
 }
 
 func NewAnswerAPIRouter(
@@ -92,6 +93,7 @@ func NewAnswerAPIRouter(
 	badgeController *controller.BadgeController,
 	adminBadgeController *controller_admin.BadgeController,
 	videoController *controller.VideoController,
+	projectController *controller.ProjectController,
 ) *AnswerAPIRouter {
 	return &AnswerAPIRouter{
 		langController:          langController,
@@ -125,6 +127,7 @@ func NewAnswerAPIRouter(
 		badgeController:         badgeController,
 		adminBadgeController:    adminBadgeController,
 		videoController:         videoController,
+		projectController:       projectController,
 	}
 }
 
@@ -174,6 +177,9 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	r.GET("/personal/question/page", a.questionController.PersonalQuestionPage)
 	r.GET("/question/link", a.questionController.GetQuestionLink)
 
+	// content (questions and articles)
+	r.GET("/content/page", a.questionController.ContentPage)
+
 	// comment
 	r.GET("/comment/page", a.commentController.GetCommentWithPage)
 	r.GET("/personal/comment/page", a.commentController.GetCommentPersonalWithPage)
@@ -209,6 +215,10 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	// video
 	r.GET("/video/info", a.videoController.GetVideo)
 	r.GET("/video/page", a.videoController.VideoPage)
+
+	// project
+	r.GET("/project/info", a.projectController.GetProject)
+	r.GET("/project/page", a.projectController.GetProjectPage)
 }
 
 func (a *AnswerAPIRouter) RegisterAuthUserWithAnyStatusAnswerAPIRouter(r *gin.RouterGroup) {
@@ -323,6 +333,12 @@ func (a *AnswerAPIRouter) RegisterAnswerAPIRouter(r *gin.RouterGroup) {
 	r.PUT("/video/update", a.videoController.UpdateVideo)
 	r.DELETE("/video/delete", a.videoController.DeleteVideo)
 	r.DELETE("/video/batch-delete", a.videoController.BatchDeleteVideo)
+
+	// project management (authenticated user operations)
+	r.POST("/project", a.projectController.AddProject)
+	r.PUT("/project", a.projectController.UpdateProject)
+	r.DELETE("/project", a.projectController.RemoveProject)
+	r.DELETE("/project/batch-delete", a.projectController.BatchRemoveProject)
 }
 
 func (a *AnswerAPIRouter) RegisterAnswerAdminAPIRouter(r *gin.RouterGroup) {

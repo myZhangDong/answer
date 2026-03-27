@@ -19,7 +19,12 @@
 
 import { FC, useEffect, useState } from 'react';
 import { ListGroup, Dropdown } from 'react-bootstrap';
-import { NavLink, useSearchParams, useNavigate } from 'react-router-dom';
+import {
+  NavLink,
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { pathFactory } from '@/router/pathFactory';
@@ -65,6 +70,7 @@ const QuestionList: FC<Props> = ({
 }) => {
   const { t } = useTranslation('translation', { keyPrefix: 'question' });
   const navigate = useNavigate();
+  const location = useLocation();
   const [urlSearchParams] = useSearchParams();
   const { isSkeletonShow } = useSkeletonControl(isLoading);
   const curOrder =
@@ -102,8 +108,12 @@ const QuestionList: FC<Props> = ({
       <div className="mb-3 d-flex flex-wrap justify-content-between">
         <h5 className="fs-5 text-nowrap mb-3 mb-md-0">
           {source === 'questions'
-            ? t('all_questions')
-            : t('x_questions', { count })}
+            ? location.pathname.startsWith('/articles')
+              ? '全部文章'
+              : t('all_questions')
+            : location.pathname.startsWith('/articles')
+              ? `${count} 篇文章`
+              : t('x_questions', { count })}
         </h5>
         <div className="d-flex flex-wrap">
           <QueryGroup
@@ -140,16 +150,22 @@ const QuestionList: FC<Props> = ({
           <>
             <PinList data={pinData} />
             {renderData?.map((li) => {
+              // 根据内容类型决定跳转路径
+              const getContentPath = (item) => {
+                if (item.type === 2) {
+                  // 文章类型跳转到文章详情页面
+                  return pathFactory.articleLanding(item.id, item.url_title);
+                }
+                // 问题类型跳转到问题详情页面
+                return pathFactory.questionLanding(item.id, item.url_title);
+              };
+
               return (
                 <ListGroup.Item
                   key={li.id}
                   action
                   as="li"
-                  onClick={() =>
-                    handleNavigate(
-                      pathFactory.questionLanding(li.id, li.url_title),
-                    )
-                  }
+                  onClick={() => handleNavigate(getContentPath(li))}
                   className="py-3 px-2 border-start-0 border-end-0 position-relative pointer">
                   <div className="d-flex flex-wrap text-secondary small mb-12">
                     <BaseUserCard
@@ -174,7 +190,7 @@ const QuestionList: FC<Props> = ({
                     <NavLink
                       className="link-dark d-block"
                       onClick={(e) => e.stopPropagation()}
-                      to={pathFactory.questionLanding(li.id, li.url_title)}>
+                      to={getContentPath(li)}>
                       {li.title}
                       {li.status === 2 ? ` [${t('closed')}]` : ''}
                     </NavLink>
@@ -182,7 +198,7 @@ const QuestionList: FC<Props> = ({
                   {viewType === 'card' && (
                     <div className="text-truncate-2 mb-2">
                       <NavLink
-                        to={pathFactory.questionLanding(li.id, li.url_title)}
+                        to={getContentPath(li)}
                         className="d-block small text-body"
                         dangerouslySetInnerHTML={{ __html: li.description }}
                         onClick={(e) => e.stopPropagation()}

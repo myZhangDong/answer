@@ -102,6 +102,11 @@ var migrations = []Migration{
 	NewMigration("v1.4.2", "add the number of question links", addQuestionLinkedCount, true),
 	NewMigration("v1.4.5", "add file record", addFileRecord, true),
 	NewMigration("v1.5.1", "add plugin kv storage", addPluginKVStorage, true),
+	NewMigration("v1.6.0", "add video table", addVideoTable, false),
+	NewMigration("v1.6.1", "add video test data", addVideoTestData, false),
+	NewMigration("v1.6.2", "update video code field to text", updateVideoCodeFieldToText, false),
+	NewMigration("v1.6.3", "add question type field", addQuestionType, false),
+	NewMigration("v1.6.4", "add project table", addProjectTable, false),
 }
 
 func GetMigrations() []Migration {

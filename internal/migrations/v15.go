@@ -21,10 +21,28 @@ package migrations
 
 import (
 	"context"
+
 	"github.com/apache/answer/internal/entity"
 	"xorm.io/xorm"
 )
 
 func addNoticeConfig(ctx context.Context, x *xorm.Engine) error {
 	return x.Context(ctx).Sync(new(entity.UserNotificationConfig))
+}
+
+func addQuestionType(ctx context.Context, x *xorm.Engine) error {
+	type Question struct {
+		ID   string `xorm:"not null pk BIGINT(20) id"`
+		Type int    `xorm:"not null default 1 INT(11) type"`
+	}
+
+	// 添加type字段
+	err := x.Context(ctx).Sync(new(Question))
+	if err != nil {
+		return err
+	}
+
+	// 为现有数据设置默认值（问题类型）
+	_, err = x.Context(ctx).Exec("UPDATE question SET type = 1 WHERE type = 0 OR type IS NULL")
+	return err
 }

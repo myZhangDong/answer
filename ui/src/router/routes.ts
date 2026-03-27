@@ -73,6 +73,25 @@ const routes: RouteNode[] = [
             page: 'pages/Questions',
           },
           {
+            path: 'articles',
+            page: 'pages/Articles',
+          },
+          {
+            path: 'articles/create',
+            page: 'pages/Articles/Create',
+            guard: () => {
+              return { ok: true };
+            },
+          },
+          {
+            path: 'articles/:aid',
+            page: 'pages/Articles/Detail',
+          },
+          {
+            path: 'articles/:aid/:slugPermalink',
+            page: 'pages/Articles/Detail',
+          },
+          {
             path: 'questions/ask',
             page: 'pages/Questions/Ask',
             guard: () => {
@@ -240,6 +259,15 @@ const routes: RouteNode[] = [
             path: '/video/:id',
             page: 'pages/Video/Detail',
           },
+          // project pages
+          {
+            path: '/projects',
+            page: 'pages/Projects/index',
+          },
+          {
+            path: '/projects/:id',
+            page: 'pages/Projects/detail',
+          },
         ],
       },
       {
@@ -362,6 +390,14 @@ const routes: RouteNode[] = [
           {
             path: 'videos/edit/:id',
             page: 'pages/Admin/Videos/Edit',
+          },
+          {
+            path: 'projects',
+            page: 'pages/Admin/Projects',
+          },
+          {
+            path: 'projects/edit/:id',
+            page: 'pages/Admin/Projects/Edit',
           },
           {
             path: 'themes',

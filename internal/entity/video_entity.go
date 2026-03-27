@@ -48,7 +48,7 @@ type Video struct {
 	AuthorName   string    `xorm:"not null default '' VARCHAR(100) author_name"`
 	AuthorIntro  string    `xorm:"TEXT author_intro"`
 	ExternalLink string    `xorm:"not null default '' VARCHAR(500) external_link"`
-	Code         string    `xorm:"not null default '' TEXT code"`
+	Code         string    `xorm:"TEXT code"`
 	Duration     int       `xorm:"not null default 0 INT(11) duration"` // duration in seconds
 	Type         string    `xorm:"not null default '' VARCHAR(50) type"`
 	Datetime     time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP datetime"`

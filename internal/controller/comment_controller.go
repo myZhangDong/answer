@@ -20,6 +20,8 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/apache/answer/internal/base/handler"
 	"github.com/apache/answer/internal/base/middleware"
 	"github.com/apache/answer/internal/base/reason"
@@ -29,20 +31,21 @@ import (
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/action"
 	"github.com/apache/answer/internal/service/comment"
+	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/permission"
 	"github.com/apache/answer/internal/service/rank"
 	"github.com/apache/answer/pkg/uid"
 	"github.com/gin-gonic/gin"
 	"github.com/segmentfault/pacman/errors"
-	"net/http"
 )
 
 // CommentController comment controller
 type CommentController struct {
-	commentService      *comment.CommentService
-	rankService         *rank.RankService
-	actionService       *action.CaptchaService
-	rateLimitMiddleware *middleware.RateLimitMiddleware
+	commentService       *comment.CommentService
+	rankService          *rank.RankService
+	actionService        *action.CaptchaService
+	rateLimitMiddleware  *middleware.RateLimitMiddleware
+	contentReviewService *content_review.ContentReviewService
 }
 
 // NewCommentController new controller
@@ -51,12 +54,14 @@ func NewCommentController(
 	rankService *rank.RankService,
 	actionService *action.CaptchaService,
 	rateLimitMiddleware *middleware.RateLimitMiddleware,
+	contentReviewService *content_review.ContentReviewService,
 ) *CommentController {
 	return &CommentController{
-		commentService:      commentService,
-		rankService:         rankService,
-		actionService:       actionService,
-		rateLimitMiddleware: rateLimitMiddleware,
+		commentService:       commentService,
+		rankService:          rankService,
+		actionService:        actionService,
+		rateLimitMiddleware:  rateLimitMiddleware,
+		contentReviewService: contentReviewService,
 	}
 }
 
@@ -117,6 +122,12 @@ func (cc *CommentController) AddComment(ctx *gin.Context) {
 	req.CanDelete = canList[2]
 	if !req.CanAdd {
 		handler.HandleResponse(ctx, errors.Forbidden(reason.RankFailToMeetTheCondition), nil)
+		return
+	}
+
+	// 内容审核 - 审核评论内容
+	if err := cc.contentReviewService.ReviewContent(ctx, "", req.OriginalText, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
 		return
 	}
 
@@ -216,6 +227,12 @@ func (cc *CommentController) UpdateComment(ctx *gin.Context) {
 			handler.HandleResponse(ctx, errors.BadRequest(reason.CaptchaVerificationFailed), errFields)
 			return
 		}
+	}
+
+	// 内容审核 - 审核评论内容
+	if err := cc.contentReviewService.ReviewContent(ctx, "", req.OriginalText, req.UserID); err != nil {
+		handler.HandleResponse(ctx, err, nil)
+		return
 	}
 
 	resp, err := cc.commentService.UpdateComment(ctx, req)

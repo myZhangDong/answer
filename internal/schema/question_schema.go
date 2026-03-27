@@ -84,6 +84,8 @@ type QuestionAdd struct {
 	HTML string `json:"-"`
 	// tags
 	Tags []*TagItem `validate:"required,dive" json:"tags"`
+	// content type (1: question, 2: article)
+	Type int `validate:"omitempty,oneof=1 2" json:"type"`
 	// user id
 	UserID string `json:"-"`
 	QuestionPermission
@@ -391,11 +393,24 @@ type QuestionPageReq struct {
 	Tag       string `validate:"omitempty,gt=0,lte=100" form:"tag"`
 	Username  string `validate:"omitempty,gt=0,lte=100" form:"username"`
 	InDays    int    `validate:"omitempty,min=1" form:"in_days"`
-
+	// user id
 	LoginUserID      string `json:"-"`
 	UserIDBeSearched string `json:"-"`
 	TagID            string `json:"-"`
 	ShowPending      bool   `json:"-"`
+}
+
+// ContentPageReq query content (questions and articles) page
+type ContentPageReq struct {
+	Page        int    `validate:"omitempty,min=1" form:"page"`
+	PageSize    int    `validate:"omitempty,min=1" form:"page_size"`
+	OrderCond   string `validate:"omitempty,oneof=newest active hot score frequent" form:"order"`
+	Tag         string `validate:"omitempty,gt=0,lte=100" form:"tag"`
+	Username    string `validate:"omitempty,gt=0,lte=100" form:"username"`
+	InDays      int    `validate:"omitempty,min=1" form:"in_days"`
+	ContentType int    `validate:"omitempty,oneof=1 2" form:"content_type"` // 1: question, 2: article, 0: all
+	// user id
+	LoginUserID string `json:"-"`
 }
 
 const (
@@ -405,34 +420,57 @@ const (
 )
 
 type QuestionPageResp struct {
-	ID          string     `json:"id" `
-	CreatedAt   int64      `json:"created_at"`
-	Title       string     `json:"title"`
-	UrlTitle    string     `json:"url_title"`
-	Description string     `json:"description"`
-	Pin         int        `json:"pin"`  // 1: unpin, 2: pin
-	Show        int        `json:"show"` // 0: show, 1: hide
-	Status      int        `json:"status"`
-	Tags        []*TagResp `json:"tags"`
+	ID                   string                    `json:"id"`
+	CreatedAt            int64                     `json:"created_at"`
+	Title                string                    `json:"title"`
+	UrlTitle             string                    `json:"url_title"`
+	Description          string                    `json:"description"`
+	Status               int                       `json:"status"`
+	ViewCount            int                       `json:"view_count"`
+	UniqueViewCount      int                       `json:"unique_view_count"`
+	VoteCount            int                       `json:"vote_count"`
+	AnswerCount          int                       `json:"answer_count"`
+	CollectionCount      int                       `json:"collection_count"`
+	FollowCount          int                       `json:"follow_count"`
+	AcceptedAnswerID     string                    `json:"accepted_answer_id"`
+	LastAnswerID         string                    `json:"last_answer_id"`
+	LastAnsweredAt       time.Time                 `json:"last_answered_at"`
+	LastAnsweredUserID   string                    `json:"-"`
+	LastAnsweredUserInfo *UserBasicInfo            `json:"last_answered_user_info"`
+	Tags                 []*TagResp                `json:"tags"`
+	Pin                  int                       `json:"pin"`
+	Show                 int                       `json:"show"`
+	OperationType        string                    `json:"operation_type"`
+	OperatedAt           int64                     `json:"operated_at"`
+	Operator             *QuestionPageRespOperator `json:"operator"`
+}
 
-	// question statistical information
-	ViewCount       int `json:"view_count"`
-	UniqueViewCount int `json:"unique_view_count"`
-	VoteCount       int `json:"vote_count"`
-	AnswerCount     int `json:"answer_count"`
-	CollectionCount int `json:"collection_count"`
-	FollowCount     int `json:"follow_count"`
-
-	// answer information
-	AcceptedAnswerID   string    `json:"accepted_answer_id"`
-	LastAnswerID       string    `json:"last_answer_id"`
-	LastAnsweredUserID string    `json:"-"`
-	LastAnsweredAt     time.Time `json:"-"`
-
-	// operator information
-	OperatedAt    int64                     `json:"operated_at"`
-	Operator      *QuestionPageRespOperator `json:"operator"`
-	OperationType string                    `json:"operation_type"`
+type ContentPageResp struct {
+	ID                   string                    `json:"id"`
+	CreatedAt            int64                     `json:"created_at"`
+	Title                string                    `json:"title"`
+	UrlTitle             string                    `json:"url_title"`
+	Description          string                    `json:"description"`
+	Status               int                       `json:"status"`
+	Type                 int                       `json:"type"`
+	TypeName             string                    `json:"type_name"`
+	ViewCount            int                       `json:"view_count"`
+	UniqueViewCount      int                       `json:"unique_view_count"`
+	VoteCount            int                       `json:"vote_count"`
+	AnswerCount          int                       `json:"answer_count"`
+	CollectionCount      int                       `json:"collection_count"`
+	FollowCount          int                       `json:"follow_count"`
+	AcceptedAnswerID     string                    `json:"accepted_answer_id"`
+	LastAnswerID         string                    `json:"last_answer_id"`
+	LastAnsweredAt       time.Time                 `json:"last_answered_at"`
+	LastAnsweredUserID   string                    `json:"-"`
+	LastAnsweredUserInfo *UserBasicInfo            `json:"last_answered_user_info"`
+	Tags                 []*TagResp                `json:"tags"`
+	Pin                  int                       `json:"pin"`
+	Show                 int                       `json:"show"`
+	OperationType        string                    `json:"operation_type"`
+	OperatedAt           int64                     `json:"operated_at"`
+	Operator             *QuestionPageRespOperator `json:"operator"`
 }
 
 type QuestionPageRespOperator struct {
