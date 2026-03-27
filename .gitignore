@@ -18,10 +18,14 @@
 /logs
 /ui/node_modules
 /ui-next/node_modules
+/ui-next/.env.local
 /ui/build/*/*/*
 /ui/build/*.json
 /ui/build/*.html
 /ui/build/*.txt
+/data/answer.log/
+/data/conf/
+/answer_backup_*
 /vendor
 Thumbs*.db
 tmp
