@@ -5,7 +5,17 @@ import { CtaBanner } from "../components/CtaBanner";
 import { LikeAndRating } from "../components/LikeAndRating";
 import { HotTutorialsWidget } from "../components/SidebarWidgets";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
-import { ContentVideo, fetchVideoDetail } from "../api/contentApi";
+import {
+  ContentVideo,
+  fetchContentFeedback,
+  fetchVideoDetail,
+  submitContentLike,
+  submitContentRating,
+} from "../api/contentApi";
+import {
+  getContentFeedbackVisitorState,
+  markContentFeedbackVisitorAction,
+} from "../utils/contentFeedbackVisitor";
 
 export function VideoDetail() {
   const { id } = useParams();
@@ -28,6 +38,41 @@ export function VideoDetail() {
           return;
         }
         setVideo(resp);
+        const localVisitorState = getContentFeedbackVisitorState("video", id);
+        void fetchContentFeedback("video", id)
+          .then((feedback) => {
+            if (!active) {
+              return;
+            }
+            setVideo((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likes: feedback.likeCount,
+                    ratingAvg: feedback.ratingAvg,
+                    ratingCount: feedback.ratingCount,
+                    likedByMe: feedback.likedByMe || Boolean(localVisitorState?.liked),
+                    ratedByMe: feedback.ratedByMe || Boolean(localVisitorState?.rated),
+                    myRating: feedback.myRating || localVisitorState?.rating || 0,
+                  }
+                : prev,
+            );
+          })
+          .catch(() => {
+            if (!active || !localVisitorState) {
+              return;
+            }
+            setVideo((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likedByMe: Boolean(localVisitorState.liked),
+                    ratedByMe: Boolean(localVisitorState.rated),
+                    myRating: localVisitorState.rating || 0,
+                  }
+                : prev,
+            );
+          });
       } catch (err) {
         if (!active) {
           return;
@@ -53,6 +98,42 @@ export function VideoDetail() {
   if (error || !video) {
     return <div className="rounded-2xl bg-white dark:bg-slate-800 p-8 text-sm text-red-500">{error || "视频不存在"}</div>;
   }
+
+  const handleLike = async () => {
+    const feedback = await submitContentLike("video", video.id);
+    markContentFeedbackVisitorAction("video", video.id, "like");
+    setVideo((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: true,
+            ratedByMe: prev.ratedByMe || feedback.ratedByMe,
+            myRating: prev.myRating || feedback.myRating,
+          }
+        : prev,
+    );
+  };
+
+  const handleRate = async (rating: number) => {
+    const feedback = await submitContentRating("video", video.id, rating);
+    markContentFeedbackVisitorAction("video", video.id, "rating", rating);
+    setVideo((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: prev.likedByMe || feedback.likedByMe,
+            ratedByMe: true,
+            myRating: rating || feedback.myRating || prev.myRating,
+          }
+        : prev,
+    );
+  };
 
   return (
     <div className="flex flex-col">
@@ -95,7 +176,9 @@ export function VideoDetail() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Star className="w-4 h-4 text-slate-400" />
-                  暂无评分
+                  {video.ratingCount > 0
+                    ? `${video.ratingAvg.toFixed(1)} 分 · ${video.ratingCount} 人评分`
+                    : "暂无评分"}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800 px-2.5 py-1 text-[12px] font-medium text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-200/50 dark:ring-slate-700/50">
@@ -148,7 +231,17 @@ export function VideoDetail() {
               {video.content && <MarkdownRenderer content={video.content} />}
             </div>
 
-            <LikeAndRating initialLikes={video.likes} label="视频" />
+            <LikeAndRating
+              likeCount={video.likes}
+              ratingAvg={video.ratingAvg}
+              ratingCount={video.ratingCount}
+              likedByMe={video.likedByMe}
+              ratedByMe={video.ratedByMe}
+              myRating={video.myRating}
+              label="视频"
+              onLike={handleLike}
+              onRate={handleRate}
+            />
 
             <CtaBanner />
           </div>

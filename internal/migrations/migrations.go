@@ -107,6 +107,7 @@ var migrations = []Migration{
 	NewMigration("v1.6.2", "update video code field to text", updateVideoCodeFieldToText, false),
 	NewMigration("v1.6.3", "add question type field", addQuestionType, false),
 	NewMigration("v1.6.4", "add project table", addProjectTable, false),
+	NewMigration("v1.6.5", "add content feedback tables", addContentFeedbackTables, false),
 }
 
 func GetMigrations() []Migration {

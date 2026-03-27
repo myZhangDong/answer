@@ -18,7 +18,6 @@ interface BackendArticleListItem {
   content?: string;
   html?: string;
   view_count?: number;
-  vote_count?: number;
   created_at?: number | string;
   create_time?: number | string;
   user_info?: BackendUserInfo;
@@ -63,9 +62,32 @@ interface BackendProjectInfo {
   code_type_name?: string;
   tags?: string[];
   view_count?: number;
-  vote_count?: number;
   created_at?: number | string;
   updated_at?: number | string;
+}
+
+interface BackendContentFeedback {
+  object_type: ContentObjectType;
+  object_id: string;
+  like_count?: number;
+  rating_avg?: number;
+  rating_count?: number;
+  liked_by_me?: boolean;
+  rated_by_me?: boolean;
+  my_rating?: number;
+}
+
+export type ContentObjectType = "article" | "video" | "project";
+
+export interface ContentFeedback {
+  objectType: ContentObjectType;
+  objectId: string;
+  likeCount: number;
+  ratingAvg: number;
+  ratingCount: number;
+  likedByMe: boolean;
+  ratedByMe: boolean;
+  myRating: number;
 }
 
 interface BackendHomepageBanner {
@@ -87,6 +109,11 @@ export interface ContentArticle {
   tag: string;
   views: number;
   likes: number;
+  ratingAvg: number;
+  ratingCount: number;
+  likedByMe: boolean;
+  ratedByMe: boolean;
+  myRating: number;
   excerpt: string;
   content: string;
   html: string;
@@ -102,6 +129,11 @@ export interface ContentVideo {
   category: string;
   views: number;
   likes: number;
+  ratingAvg: number;
+  ratingCount: number;
+  likedByMe: boolean;
+  ratedByMe: boolean;
+  myRating: number;
   thumbnail: string;
   videoUrl: string;
   description: string;
@@ -118,6 +150,11 @@ export interface ContentProject {
   language: string;
   views: number;
   likes: number;
+  ratingAvg: number;
+  ratingCount: number;
+  likedByMe: boolean;
+  ratedByMe: boolean;
+  myRating: number;
   tags: string[];
   repo: string;
   repoUrlMap: Record<string, string>;
@@ -143,6 +180,16 @@ export interface FetchListParams {
   search?: string;
   order?: string;
 }
+
+type FeedbackCarrier = {
+  id: string;
+  likes: number;
+  ratingAvg: number;
+  ratingCount: number;
+  likedByMe: boolean;
+  ratedByMe: boolean;
+  myRating: number;
+};
 
 function toQuery(params: Record<string, string | number | undefined>) {
   const query = new URLSearchParams();
@@ -210,6 +257,34 @@ function excerptFromText(value = "", maxLength = 120) {
   return `${text.slice(0, maxLength)}...`;
 }
 
+function mapContentFeedback(item: BackendContentFeedback): ContentFeedback {
+  return {
+    objectType: item.object_type,
+    objectId: item.object_id,
+    likeCount: item.like_count || 0,
+    ratingAvg: item.rating_avg || 0,
+    ratingCount: item.rating_count || 0,
+    likedByMe: Boolean(item.liked_by_me),
+    ratedByMe: Boolean(item.rated_by_me),
+    myRating: item.my_rating || 0,
+  };
+}
+
+function applyFeedback<T extends FeedbackCarrier>(item: T, feedback?: ContentFeedback): T {
+  if (!feedback) {
+    return item;
+  }
+  return {
+    ...item,
+    likes: feedback.likeCount,
+    ratingAvg: feedback.ratingAvg,
+    ratingCount: feedback.ratingCount,
+    likedByMe: feedback.likedByMe,
+    ratedByMe: feedback.ratedByMe,
+    myRating: feedback.myRating,
+  };
+}
+
 function mapArticleListItem(item: BackendArticleListItem): ContentArticle {
   return {
     id: item.id,
@@ -218,7 +293,12 @@ function mapArticleListItem(item: BackendArticleListItem): ContentArticle {
     date: formatDate(item.created_at || item.create_time),
     tag: getPrimaryTag(item.tags),
     views: item.view_count || 0,
-    likes: item.vote_count || 0,
+    likes: 0,
+    ratingAvg: 0,
+    ratingCount: 0,
+    likedByMe: false,
+    ratedByMe: false,
+    myRating: 0,
     excerpt:
       item.description ||
       excerptFromText(item.content || item.html || ""),
@@ -250,6 +330,11 @@ function mapVideo(item: BackendVideoInfo): ContentVideo {
     category: item.type || "视频教程",
     views: item.view_count || 0,
     likes: 0,
+    ratingAvg: 0,
+    ratingCount: 0,
+    likedByMe: false,
+    ratedByMe: false,
+    myRating: 0,
     thumbnail: item.cover || "/placeholder-image.svg",
     videoUrl: item.external_link || "",
     description: item.description || "",
@@ -274,7 +359,12 @@ function mapProject(item: BackendProjectInfo): ContentProject {
     description: item.description || "",
     language: item.code_type_name || "Unknown",
     views: Number(item.view_count || 0),
-    likes: item.vote_count || 0,
+    likes: 0,
+    ratingAvg: 0,
+    ratingCount: 0,
+    likedByMe: false,
+    ratedByMe: false,
+    myRating: 0,
     tags: item.tags || [],
     repo,
     repoUrlMap,
@@ -292,6 +382,125 @@ function mapHomepageBanner(item?: BackendHomepageBanner): ContentHomepageBanner 
   };
 }
 
+async function fetchFeedbackMap(
+  objectType: ContentObjectType,
+  objectIDs: string[],
+): Promise<Map<string, ContentFeedback>> {
+  const normalizedIDs = Array.from(new Set(objectIDs.filter(Boolean)));
+  if (normalizedIDs.length === 0) {
+    return new Map();
+  }
+
+  const resp = await apiRequest<BackendContentFeedback[]>(
+    "/answer/api/v1/content/feedback/batch",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        object_type: objectType,
+        object_ids: normalizedIDs,
+      }),
+    },
+  );
+
+  return new Map(
+    (resp || []).map((item) => {
+      const feedback = mapContentFeedback(item);
+      return [feedback.objectId, feedback];
+    }),
+  );
+}
+
+async function attachFeedback<T extends FeedbackCarrier>(
+  objectType: ContentObjectType,
+  list: T[],
+): Promise<T[]> {
+  if (list.length === 0) {
+    return list;
+  }
+
+  try {
+    const feedbackMap = await fetchFeedbackMap(
+      objectType,
+      list.map((item) => item.id),
+    );
+    return list.map((item) => applyFeedback(item, feedbackMap.get(item.id)));
+  } catch {
+    return list;
+  }
+}
+
+export async function fetchContentFeedback(
+  objectType: ContentObjectType,
+  objectID: string,
+): Promise<ContentFeedback> {
+  const query = toQuery({
+    object_type: objectType,
+    object_id: objectID,
+  });
+  const resp = await apiRequest<BackendContentFeedback>(
+    `/answer/api/v1/content/feedback?${query}`,
+  );
+  return mapContentFeedback(resp);
+}
+
+export async function fetchContentFeedbackBatch(
+  objectType: ContentObjectType,
+  objectIDs: string[],
+): Promise<ContentFeedback[]> {
+  const feedbackMap = await fetchFeedbackMap(objectType, objectIDs);
+  return objectIDs
+    .filter(Boolean)
+    .map(
+      (objectID) =>
+        feedbackMap.get(objectID) || {
+          objectType,
+          objectId: objectID,
+          likeCount: 0,
+          ratingAvg: 0,
+          ratingCount: 0,
+          likedByMe: false,
+          ratedByMe: false,
+          myRating: 0,
+        },
+    );
+}
+
+export async function submitContentLike(
+  objectType: ContentObjectType,
+  objectID: string,
+): Promise<ContentFeedback> {
+  const resp = await apiRequest<BackendContentFeedback>(
+    "/answer/api/v1/content/feedback/like",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        object_type: objectType,
+        object_id: objectID,
+      }),
+    },
+  );
+  return mapContentFeedback(resp);
+}
+
+export async function submitContentRating(
+  objectType: ContentObjectType,
+  objectID: string,
+  rating: number,
+): Promise<ContentFeedback> {
+  const resp = await apiRequest<BackendContentFeedback>(
+    "/answer/api/v1/content/feedback/rating",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        object_type: objectType,
+        object_id: objectID,
+        rating,
+      }),
+    },
+  );
+  return mapContentFeedback(resp);
+}
+
 export async function fetchArticles(
   params: FetchListParams = {},
 ): Promise<BackendPaged<ContentArticle>> {
@@ -305,10 +514,14 @@ export async function fetchArticles(
   const resp = await apiRequest<BackendPaged<BackendArticleListItem>>(
     `/answer/api/v1/content/page?${query}`,
   );
+  const list = await attachFeedback(
+    "article",
+    (resp.list || []).map(mapArticleListItem),
+  );
 
   return {
     count: resp.count || 0,
-    list: (resp.list || []).map(mapArticleListItem),
+    list,
   };
 }
 
@@ -331,9 +544,10 @@ export async function fetchVideos(
   const resp = await apiRequest<BackendPaged<BackendVideoInfo>>(
     `/answer/api/v1/video/page?${query}`,
   );
+  const list = await attachFeedback("video", (resp.list || []).map(mapVideo));
   return {
     count: resp.count || 0,
-    list: (resp.list || []).map(mapVideo),
+    list,
   };
 }
 
@@ -356,9 +570,10 @@ export async function fetchProjects(
   const resp = await apiRequest<BackendPaged<BackendProjectInfo>>(
     `/answer/api/v1/project/page?${query}`,
   );
+  const list = await attachFeedback("project", (resp.list || []).map(mapProject));
   return {
     count: resp.count || 0,
-    list: (resp.list || []).map(mapProject),
+    list,
   };
 }
 

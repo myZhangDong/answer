@@ -33,6 +33,7 @@ import (
 	"github.com/apache/answer/internal/service/comment_common"
 	"github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/content"
+	feedbackservice "github.com/apache/answer/internal/service/content_feedback"
 	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/dashboard"
 	"github.com/apache/answer/internal/service/event_queue"
@@ -134,4 +135,5 @@ var ProviderSetService = wire.NewSet(
 	videocommon.NewVideoCommon,
 	projectcommon.NewProjectCommon,
 	content_review.NewContentReviewService,
+	feedbackservice.NewContentFeedbackService,
 )

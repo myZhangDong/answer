@@ -82,12 +82,12 @@ export function Home() {
         if (sortType === "latest") {
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         }
-        return b.likes - a.likes || b.views - a.views;
+        return b.views - a.views;
       });
   }, [activeCategory, articles, sortType]);
 
   const hotArticles = useMemo(
-    () => [...articles].sort((a, b) => b.likes - a.likes || b.views - a.views),
+    () => [...articles].sort((a, b) => b.views - a.views),
     [articles],
   );
 

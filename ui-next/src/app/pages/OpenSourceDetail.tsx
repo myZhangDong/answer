@@ -1,11 +1,22 @@
-import { ChevronLeft, Github, Eye, Star, FileText, Code } from "lucide-react";
+import { ChevronLeft, Github, Eye, Star, FileText, Code, ThumbsUp } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { CodeBlock } from "../components/CodeBlock";
 import { CtaBanner } from "../components/CtaBanner";
 import { HotDemosWidget } from "../components/SidebarWidgets";
 import { useEffect, useState } from "react";
-import { ContentProject, fetchProjectDetail } from "../api/contentApi";
+import {
+  ContentProject,
+  fetchContentFeedback,
+  fetchProjectDetail,
+  submitContentLike,
+  submitContentRating,
+} from "../api/contentApi";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
+import { LikeAndRating } from "../components/LikeAndRating";
+import {
+  getContentFeedbackVisitorState,
+  markContentFeedbackVisitorAction,
+} from "../utils/contentFeedbackVisitor";
 
 const placeholderImg = "/placeholder-image.svg";
 
@@ -40,6 +51,41 @@ export function OpenSourceDetail() {
           return;
         }
         setProject(resp);
+        const localVisitorState = getContentFeedbackVisitorState("project", id);
+        void fetchContentFeedback("project", id)
+          .then((feedback) => {
+            if (!active) {
+              return;
+            }
+            setProject((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likes: feedback.likeCount,
+                    ratingAvg: feedback.ratingAvg,
+                    ratingCount: feedback.ratingCount,
+                    likedByMe: feedback.likedByMe || Boolean(localVisitorState?.liked),
+                    ratedByMe: feedback.ratedByMe || Boolean(localVisitorState?.rated),
+                    myRating: feedback.myRating || localVisitorState?.rating || 0,
+                  }
+                : prev,
+            );
+          })
+          .catch(() => {
+            if (!active || !localVisitorState) {
+              return;
+            }
+            setProject((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likedByMe: Boolean(localVisitorState.liked),
+                    ratedByMe: Boolean(localVisitorState.rated),
+                    myRating: localVisitorState.rating || 0,
+                  }
+                : prev,
+            );
+          });
       } catch (err) {
         if (!active) {
           return;
@@ -65,6 +111,42 @@ export function OpenSourceDetail() {
   if (error || !project) {
     return <div className="rounded-2xl bg-white dark:bg-slate-800 p-8 text-sm text-red-500">{error || "项目不存在"}</div>;
   }
+
+  const handleLike = async () => {
+    const feedback = await submitContentLike("project", project.id);
+    markContentFeedbackVisitorAction("project", project.id, "like");
+    setProject((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: true,
+            ratedByMe: prev.ratedByMe || feedback.ratedByMe,
+            myRating: prev.myRating || feedback.myRating,
+          }
+        : prev,
+    );
+  };
+
+  const handleRate = async (rating: number) => {
+    const feedback = await submitContentRating("project", project.id, rating);
+    markContentFeedbackVisitorAction("project", project.id, "rating", rating);
+    setProject((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: prev.likedByMe || feedback.likedByMe,
+            ratedByMe: true,
+            myRating: rating || feedback.myRating || prev.myRating,
+          }
+        : prev,
+    );
+  };
 
   return (
     <div className="flex flex-col">
@@ -99,8 +181,16 @@ export function OpenSourceDetail() {
                   <span>{formatNumber(project.views)} 浏览</span>
                 </div>
                 <div className="flex items-center gap-1.5 hover:text-[#009EFF] dark:hover:text-[#33B1FF] transition-colors cursor-pointer">
-                  <Star className="w-4 h-4" />
+                  <ThumbsUp className="w-4 h-4" />
                   <span>{formatNumber(project.likes)} 点赞</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-4 h-4" />
+                  <span>
+                    {project.ratingCount > 0
+                      ? `${project.ratingAvg.toFixed(1)} 分 · ${project.ratingCount} 人评分`
+                      : "暂无评分"}
+                  </span>
                 </div>
 
                 <div className="flex gap-2 ml-2">
@@ -148,6 +238,18 @@ export function OpenSourceDetail() {
                 </button>
               </div>
             </div>
+
+            <LikeAndRating
+              likeCount={project.likes}
+              ratingAvg={project.ratingAvg}
+              ratingCount={project.ratingCount}
+              likedByMe={project.likedByMe}
+              ratedByMe={project.ratedByMe}
+              myRating={project.myRating}
+              label="项目"
+              onLike={handleLike}
+              onRate={handleRate}
+            />
 
             {/* CTA Banner */}
             <CtaBanner />

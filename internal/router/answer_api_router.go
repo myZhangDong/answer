@@ -27,38 +27,39 @@ import (
 )
 
 type AnswerAPIRouter struct {
-	langController          *controller.LangController
-	userController          *controller.UserController
-	commentController       *controller.CommentController
-	reportController        *controller.ReportController
-	voteController          *controller.VoteController
-	tagController           *controller.TagController
-	followController        *controller.FollowController
-	collectionController    *controller.CollectionController
-	questionController      *controller.QuestionController
-	answerController        *controller.AnswerController
-	searchController        *controller.SearchController
-	revisionController      *controller.RevisionController
-	rankController          *controller.RankController
-	adminUserController     *controller_admin.UserAdminController
-	reasonController        *controller.ReasonController
-	themeController         *controller_admin.ThemeController
-	adminSiteInfoController *controller_admin.SiteInfoController
-	siteInfoController      *controller.SiteInfoController
-	notificationController  *controller.NotificationController
-	dashboardController     *controller.DashboardController
-	uploadController        *controller.UploadController
-	activityController      *controller.ActivityController
-	roleController          *controller_admin.RoleController
-	pluginController        *controller_admin.PluginController
-	permissionController    *controller.PermissionController
-	userPluginController    *controller.UserPluginController
-	reviewController        *controller.ReviewController
-	metaController          *controller.MetaController
-	badgeController         *controller.BadgeController
-	adminBadgeController    *controller_admin.BadgeController
-	videoController         *controller.VideoController
-	projectController       *controller.ProjectController
+	langController            *controller.LangController
+	userController            *controller.UserController
+	commentController         *controller.CommentController
+	reportController          *controller.ReportController
+	voteController            *controller.VoteController
+	tagController             *controller.TagController
+	followController          *controller.FollowController
+	collectionController      *controller.CollectionController
+	questionController        *controller.QuestionController
+	answerController          *controller.AnswerController
+	searchController          *controller.SearchController
+	revisionController        *controller.RevisionController
+	rankController            *controller.RankController
+	adminUserController       *controller_admin.UserAdminController
+	reasonController          *controller.ReasonController
+	themeController           *controller_admin.ThemeController
+	adminSiteInfoController   *controller_admin.SiteInfoController
+	siteInfoController        *controller.SiteInfoController
+	notificationController    *controller.NotificationController
+	dashboardController       *controller.DashboardController
+	uploadController          *controller.UploadController
+	activityController        *controller.ActivityController
+	roleController            *controller_admin.RoleController
+	pluginController          *controller_admin.PluginController
+	permissionController      *controller.PermissionController
+	userPluginController      *controller.UserPluginController
+	reviewController          *controller.ReviewController
+	metaController            *controller.MetaController
+	badgeController           *controller.BadgeController
+	adminBadgeController      *controller_admin.BadgeController
+	videoController           *controller.VideoController
+	projectController         *controller.ProjectController
+	contentFeedbackController *controller.ContentFeedbackController
 }
 
 func NewAnswerAPIRouter(
@@ -94,40 +95,42 @@ func NewAnswerAPIRouter(
 	adminBadgeController *controller_admin.BadgeController,
 	videoController *controller.VideoController,
 	projectController *controller.ProjectController,
+	contentFeedbackController *controller.ContentFeedbackController,
 ) *AnswerAPIRouter {
 	return &AnswerAPIRouter{
-		langController:          langController,
-		userController:          userController,
-		commentController:       commentController,
-		reportController:        reportController,
-		voteController:          voteController,
-		tagController:           tagController,
-		followController:        followController,
-		collectionController:    collectionController,
-		questionController:      questionController,
-		answerController:        answerController,
-		searchController:        searchController,
-		revisionController:      revisionController,
-		rankController:          rankController,
-		adminUserController:     adminUserController,
-		reasonController:        reasonController,
-		themeController:         themeController,
-		adminSiteInfoController: adminSiteInfoController,
-		notificationController:  notificationController,
-		siteInfoController:      siteInfoController,
-		dashboardController:     dashboardController,
-		uploadController:        uploadController,
-		activityController:      activityController,
-		roleController:          roleController,
-		pluginController:        pluginController,
-		permissionController:    permissionController,
-		userPluginController:    userPluginController,
-		reviewController:        reviewController,
-		metaController:          metaController,
-		badgeController:         badgeController,
-		adminBadgeController:    adminBadgeController,
-		videoController:         videoController,
-		projectController:       projectController,
+		langController:            langController,
+		userController:            userController,
+		commentController:         commentController,
+		reportController:          reportController,
+		voteController:            voteController,
+		tagController:             tagController,
+		followController:          followController,
+		collectionController:      collectionController,
+		questionController:        questionController,
+		answerController:          answerController,
+		searchController:          searchController,
+		revisionController:        revisionController,
+		rankController:            rankController,
+		adminUserController:       adminUserController,
+		reasonController:          reasonController,
+		themeController:           themeController,
+		adminSiteInfoController:   adminSiteInfoController,
+		notificationController:    notificationController,
+		siteInfoController:        siteInfoController,
+		dashboardController:       dashboardController,
+		uploadController:          uploadController,
+		activityController:        activityController,
+		roleController:            roleController,
+		pluginController:          pluginController,
+		permissionController:      permissionController,
+		userPluginController:      userPluginController,
+		reviewController:          reviewController,
+		metaController:            metaController,
+		badgeController:           badgeController,
+		adminBadgeController:      adminBadgeController,
+		videoController:           videoController,
+		projectController:         projectController,
+		contentFeedbackController: contentFeedbackController,
 	}
 }
 
@@ -220,6 +223,12 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	// project
 	r.GET("/project/info", a.projectController.GetProject)
 	r.GET("/project/page", a.projectController.GetProjectPage)
+
+	// content feedback
+	r.GET("/content/feedback", a.contentFeedbackController.GetFeedback)
+	r.POST("/content/feedback/batch", a.contentFeedbackController.BatchGetFeedback)
+	r.POST("/content/feedback/like", a.contentFeedbackController.Like)
+	r.POST("/content/feedback/rating", a.contentFeedbackController.Rating)
 }
 
 func (a *AnswerAPIRouter) RegisterAuthUserWithAnyStatusAnswerAPIRouter(r *gin.RouterGroup) {

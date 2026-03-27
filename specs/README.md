@@ -30,6 +30,10 @@
   - 用于单独跟踪 `ui-next` 网站设置迁移、首页 Banner 配置和“周热门文章”广告位配置
 - `specs/003-ui-next-admin-site-settings-tasks.md`
   - 用于单独跟踪 `003` 规格的执行步骤、阶段验收和后续迁移衔接
+- `specs/004-anonymous-feedback-spec.md`
+  - 用于单独跟踪内容门户下“匿名点赞 + 匿名评分”的产品规则、接口边界、去重方式和数据结构
+- `specs/004-anonymous-feedback-tasks.md`
+  - 用于单独跟踪 `004` 规格的执行步骤、阶段验收和三类内容接入进度
 
 ## 文件职责
 

@@ -27,6 +27,7 @@ import (
 	"github.com/apache/answer/internal/repo/collection"
 	"github.com/apache/answer/internal/repo/comment"
 	"github.com/apache/answer/internal/repo/config"
+	"github.com/apache/answer/internal/repo/content_feedback"
 	"github.com/apache/answer/internal/repo/export"
 	"github.com/apache/answer/internal/repo/file_record"
 	"github.com/apache/answer/internal/repo/limit"
@@ -64,6 +65,7 @@ import (
 	"github.com/apache/answer/internal/service/comment_common"
 	config2 "github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/content"
+	feedbackservice "github.com/apache/answer/internal/service/content_feedback"
 	"github.com/apache/answer/internal/service/content_review"
 	"github.com/apache/answer/internal/service/dashboard"
 	"github.com/apache/answer/internal/service/event_queue"
@@ -266,7 +268,10 @@ func initApplication(debug bool, serverConf *conf.Server, dbConf *data.Database,
 	projectRepo := project.NewProjectRepo(dataData, uniqueIDRepo)
 	projectCommon := projectcommon.NewProjectCommon(projectRepo, questionRepo, userRepo)
 	projectController := controller.NewProjectController(projectCommon)
-	answerAPIRouter := router.NewAnswerAPIRouter(langController, userController, commentController, reportController, voteController, tagController, followController, collectionController, questionController, answerController, searchController, revisionController, rankController, userAdminController, reasonController, themeController, siteInfoController, controllerSiteInfoController, notificationController, dashboardController, uploadController, activityController, roleController, pluginController, permissionController, userPluginController, reviewController, metaController, badgeController, controller_adminBadgeController, videoController, projectController)
+	contentFeedbackRepo := content_feedback.NewContentFeedbackRepo(dataData)
+	contentFeedbackService := feedbackservice.NewContentFeedbackService(contentFeedbackRepo, questionRepo, videoRepo, projectRepo)
+	contentFeedbackController := controller.NewContentFeedbackController(contentFeedbackService, siteInfoCommonService)
+	answerAPIRouter := router.NewAnswerAPIRouter(langController, userController, commentController, reportController, voteController, tagController, followController, collectionController, questionController, answerController, searchController, revisionController, rankController, userAdminController, reasonController, themeController, siteInfoController, controllerSiteInfoController, notificationController, dashboardController, uploadController, activityController, roleController, pluginController, permissionController, userPluginController, reviewController, metaController, badgeController, controller_adminBadgeController, videoController, projectController, contentFeedbackController)
 	swaggerRouter := router.NewSwaggerRouter(swaggerConf)
 	uiRouter := router.NewUIRouter(controllerSiteInfoController, siteInfoCommonService)
 	authUserMiddleware := middleware.NewAuthUserMiddleware(authService, siteInfoCommonService)

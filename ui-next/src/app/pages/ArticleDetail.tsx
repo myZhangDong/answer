@@ -4,7 +4,18 @@ import { MarkdownRenderer, extractHeadings } from "../components/MarkdownRendere
 import { CtaBanner } from "../components/CtaBanner";
 import { LikeAndRating } from "../components/LikeAndRating";
 import { useEffect, useMemo, useState } from "react";
-import { ContentArticle, fetchArticleDetail, fetchArticles } from "../api/contentApi";
+import {
+  ContentArticle,
+  fetchArticleDetail,
+  fetchArticles,
+  fetchContentFeedback,
+  submitContentLike,
+  submitContentRating,
+} from "../api/contentApi";
+import {
+  getContentFeedbackVisitorState,
+  markContentFeedbackVisitorAction,
+} from "../utils/contentFeedbackVisitor";
 
 export function ArticleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +43,41 @@ export function ArticleDetail() {
         }
         setArticle(detail);
         setArticles(listResp.list);
+        const localVisitorState = getContentFeedbackVisitorState("article", id);
+        void fetchContentFeedback("article", id)
+          .then((feedback) => {
+            if (!active) {
+              return;
+            }
+            setArticle((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likes: feedback.likeCount,
+                    ratingAvg: feedback.ratingAvg,
+                    ratingCount: feedback.ratingCount,
+                    likedByMe: feedback.likedByMe || Boolean(localVisitorState?.liked),
+                    ratedByMe: feedback.ratedByMe || Boolean(localVisitorState?.rated),
+                    myRating: feedback.myRating || localVisitorState?.rating || 0,
+                  }
+                : prev,
+            );
+          })
+          .catch(() => {
+            if (!active || !localVisitorState) {
+              return;
+            }
+            setArticle((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    likedByMe: Boolean(localVisitorState.liked),
+                    ratedByMe: Boolean(localVisitorState.rated),
+                    myRating: localVisitorState.rating || 0,
+                  }
+                : prev,
+            );
+          });
       } catch (err) {
         if (!active) {
           return;
@@ -70,6 +116,42 @@ export function ArticleDetail() {
   if (error || !article) {
     return <div className="rounded-2xl bg-white dark:bg-slate-800 p-8 text-sm text-red-500">{error || "文章不存在"}</div>;
   }
+
+  const handleLike = async () => {
+    const feedback = await submitContentLike("article", article.id);
+    markContentFeedbackVisitorAction("article", article.id, "like");
+    setArticle((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: true,
+            ratedByMe: prev.ratedByMe || feedback.ratedByMe,
+            myRating: prev.myRating || feedback.myRating,
+          }
+        : prev,
+    );
+  };
+
+  const handleRate = async (rating: number) => {
+    const feedback = await submitContentRating("article", article.id, rating);
+    markContentFeedbackVisitorAction("article", article.id, "rating", rating);
+    setArticle((prev) =>
+      prev
+        ? {
+            ...prev,
+            likes: feedback.likeCount,
+            ratingAvg: feedback.ratingAvg,
+            ratingCount: feedback.ratingCount,
+            likedByMe: prev.likedByMe || feedback.likedByMe,
+            ratedByMe: true,
+            myRating: rating || feedback.myRating || prev.myRating,
+          }
+        : prev,
+    );
+  };
 
   return (
     <div className="flex flex-col">
@@ -111,7 +193,9 @@ export function ArticleDetail() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Star className="w-4 h-4 text-slate-400" />
-                  暂无评分
+                  {article.ratingCount > 0
+                    ? `${article.ratingAvg.toFixed(1)} 分 · ${article.ratingCount} 人评分`
+                    : "暂无评分"}
                 </div>
                 <span className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800 px-2.5 py-1 text-[12px] font-medium text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-200/50 dark:ring-slate-700/50">
                   {article.tag}
@@ -122,7 +206,17 @@ export function ArticleDetail() {
             {/* Markdown 正文 */}
             <MarkdownRenderer content={article.content} />
 
-            <LikeAndRating initialLikes={article.likes} label="文章" />
+            <LikeAndRating
+              likeCount={article.likes}
+              ratingAvg={article.ratingAvg}
+              ratingCount={article.ratingCount}
+              likedByMe={article.likedByMe}
+              ratedByMe={article.ratedByMe}
+              myRating={article.myRating}
+              label="文章"
+              onLike={handleLike}
+              onRate={handleRate}
+            />
             <CtaBanner />
           </article>
         </main>

@@ -8,8 +8,6 @@ import {
   ChevronRight,
   Clock,
   Eye,
-  Star,
-  GitFork,
   ThumbsUp,
   Tag,
 } from "lucide-react";
@@ -52,8 +50,8 @@ type SearchItem =
       title: string;
       description: string;
       language: string;
-      stars: number;
-      forks: number;
+      views: number;
+      likes: number;
       tags: string[];
     };
 
@@ -154,8 +152,8 @@ export function Search() {
             title: p.name,
             description: p.description,
             language: p.language,
-            stars: p.views,
-            forks: p.likes,
+            views: p.views,
+            likes: p.likes,
             tags: p.tags,
           })),
         ];
@@ -359,12 +357,12 @@ function ResultCard({ item, query }: { item: SearchItem; query: string }) {
         {item.kind === "project" && (
           <>
             <span className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5" />
-              {(item.stars || 0).toLocaleString()}
+              <Eye className="w-3.5 h-3.5" />
+              {(item.views || 0).toLocaleString()}
             </span>
             <span className="flex items-center gap-1">
-              <GitFork className="w-3.5 h-3.5" />
-              {item.forks || 0}
+              <ThumbsUp className="w-3.5 h-3.5" />
+              {item.likes || 0}
             </span>
             <span className="text-slate-400 dark:text-slate-500">{item.language}</span>
             <div className="flex gap-1 flex-wrap">

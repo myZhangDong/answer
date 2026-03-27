@@ -1,4 +1,4 @@
-import { Star, Github, Eye, ChevronRight } from "lucide-react";
+import { ThumbsUp, Github, Eye, ChevronRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { DemoModal, isDemoVerified } from "../components/DemoModal";
@@ -118,7 +118,7 @@ export function OpenSource() {
                       <span>{formatNumber(project.views)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Star className="w-4 h-4" />
+                      <ThumbsUp className="w-4 h-4" />
                       <span>{formatNumber(project.likes)}</span>
                     </div>
                   </div>

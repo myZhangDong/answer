@@ -55,4 +55,5 @@ var ProviderSetController = wire.NewSet(
 	NewRenderController,
 	NewVideoController,
 	NewProjectController,
+	NewContentFeedbackController,
 )
