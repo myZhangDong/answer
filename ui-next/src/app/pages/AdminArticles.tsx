@@ -3,6 +3,12 @@ import { AlertCircle, CheckCircle2, ExternalLink, MoreHorizontal, Pencil, Plus, 
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { deleteArticle, getAdminArticles, getArticleTagOptions, type AdminArticleSummary, type AdminTagOption } from "../api/adminApi";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -35,7 +41,6 @@ export function AdminArticles() {
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [tagOptions, setTagOptions] = useState<AdminTagOption[]>([]);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
@@ -129,7 +134,6 @@ export function AdminArticles() {
   };
 
   const handleDelete = async (article: AdminArticleSummary) => {
-    setMenuOpenId(null);
     if (!window.confirm(`确定删除文章「${article.title}」吗？`)) {
       return;
     }
@@ -257,48 +261,37 @@ export function AdminArticles() {
                       </div>
                     </button>
 
-                    <div className="relative shrink-0">
-                      <button
-                        type="button"
-                        disabled={deletingId === article.id}
-                        onClick={() => setMenuOpenId((current) => (current === article.id ? null : article.id))}
-                        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
-                      {menuOpenId === article.id && (
-                        <div className="absolute right-0 top-10 z-10 w-36 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/article/${article.id}`)}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                            查看文章
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(`/admin/articles/${article.id}/edit${location.search}`, {
-                                state: { from: `${location.pathname}${location.search}` },
-                              })
-                            }
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                            编辑文章
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(article)}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            删除文章
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          disabled={deletingId === article.id}
+                          className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-36">
+                        <DropdownMenuItem onClick={() => navigate(`/article/${article.id}`)}>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          查看文章
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/admin/articles/${article.id}/edit${location.search}`, {
+                              state: { from: `${location.pathname}${location.search}` },
+                            })
+                          }
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          编辑文章
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => void handleDelete(article)} className="text-red-600 focus:text-red-600">
+                          <Trash2 className="h-3.5 w-3.5" />
+                          删除文章
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
