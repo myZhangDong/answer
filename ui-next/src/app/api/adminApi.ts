@@ -26,6 +26,7 @@ import type {
   UploadedFile,
 } from "./types";
 import { apiRequest } from "./client";
+import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 export interface AdminTagOption {
   tag_id?: string;
@@ -712,8 +713,8 @@ export async function uploadFile(
     return {
       success: true,
       data: {
-        url,
-        path: url,
+        url: normalizeUploadedAssetUrl(url),
+        path: normalizeUploadedAssetUrl(url),
       },
     };
   } catch (error) {

@@ -21,6 +21,7 @@ import {
   updateSiteInterfaceSettings,
   updateSiteSeoSettings,
 } from "../api/siteSettingsApi";
+import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 function SectionCard({
   title,
@@ -176,6 +177,7 @@ function UploadField({
   onToast: (type: "success" | "error", msg: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const previewUrl = normalizeUploadedAssetUrl(value);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -202,8 +204,8 @@ function UploadField({
       <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
         <div className="flex flex-col gap-3 md:flex-row md:items-start">
           <div className="flex h-28 w-full items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-800 md:w-44">
-            {value ? (
-              <img src={value} alt={label} className="h-full w-full object-cover" />
+            {previewUrl ? (
+              <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
             ) : (
               <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
                 <ImagePlus className="h-6 w-6" />
@@ -212,7 +214,11 @@ function UploadField({
             )}
           </div>
           <div className="flex flex-1 flex-col gap-3">
-            <Input value={value} onChange={onChange} placeholder="可直接粘贴图片地址，或使用上传按钮" />
+            <Input
+              value={value}
+              onChange={(nextValue) => onChange(normalizeUploadedAssetUrl(nextValue))}
+              placeholder="可直接粘贴图片地址，或使用上传按钮"
+            />
             <div className="flex flex-wrap items-center gap-2">
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
                 {uploading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

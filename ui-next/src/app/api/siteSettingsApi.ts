@@ -1,4 +1,5 @@
 import { apiRequest } from "./client";
+import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 export interface AdminLanguageOption {
   label: string;
@@ -53,11 +54,22 @@ function normalizeHomepageSettings(data?: Partial<SiteHomepageSettings> | null):
     home_banner: {
       ...EMPTY_BANNER,
       ...(data?.home_banner || {}),
+      image_url: normalizeUploadedAssetUrl(data?.home_banner?.image_url),
     },
     hot_articles_ad: {
       ...EMPTY_BANNER,
       ...(data?.hot_articles_ad || {}),
+      image_url: normalizeUploadedAssetUrl(data?.hot_articles_ad?.image_url),
     },
+  };
+}
+
+function normalizeBrandingSettings(data?: Partial<SiteBrandingSettings> | null): SiteBrandingSettings {
+  return {
+    logo: normalizeUploadedAssetUrl(data?.logo),
+    mobile_logo: normalizeUploadedAssetUrl(data?.mobile_logo),
+    square_icon: normalizeUploadedAssetUrl(data?.square_icon),
+    favicon: normalizeUploadedAssetUrl(data?.favicon),
   };
 }
 
@@ -94,9 +106,10 @@ export async function updateSiteInterfaceSettings(payload: SiteInterfaceSettings
 }
 
 export async function getSiteBrandingSettings() {
-  return apiRequest<SiteBrandingSettings>("/answer/admin/api/siteinfo/branding", {
+  const data = await apiRequest<SiteBrandingSettings>("/answer/admin/api/siteinfo/branding", {
     method: "GET",
   });
+  return normalizeBrandingSettings(data);
 }
 
 export async function updateSiteBrandingSettings(payload: SiteBrandingSettings) {

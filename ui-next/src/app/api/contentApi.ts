@@ -1,4 +1,5 @@
 import { apiRequest } from "./client";
+import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 interface BackendUserInfo {
   username?: string;
@@ -397,7 +398,7 @@ function mapProject(item: BackendProjectInfo): ContentProject {
 function mapHomepageBanner(item?: BackendHomepageBanner): ContentHomepageBanner {
   return {
     enabled: Boolean(item?.enabled),
-    imageUrl: item?.image_url || "",
+    imageUrl: normalizeUploadedAssetUrl(item?.image_url),
     linkUrl: item?.link_url || "",
   };
 }
