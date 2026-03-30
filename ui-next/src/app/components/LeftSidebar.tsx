@@ -12,7 +12,7 @@ export function LeftSidebar() {
   ];
 
   return (
-    <aside className="w-56 shrink-0 hidden min-[1200px]:block">
+    <aside className="hidden w-56 shrink-0 xl:block">
       <div className="sticky top-24 flex flex-col gap-1">
         {navigation.map((item) => {
           const isActive = 

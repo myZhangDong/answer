@@ -38,6 +38,10 @@
   - 用于单独跟踪 `ui-next` 后台文章标签管理、文章标签录入闭环，以及视频分类配置化边界
 - `specs/005-ui-next-content-taxonomy-tasks.md`
   - 用于单独跟踪 `005` 规格的执行步骤、阶段验收，以及文章标签管理与视频分类配置化的推进状态
+- `specs/006-ui-next-mobile-adaptation-spec.md`
+  - 用于单独跟踪 `ui-next` 前台与后台在移动端的响应式适配范围、优先级、边界和 Tailwind 实施原则
+- `specs/006-ui-next-mobile-adaptation-tasks.md`
+  - 用于单独跟踪 `006` 规格的执行步骤、阶段验收，以及前台完整适配与后台基础可用的推进状态
 
 ## 文件职责
 

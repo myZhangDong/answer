@@ -69,12 +69,12 @@ export function Admin() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120]">
       <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-[#111827]/90">
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-4 px-6">
-          <LogoSvg className="h-7 w-auto" />
+        <div className="mx-auto flex min-h-14 max-w-[1400px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5 lg:px-6">
+          <LogoSvg className="h-6 w-auto sm:h-7" />
           <span className="rounded-md bg-[#009EFF]/10 px-2 py-0.5 text-[12px] font-medium text-[#009EFF] dark:bg-[#33B1FF]/10 dark:text-[#33B1FF]">
             管理后台
           </span>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-[12px] font-medium text-slate-700 dark:text-slate-200">
                 {user?.display_name || user?.username || user?.e_mail || "管理员"}
@@ -96,7 +96,7 @@ export function Admin() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-[1400px] gap-6 px-6 py-8">
+      <main className="mx-auto flex max-w-[1400px] gap-5 px-4 py-5 sm:px-5 md:gap-6 md:py-8 lg:px-6">
         <aside className="hidden w-56 shrink-0 md:block">
           <div className="sticky top-24 flex flex-col gap-1">
             {adminNavigation.map((item) => (
@@ -106,7 +106,7 @@ export function Admin() {
         </aside>
 
         <div className="min-w-0 flex-1">
-          <nav className="mb-6 flex gap-2 overflow-x-auto md:hidden">
+          <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 md:hidden">
             {adminNavigation.map((item) => (
               <AdminSidebarLink key={item.to} to={item.to} label={item.label} icon={item.icon} />
             ))}

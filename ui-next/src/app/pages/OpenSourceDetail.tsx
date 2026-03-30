@@ -149,18 +149,18 @@ export function OpenSourceDetail() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-5 sm:gap-6">
       <div className="mb-5">
         <Link to="/projects" className="inline-flex items-center text-[14px] font-medium text-slate-500 dark:text-slate-400 hover:text-[#009EFF] dark:hover:text-[#33B1FF] transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1" /> 返回列表
         </Link>
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
         <main className="flex-1 min-w-0">
-          <article className="rounded-2xl bg-white dark:bg-[#111827] shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 dark:ring-slate-800 p-8 md:p-12 transition-colors">
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-8 mb-8">
-              <div className="flex items-center gap-4 mb-4">
+          <article className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 transition-colors dark:bg-[#111827] dark:ring-slate-800 sm:p-6 md:p-10 lg:p-12">
+            <div className="mb-6 border-b border-slate-100 pb-6 dark:border-slate-800 sm:mb-8 sm:pb-8">
+              <div className="mb-4 flex items-start gap-3 sm:gap-4">
                 <div className="p-1 bg-slate-50 dark:bg-slate-900/50 rounded-md text-slate-700 dark:text-slate-300 ring-1 ring-slate-200/50 dark:ring-slate-700/50 overflow-hidden">
                   {project.iconUrl ? (
                     <img src={project.iconUrl} alt={project.name} className="w-12 h-12 object-cover rounded-[4px]" />
@@ -168,14 +168,14 @@ export function OpenSourceDetail() {
                     <Github className="w-8 h-8 m-2" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h1 className="text-[28px] md:text-[32px] font-bold text-slate-900 dark:text-slate-100 leading-tight tracking-tight flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <h1 className="flex items-center gap-3 text-[24px] font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100 sm:text-[28px] md:text-[32px]">
                     {project.name}
                   </h1>
                 </div>
               </div>
 
-              <div className="flex items-center flex-wrap gap-5 text-[14px] text-slate-500 dark:text-slate-400 mt-6">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 text-[13px] text-slate-500 dark:text-slate-400 sm:text-[14px]">
                 <div className="flex items-center gap-1.5 hover:text-[#009EFF] dark:hover:text-[#33B1FF] transition-colors cursor-pointer">
                   <Eye className="w-4 h-4" />
                   <span>{formatNumber(project.views)} 浏览</span>
@@ -193,7 +193,7 @@ export function OpenSourceDetail() {
                   </span>
                 </div>
 
-                <div className="flex gap-2 ml-2">
+                <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag: string) => (
                     <span key={tag} className="px-2.5 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[12px] font-medium rounded-md ring-1 ring-inset ring-slate-200/50 dark:ring-slate-700/50">
                       {tag}
@@ -204,7 +204,7 @@ export function OpenSourceDetail() {
             </div>
 
             <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-[#009EFF] dark:prose-a:text-[#33B1FF] hover:prose-a:text-blue-500 prose-p:leading-loose">
-              <p className="text-slate-600 dark:text-slate-300 text-[16px] text-lg font-medium mb-10 border-l-4 border-[#009EFF] dark:border-[#33B1FF] pl-4">
+              <p className="mb-8 border-l-4 border-[#009EFF] pl-4 text-[16px] font-medium text-slate-600 dark:border-[#33B1FF] dark:text-slate-300 sm:mb-10 lg:text-lg">
                 {project.description}
               </p>
 
@@ -256,7 +256,7 @@ export function OpenSourceDetail() {
           </article>
         </main>
 
-        <aside className="w-64 shrink-0 hidden lg:flex flex-col gap-6 sticky top-24">
+        <aside className="flex w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-64">
           <HotDemosWidget demos={HOT_DEMOS} />
         </aside>
       </div>

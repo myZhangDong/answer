@@ -548,7 +548,7 @@ export function AdminUsers() {
         </div>
       )}
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
         <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-slate-800 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">用户管理</h2>
@@ -556,7 +556,7 @@ export function AdminUsers() {
               用于新增其他管理员账号，并完成用户资料、角色、状态和密码维护。旧后台顶部筛选 tabs 不再复刻，改为搜索和范围切换。
             </p>
           </div>
-          <Button type="button" onClick={handleOpenAddDialog} className="self-start">
+          <Button type="button" onClick={handleOpenAddDialog} className="w-full sm:w-auto lg:self-start">
             <UserPlus className="h-4 w-4" />
             新增账号
           </Button>
@@ -596,12 +596,12 @@ export function AdminUsers() {
             </div>
           </form>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <span className="text-[13px] font-medium text-slate-600 dark:text-slate-300">列表范围</span>
             <select
               value={currentScope}
               onChange={(event) => syncQuery({ scope: event.target.value as UserScope })}
-              className="w-[180px] rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009EFF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-[#33B1FF]/40"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009EFF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-[#33B1FF]/40 sm:w-[180px]"
             >
               {USER_SCOPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -622,48 +622,20 @@ export function AdminUsers() {
               当前范围下没有匹配的用户。
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 dark:bg-slate-900/40 dark:hover:bg-slate-900/40">
-                  <TableHead className="px-4">用户</TableHead>
-                  <TableHead className="px-4">邮箱</TableHead>
-                  <TableHead className="px-4">创建时间</TableHead>
-                  <TableHead className="px-4">状态</TableHead>
-                  <TableHead className="px-4">角色</TableHead>
-                  <TableHead className="px-4 text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              <div className="divide-y divide-slate-200 dark:divide-slate-800 md:hidden">
                 {users.map((targetUser) => {
                   const selfUser = isCurrentLoginUser(targetUser);
                   return (
-                    <TableRow key={targetUser.user_id} className="bg-white dark:bg-[#111827]">
-                      <TableCell className="px-4 py-3">
+                    <div key={targetUser.user_id} className="bg-white px-4 py-4 dark:bg-[#111827]">
+                      <div className="flex items-start justify-between gap-3">
                         <UserIdentityCell user={targetUser} />
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-[13px] text-slate-600 dark:text-slate-300">
-                        <div className="max-w-[240px] truncate">{targetUser.e_mail}</div>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-[13px] text-slate-500 dark:text-slate-400">
-                        {formatTime(targetUser.created_at)}
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${STATUS_BADGE_CLASS_MAP[targetUser.status]}`}>
-                          {STATUS_LABEL_MAP[targetUser.status]}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-3">
-                        <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
-                          {formatRoleName(targetUser.role_name)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
                               type="button"
                               disabled={submittingKey?.includes(targetUser.user_id)}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </button>
@@ -742,19 +714,163 @@ export function AdminUsers() {
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+
+                      <div className="mt-3 break-all text-[13px] text-slate-600 dark:text-slate-300">{targetUser.e_mail}</div>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${STATUS_BADGE_CLASS_MAP[targetUser.status]}`}>
+                          {STATUS_LABEL_MAP[targetUser.status]}
+                        </span>
+                        <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+                          {formatRoleName(targetUser.role_name)}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 text-[12px] text-slate-500 dark:text-slate-400">
+                        创建于 {formatTime(targetUser.created_at)}
+                      </div>
+                    </div>
                   );
                 })}
-              </TableBody>
-            </Table>
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 dark:bg-slate-900/40 dark:hover:bg-slate-900/40">
+                      <TableHead className="px-4">用户</TableHead>
+                      <TableHead className="px-4">邮箱</TableHead>
+                      <TableHead className="px-4">创建时间</TableHead>
+                      <TableHead className="px-4">状态</TableHead>
+                      <TableHead className="px-4">角色</TableHead>
+                      <TableHead className="px-4 text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((targetUser) => {
+                      const selfUser = isCurrentLoginUser(targetUser);
+                      return (
+                        <TableRow key={targetUser.user_id} className="bg-white dark:bg-[#111827]">
+                          <TableCell className="px-4 py-3">
+                            <UserIdentityCell user={targetUser} />
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-[13px] text-slate-600 dark:text-slate-300">
+                            <div className="max-w-[240px] truncate">{targetUser.e_mail}</div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-[13px] text-slate-500 dark:text-slate-400">
+                            {formatTime(targetUser.created_at)}
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${STATUS_BADGE_CLASS_MAP[targetUser.status]}`}>
+                              {STATUS_LABEL_MAP[targetUser.status]}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+                              {formatRoleName(targetUser.role_name)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  disabled={submittingKey?.includes(targetUser.user_id)}
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44">
+                                {selfUser && (
+                                  <>
+                                    <div className="px-2 py-1.5 text-[12px] text-slate-400 dark:text-slate-500">当前登录账号</div>
+                                    <DropdownMenuSeparator />
+                                  </>
+                                )}
+                                <DropdownMenuItem onClick={() => openEditProfileDialog(targetUser)}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  编辑资料
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openPasswordDialog(targetUser)}>
+                                  <KeyRound className="h-3.5 w-3.5" />
+                                  设置新密码
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openRoleDialog(targetUser)} disabled={selfUser || roles.length === 0}>
+                                  <UserCog className="h-3.5 w-3.5" />
+                                  修改角色
+                                </DropdownMenuItem>
+
+                                {!selfUser && targetUser.status === "inactive" && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleCopyActivation(targetUser)}>
+                                      <Copy className="h-3.5 w-3.5" />
+                                      复制激活链接
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleSendActivation(targetUser)}>
+                                      <Mail className="h-3.5 w-3.5" />
+                                      发送激活邮件
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {!selfUser && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    {targetUser.status !== "normal" && targetUser.status !== "deleted" && (
+                                      <DropdownMenuItem
+                                        onClick={() => updateStatusWithConfirm(targetUser, "normal", `确定将「${targetUser.display_name || targetUser.username}」恢复为正常状态吗？`)}
+                                      >
+                                        <ShieldPlus className="h-3.5 w-3.5" />
+                                        设为正常
+                                      </DropdownMenuItem>
+                                    )}
+                                    {targetUser.status === "normal" && (
+                                      <>
+                                        <DropdownMenuItem
+                                          onClick={() => updateStatusWithConfirm(targetUser, "inactive", `确定将「${targetUser.display_name || targetUser.username}」设为未激活吗？`)}
+                                        >
+                                          <Mail className="h-3.5 w-3.5" />
+                                          设为未激活
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => updateStatusWithConfirm(targetUser, "suspended", `确定封禁「${targetUser.display_name || targetUser.username}」吗？`)}
+                                        >
+                                          <UserX className="h-3.5 w-3.5" />
+                                          封禁账号
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                    {targetUser.status !== "deleted" && (
+                                      <DropdownMenuItem
+                                        variant="destructive"
+                                        onClick={() => updateStatusWithConfirm(targetUser, "deleted", `确定删除用户「${targetUser.display_name || targetUser.username}」吗？`)}
+                                      >
+                                        <UserX className="h-3.5 w-3.5" />
+                                        删除账号
+                                      </DropdownMenuItem>
+                                    )}
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-4 text-[13px] text-slate-500 dark:text-slate-400">
+        <div className="mt-5 flex flex-col gap-3 text-[13px] text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>共 {count} 个用户</span>
           {totalPages > 1 ? (
-            <Pagination>
+            <Pagination className="justify-start sm:justify-end">
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious

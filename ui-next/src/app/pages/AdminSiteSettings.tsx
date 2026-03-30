@@ -33,12 +33,12 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+    <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
       <div className="border-b border-slate-100 pb-5 dark:border-slate-800">
         <h2 className="text-[18px] font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
         <p className="mt-1 text-[13px] text-slate-500 dark:text-slate-400">{description}</p>
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-5 min-w-0">{children}</div>
     </section>
   );
 }
@@ -423,7 +423,7 @@ export function AdminSiteSettings() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-white px-6 py-14 text-center text-[14px] text-slate-500 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:text-slate-400 dark:ring-slate-800">
+        <div className="rounded-2xl bg-white px-5 py-14 text-center text-[14px] text-slate-500 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:text-slate-400 dark:ring-slate-800 sm:px-6">
         正在加载网站设置...
       </div>
     );
@@ -627,7 +627,7 @@ export function AdminSiteSettings() {
           }}
         >
           <div className="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-            <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100">首页顶部 Banner</h3>
                 <p className="mt-1 text-[13px] text-slate-500 dark:text-slate-400">前台首页顶部直接展示“图片 + 链接”的 Banner。</p>
@@ -681,7 +681,7 @@ export function AdminSiteSettings() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-            <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100">周热门文章广告位</h3>
                 <p className="mt-1 text-[13px] text-slate-500 dark:text-slate-400">位于首页右侧“周热门文章”上方，未配置时直接隐藏。</p>

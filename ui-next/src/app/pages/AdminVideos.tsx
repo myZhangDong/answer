@@ -150,7 +150,7 @@ export function AdminVideos() {
         </div>
       )}
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
         <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-slate-800 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">视频管理</h2>
@@ -186,15 +186,15 @@ export function AdminVideos() {
               {videos.map((video) => (
                 <div
                   key={video.id}
-                  className="bg-white px-5 py-4 transition-colors hover:bg-slate-50/80 dark:bg-[#111827] dark:hover:bg-slate-900/50"
+                  className="bg-white px-4 py-4 transition-colors hover:bg-slate-50/80 dark:bg-[#111827] dark:hover:bg-slate-900/50 sm:px-5"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
                     <button
                       type="button"
                       onClick={() => navigate(`/video/${video.id}`)}
-                      className="flex min-w-0 flex-1 items-start gap-4 text-left"
+                      className="flex min-w-0 flex-1 flex-col items-start gap-4 text-left sm:flex-row"
                     >
-                      <div className="h-20 w-36 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+                      <div className="h-44 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:h-20 sm:w-36">
                         {video.cover ? (
                           <img src={video.cover} alt={video.title} className="h-full w-full object-cover" />
                         ) : (
@@ -239,7 +239,7 @@ export function AdminVideos() {
                         <button
                           type="button"
                           disabled={deletingId === video.id}
-                          className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                          className="self-end shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
@@ -276,7 +276,7 @@ export function AdminVideos() {
           <p className="shrink-0 whitespace-nowrap text-[13px] text-slate-500 dark:text-slate-400">
             共 {count} 个视频，当前第 {currentPage} / {totalPages} 页
           </p>
-          <Pagination className="justify-end">
+          <Pagination className="justify-start sm:justify-end">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

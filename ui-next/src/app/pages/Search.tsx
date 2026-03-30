@@ -205,7 +205,7 @@ export function Search() {
   ];
 
   return (
-    <div className="flex flex-col gap-8 pb-12 min-h-[60vh]">
+    <div className="min-h-[60vh] flex flex-col gap-6 pb-12 md:gap-8">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-[22px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
@@ -228,34 +228,36 @@ export function Search() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800">
-        {tabDefs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`pb-3 px-3 text-[14px] font-medium transition-colors relative flex items-center gap-1.5 ${
-              activeTab === tab.id
-                ? "text-[#009EFF] dark:text-[#33B1FF]"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            }`}
-          >
-            {tab.label}
-            {query && tab.count > 0 && (
-              <span
-                className={`text-[11px] px-1.5 py-0.5 rounded-full font-semibold ${
-                  activeTab === tab.id
-                    ? "bg-[#009EFF]/10 dark:bg-[#33B1FF]/15 text-[#009EFF] dark:text-[#33B1FF]"
-                    : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                }`}
-              >
-                {tab.count}
-              </span>
-            )}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#009EFF] dark:bg-[#33B1FF] rounded-t-full" />
-            )}
-          </button>
-        ))}
+      <div className="-mx-1 overflow-x-auto border-b border-slate-200 px-1 dark:border-slate-800">
+        <div className="flex min-w-max items-center gap-1">
+          {tabDefs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative flex items-center gap-1.5 px-3 pb-3 text-[14px] font-medium transition-colors ${
+                activeTab === tab.id
+                  ? "text-[#009EFF] dark:text-[#33B1FF]"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+              }`}
+            >
+              {tab.label}
+              {query && tab.count > 0 && (
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
+                    activeTab === tab.id
+                      ? "bg-[#009EFF]/10 dark:bg-[#33B1FF]/15 text-[#009EFF] dark:text-[#33B1FF]"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full bg-[#009EFF] dark:bg-[#33B1FF]" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Results */}
@@ -297,14 +299,14 @@ function ResultCard({ item, query }: { item: SearchItem; query: string }) {
   return (
     <Link
       to={linkTo}
-      className="group flex flex-col gap-3 rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100/80 dark:ring-slate-700/80 transition-all duration-300 hover:shadow-md hover:ring-blue-200/80 dark:hover:ring-blue-500/30"
+      className="group flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100/80 transition-all duration-300 hover:shadow-md hover:ring-blue-200/80 dark:bg-slate-800 dark:ring-slate-700/80 dark:hover:ring-blue-500/30 sm:p-6"
     >
       {/* Title row */}
-      <div className="flex items-start justify-between gap-4">
-        <h3 className="text-[17px] font-semibold text-slate-900 dark:text-slate-100 group-hover:text-[#009EFF] dark:group-hover:text-[#33B1FF] transition-colors tracking-tight leading-snug">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <h3 className="text-[16px] font-semibold leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-[#009EFF] dark:text-slate-100 dark:group-hover:text-[#33B1FF] sm:text-[17px]">
           {highlight(item.title, query)}
         </h3>
-        <span className="shrink-0 inline-flex items-center gap-1 text-[12px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1 rounded-md">
+        <span className="inline-flex shrink-0 items-center gap-1 self-start rounded-md bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-slate-500 dark:bg-slate-700/50 dark:text-slate-400">
           <Icon className="w-3.5 h-3.5" />
           {label}
         </span>
@@ -378,7 +380,7 @@ function ResultCard({ item, query }: { item: SearchItem; query: string }) {
           </>
         )}
 
-        <span className="ml-auto flex items-center text-[#009EFF] dark:text-[#33B1FF] opacity-0 group-hover:opacity-100 transition-all translate-x-[-8px] group-hover:translate-x-0 duration-300 whitespace-nowrap">
+        <span className="flex items-center whitespace-nowrap text-[#009EFF] transition-all duration-300 sm:ml-auto sm:translate-x-[-8px] sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100 dark:text-[#33B1FF]">
           查看详情 <ChevronRight className="w-4 h-4 ml-0.5" />
         </span>
       </div>

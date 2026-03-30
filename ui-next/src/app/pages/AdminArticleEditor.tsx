@@ -352,7 +352,7 @@ export function AdminArticleEditor() {
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">
             {isEditMode ? "编辑文章" : "新建文章"}
@@ -364,7 +364,7 @@ export function AdminArticleEditor() {
         <button
           type="button"
           onClick={() => navigate(returnTo)}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="h-4 w-4" />
           返回列表
@@ -372,12 +372,12 @@ export function AdminArticleEditor() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-5 rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+        <div className="flex flex-col gap-5 rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
           <Field label="文章标题" required>
             <Input value={form.title} onChange={set("title")} placeholder="请输入文章标题" />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="作者" hint="由当前登录管理员身份推导">
               <Input value={form.author} onChange={set("author")} placeholder="用户名" />
             </Field>
@@ -386,7 +386,7 @@ export function AdminArticleEditor() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="技术标签" required hint="优先按后端已有标签选择">
               <div className="flex flex-col gap-2">
                 <Select
@@ -398,12 +398,12 @@ export function AdminArticleEditor() {
                       : [{ slug_name: "loading", display_name: tagsLoading ? "标签加载中..." : "暂无可用标签" }]
                   }
                 />
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-slate-200 px-3 py-2 text-[12px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                <div className="flex flex-col gap-3 rounded-xl border border-dashed border-slate-200 px-3 py-2 text-[12px] text-slate-500 dark:border-slate-700 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
                   <span>{tagOptions.length > 0 ? "标签不合适？可以先去标签管理补充。" : "当前没有可用标签，请先创建标签。"}</span>
                   <button
                     type="button"
                     onClick={handleGoToTagManager}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-[#009EFF] transition-colors hover:bg-[#009EFF]/8 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF]/10"
+                    className="inline-flex items-center gap-1 self-start rounded-md px-2 py-1 font-medium text-[#009EFF] transition-colors hover:bg-[#009EFF]/8 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF]/10"
                   >
                     <Tag className="h-3.5 w-3.5" />
                     去创建标签
@@ -431,7 +431,7 @@ export function AdminArticleEditor() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
               正文内容
               <span className="ml-2 text-[12px] font-normal text-slate-400">（Markdown）</span>
@@ -439,7 +439,7 @@ export function AdminArticleEditor() {
             <button
               type="button"
               onClick={() => setPreviewOpen(true)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#009EFF] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-[#33B1FF]"
+              className="flex items-center gap-1.5 self-start rounded-lg px-3 py-1.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-[#009EFF] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-[#33B1FF]"
             >
               <Eye className="h-3.5 w-3.5" />
               全屏预览
@@ -453,11 +453,11 @@ export function AdminArticleEditor() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <button
             type="submit"
             disabled={submitting || loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#009EFF] px-6 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#0089e0] disabled:opacity-60 dark:bg-[#33B1FF] dark:hover:bg-[#1fa8ff]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#009EFF] px-6 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#0089e0] disabled:opacity-60 dark:bg-[#33B1FF] dark:hover:bg-[#1fa8ff]"
           >
             <Save className="h-4 w-4" />
             {submitting ? "提交中…" : isEditMode ? "保存修改" : "发布文章"}
@@ -481,8 +481,8 @@ export function AdminArticleEditor() {
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex items-stretch bg-black/50 backdrop-blur-sm">
           <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0B1120]">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/90 px-6 py-3 backdrop-blur dark:border-slate-800 dark:bg-[#0B1120]/90">
-              <span className="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-100 bg-white/90 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-[#0B1120]/90 sm:px-6">
+              <span className="min-w-0 truncate text-[15px] font-semibold text-slate-900 dark:text-slate-100">
                 {form.title || "（未填写标题）"}
               </span>
               <button
@@ -493,7 +493,7 @@ export function AdminArticleEditor() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mx-auto max-w-3xl px-6 py-10">
+            <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
               <MarkdownRenderer content={form.content} />
             </div>
           </div>

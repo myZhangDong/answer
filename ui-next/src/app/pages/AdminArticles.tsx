@@ -196,7 +196,7 @@ export function AdminArticles() {
         </div>
       )}
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
         <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-slate-800 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">文章管理</h2>
@@ -221,7 +221,7 @@ export function AdminArticles() {
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="text-[13px] font-medium text-slate-600 dark:text-slate-300">标签筛选</label>
-            <div className="relative min-w-[180px]">
+            <div className="relative w-full sm:min-w-[180px] sm:w-auto">
               <select
                 value={currentTag}
                 onChange={(e) => updateQuery({ tag: e.target.value })}
@@ -251,15 +251,15 @@ export function AdminArticles() {
           ) : (
             <div className="divide-y divide-slate-200 dark:divide-slate-800">
               {articles.map((article) => (
-                <div key={article.id} className="bg-white px-5 py-4 transition-colors hover:bg-slate-50/80 dark:bg-[#111827] dark:hover:bg-slate-900/50">
-                  <div className="flex items-start gap-4">
+                <div key={article.id} className="bg-white px-4 py-4 transition-colors hover:bg-slate-50/80 dark:bg-[#111827] dark:hover:bg-slate-900/50 sm:px-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
                     <button
                       type="button"
                       onClick={() => navigate(`/article/${article.id}`)}
                       className="min-w-0 flex-1 text-left"
                     >
-                      <div className="flex items-center gap-2">
-                        <h3 className="truncate text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="min-w-0 text-[15px] font-semibold text-slate-900 dark:text-slate-100 sm:truncate">
                           {article.title}
                         </h3>
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-300">
@@ -282,7 +282,7 @@ export function AdminArticles() {
                         <button
                           type="button"
                           disabled={deletingId === article.id}
-                          className="shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                          className="self-end shrink-0 rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
@@ -319,7 +319,7 @@ export function AdminArticles() {
           <p className="shrink-0 whitespace-nowrap text-[13px] text-slate-500 dark:text-slate-400">
             共 {count} 篇文章，当前第 {currentPage} / {totalPages} 页
           </p>
-          <Pagination className="justify-end">
+          <Pagination className="justify-start sm:justify-end">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

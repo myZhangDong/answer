@@ -89,12 +89,16 @@
 
 - [x] 拆分 `ui-next` 管理员登录与后台鉴权复用独立规格：`specs/ui-next-admin-auth-spec.md`
 - [x] 拆分 `ui-next` 管理员登录独立任务清单：`specs/ui-next-admin-auth-tasks.md`
+- [x] 拆分 `ui-next` 移动端适配独立规格：`specs/006-ui-next-mobile-adaptation-spec.md`
+- [x] 拆分 `ui-next` 移动端适配独立任务清单：`specs/006-ui-next-mobile-adaptation-tasks.md`
 
 备注：
 
 - 内容门户主规格不再继续承载 `ui-next` 后台认证迁移细节
 - 后续实现 `ui-next` 管理员登录、会话恢复、后台守卫时，以该独立规格为准
 - 执行状态以 `specs/ui-next-admin-auth-tasks.md` 为准
+- `ui-next` 移动端适配后续以 `006` 规格为范围依据，优先使用 Tailwind 响应式能力完成前台完整适配与后台基础可用适配
+- `006` 的执行状态以后续 `tasks` 文件为准，不再混写到主任务清单
 
 ## Phase 2：前台路由与导航收口
 

@@ -65,7 +65,7 @@ export function OpenSource() {
   }, [highlightId]);
 
   return (
-    <div className="flex flex-col gap-10 pb-12">
+    <div className="flex flex-col gap-8 pb-12 md:gap-10">
       <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-[24px] font-semibold text-slate-900 dark:text-slate-100 mb-2.5 tracking-tight">开源项目</h1>
@@ -75,7 +75,7 @@ export function OpenSource() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading && (
           <div className="col-span-full rounded-2xl bg-white dark:bg-slate-800 p-6 text-sm text-slate-500 dark:text-slate-400 shadow-sm ring-1 ring-slate-100/80 dark:ring-slate-700/80">
             正在加载项目...
@@ -92,7 +92,7 @@ export function OpenSource() {
           <div 
             key={project.id} 
             ref={isHighlighted ? highlightRef : null}
-            className={`group flex flex-col rounded-2xl bg-white dark:bg-slate-800 p-5 md:p-6 pb-5 md:pb-5 shadow-sm transition-all duration-300 hover:-translate-y-1 ${
+            className={`group flex flex-col rounded-2xl bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 dark:bg-slate-800 sm:p-6 ${
               isHighlighted 
                 ? "ring-2 ring-[#009EFF] dark:ring-[#33B1FF] shadow-lg shadow-[#009EFF]/20 dark:shadow-[#33B1FF]/20" 
                 : "ring-1 ring-slate-100/80 dark:ring-slate-700/80 hover:shadow-md hover:ring-blue-200/80 dark:hover:ring-blue-500/30"
@@ -112,7 +112,7 @@ export function OpenSource() {
                     {project.name}
                   </h3>
                   {/* 浏览 & 点赞 */}
-                  <div className="flex items-center gap-4 mt-1.5 text-slate-500 dark:text-slate-400 text-[13px]">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-1.5">
                       <Eye className="w-4 h-4" />
                       <span>{formatNumber(project.views)}</span>
@@ -128,7 +128,7 @@ export function OpenSource() {
 
             <p className="text-slate-500 dark:text-slate-400 text-[14px] mb-6 flex-1 leading-relaxed">
               {project.description}
-              <Link to={`/project/${project.id}`} className="ml-1.5 whitespace-nowrap inline-flex items-center text-[#009EFF] dark:text-[#33B1FF] hover:underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link to={`/project/${project.id}`} className="ml-1.5 inline-flex items-center whitespace-nowrap text-[#009EFF] transition-colors hover:text-blue-600 hover:underline dark:text-[#33B1FF] dark:hover:text-blue-400">
                 查看详情<ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </Link>
             </p>
@@ -151,7 +151,7 @@ export function OpenSource() {
                     setDemoModal({ open: true, projectName: project.name, demoUrl });
                   }
                 }}
-                className="w-full py-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-[#009EFF] dark:text-[#33B1FF] text-[14px] font-medium hover:bg-[#009EFF] hover:text-white dark:hover:bg-[#33B1FF] dark:hover:text-white hover:shadow-md hover:shadow-[#009EFF]/20 dark:hover:shadow-[#33B1FF]/20 transition-all duration-300">
+                className="w-full rounded-lg bg-slate-100 py-3 text-[14px] font-medium text-[#009EFF] transition-all duration-300 hover:bg-[#009EFF] hover:text-white hover:shadow-md hover:shadow-[#009EFF]/20 dark:bg-slate-700/50 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF] dark:hover:text-white dark:hover:shadow-[#33B1FF]/20">
                 获取 Demo 示例
               </button>
             </div>

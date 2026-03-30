@@ -154,7 +154,7 @@ export function ArticleDetail() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-5 sm:gap-6">
       <div className="mb-5">
         <Link
           to="/"
@@ -164,20 +164,20 @@ export function ArticleDetail() {
         </Link>
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
         <main className="flex-1 min-w-0">
-          <article className="rounded-2xl bg-white dark:bg-[#111827] shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 dark:ring-slate-800 p-8 md:p-12 transition-colors">
+          <article className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 transition-colors dark:bg-[#111827] dark:ring-slate-800 sm:p-6 md:p-10 lg:p-12">
             {/* 文章头部 */}
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-8 mb-8">
-              <h1 className="text-[28px] md:text-[32px] font-bold text-slate-900 dark:text-slate-100 mb-5 leading-tight tracking-tight">
+            <div className="mb-6 border-b border-slate-100 pb-6 dark:border-slate-800 sm:mb-8 sm:pb-8">
+              <h1 className="mb-4 text-[24px] font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100 sm:mb-5 sm:text-[28px] md:text-[32px]">
                 {article.title}
               </h1>
-              <div className="flex items-center flex-wrap gap-5 text-[14px] text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-[13px] text-slate-500 dark:text-slate-400 sm:text-[14px]">
+                <div className="flex min-w-0 items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#009EFF] to-[#33B1FF] flex items-center justify-center text-white text-[13px] font-bold shrink-0">
                     {article.author.slice(0, 1).toUpperCase()}
                   </div>
-                {article.author}
+                  <span className="truncate">{article.author}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-slate-400" />
@@ -222,10 +222,10 @@ export function ArticleDetail() {
         </main>
 
         {/* 右侧边栏 */}
-        <aside className="w-64 shrink-0 hidden lg:flex flex-col gap-6 sticky top-24">
+        <aside className="flex w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-64">
           {/* 目录 */}
           {headings.length > 0 && (
-            <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 dark:ring-slate-700/80 p-6 transition-colors">
+            <div className="rounded-2xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 transition-colors dark:bg-slate-800 dark:ring-slate-700/80 sm:p-6">
               <div className="flex items-center gap-2.5 mb-5 pb-4 border-b border-slate-100/80 dark:border-slate-700/80">
                 <ListTree className="w-4 h-4 text-[#009EFF] dark:text-[#33B1FF]" />
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-[15px] tracking-tight">
@@ -250,7 +250,7 @@ export function ArticleDetail() {
 
           {/* 上一篇 / 下一篇 */}
           {(prevArticle || nextArticle) && (
-            <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 dark:ring-slate-700/80 p-6 transition-colors">
+            <div className="rounded-2xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 transition-colors dark:bg-slate-800 dark:ring-slate-700/80 sm:p-6">
               <div className="flex items-center gap-2.5 mb-5 pb-4 border-b border-slate-100/80 dark:border-slate-700/80">
                 <FileText className="w-4 h-4 text-[#009EFF] dark:text-[#33B1FF]" />
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-[15px] tracking-tight">

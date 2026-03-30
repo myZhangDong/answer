@@ -191,11 +191,10 @@ export function Home() {
         </div>
       )}
 
-      {/* Main Layout Area */}
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-8">
         <main className="flex-1 min-w-0 flex flex-col gap-6">
           <div className="flex flex-col gap-4 pb-4 border-b border-slate-200/60 dark:border-slate-700/80">
-            <div className="flex items-end justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <h1 className="text-xl md:text-2xl font-bold tracking-tight leading-none text-slate-900 dark:text-white">技术文章</h1>
               <div className="flex items-center gap-3">
                 <button 
@@ -231,7 +230,7 @@ export function Home() {
                   key={cat.slugName || "all"}
                   onClick={() => handleCategoryChange(cat.slugName)}
                   className={clsx(
-                    "whitespace-nowrap px-5 py-2 rounded-full text-[14px] font-medium transition-all duration-200",
+                    "whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-medium transition-all duration-200 sm:px-5",
                     activeCategory === cat.slugName
                       ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm ring-1 ring-slate-900 dark:ring-slate-100"
                       : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white"
@@ -263,7 +262,7 @@ export function Home() {
               <Link 
                 key={article.id} 
                 to={`/article/${article.id}`}
-                className="group flex flex-col rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100/80 dark:ring-slate-700/80 transition-all duration-300 hover:shadow-md hover:ring-[#009EFF]/30 dark:hover:ring-[#33B1FF]/50 hover:-translate-y-0.5"
+                className="group flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:ring-[#009EFF]/30 dark:bg-slate-800 dark:ring-slate-700/80 dark:hover:ring-[#33B1FF]/50 sm:p-6"
               >
                 <h2 className="text-base md:text-[17px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#009EFF] dark:group-hover:text-[#33B1FF] transition-colors mb-2.5 line-clamp-1 tracking-tight">
                   {article.title}
@@ -272,7 +271,7 @@ export function Home() {
                   {article.excerpt}
                 </p>
                 
-                <div className="flex items-center flex-wrap gap-y-3 gap-x-5 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-3 text-sm text-slate-500 dark:text-slate-400">
                   <div className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
                     <div className="w-5 h-5 rounded-full bg-[#F0F8FF] dark:bg-[#33B1FF]/10 flex items-center justify-center text-[#009EFF] dark:text-[#33B1FF] text-[11px] font-bold ring-1 ring-[#009EFF]/20 dark:ring-[#33B1FF]/20">
                       {article.author.charAt(0).toUpperCase()}
@@ -289,7 +288,7 @@ export function Home() {
                       {article.tag}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 ml-auto text-slate-400">
+                  <div className="flex items-center gap-1.5 text-slate-400 sm:ml-auto">
                     <ThumbsUp className="w-3.5 h-3.5" />
                     {article.likes}
                   </div>
@@ -312,7 +311,7 @@ export function Home() {
           )}
         </main>
 
-        <aside className="w-[300px] shrink-0 hidden xl:flex flex-col gap-6">
+        <aside className="flex w-full shrink-0 flex-col gap-6 xl:w-[300px]">
           {hotArticlesAd?.enabled && hotArticlesAd.imageUrl && (
             <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100 dark:ring-slate-800">
               {renderLinkedImage(
@@ -325,7 +324,7 @@ export function Home() {
           )}
 
           {/* Hot Articles */}
-          <div className="rounded-2xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700/80 p-6">
+          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700/80 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
                 <TrendingUp className="w-[18px] h-[18px] text-[#009EFF] dark:text-[#33B1FF]" />

@@ -328,7 +328,7 @@ export function AdminProjectEditor() {
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">
             {isEditMode ? "编辑项目" : "新建项目"}
@@ -340,7 +340,7 @@ export function AdminProjectEditor() {
         <button
           type="button"
           onClick={() => navigate(returnTo)}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="h-4 w-4" />
           返回列表
@@ -348,12 +348,12 @@ export function AdminProjectEditor() {
       </div>
 
       {loading ? (
-        <div className="rounded-2xl bg-white px-6 py-12 text-center text-[14px] text-slate-500 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:text-slate-400 dark:ring-slate-800">
+        <div className="rounded-2xl bg-white px-5 py-12 text-center text-[14px] text-slate-500 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:text-slate-400 dark:ring-slate-800 sm:px-6">
           正在加载项目详情...
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-5 rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+          <div className="flex flex-col gap-5 rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
             <Field label="项目名称" required>
               <Input value={form.title} onChange={set("title")} placeholder="请输入项目名称" />
             </Field>
@@ -403,11 +403,11 @@ export function AdminProjectEditor() {
             </Field>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#009EFF] px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#0089e0] disabled:opacity-60 dark:bg-[#33B1FF] dark:hover:bg-[#1fa8ff]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#009EFF] px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#0089e0] disabled:opacity-60 dark:bg-[#33B1FF] dark:hover:bg-[#1fa8ff]"
             >
               <Save className="h-4 w-4" />
               {submitting ? "提交中..." : isEditMode ? "保存项目" : "创建项目"}
@@ -415,7 +415,7 @@ export function AdminProjectEditor() {
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[14px] font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[14px] font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <X className="h-4 w-4" />
               重置

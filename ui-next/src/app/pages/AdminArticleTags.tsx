@@ -367,7 +367,7 @@ export function AdminArticleTags() {
         </div>
       )}
 
-      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800">
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-100/80 dark:bg-[#111827] dark:ring-slate-800 sm:p-6">
         <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-slate-800 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-[20px] font-semibold text-slate-900 dark:text-slate-100">文章标签</h2>
@@ -375,14 +375,14 @@ export function AdminArticleTags() {
               管理文章创建、编辑和筛选共用的标签数据源。
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {state?.returnTo && (
-              <Button type="button" variant="outline" onClick={handleReturnToEditor}>
+              <Button type="button" variant="outline" onClick={handleReturnToEditor} className="w-full sm:w-auto">
                 <Tag className="h-4 w-4" />
                 {state.returnLabel || "返回文章编辑"}
               </Button>
             )}
-            <Button type="button" onClick={handleOpenCreateDialog}>
+            <Button type="button" onClick={handleOpenCreateDialog} className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               新建标签
             </Button>
@@ -395,7 +395,7 @@ export function AdminArticleTags() {
               e.preventDefault();
               updateQuery({ keyword: searchInput, page: 1 });
             }}
-            className="flex w-full max-w-xl items-center gap-3"
+            className="flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:items-center"
           >
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -406,11 +406,11 @@ export function AdminArticleTags() {
                 className="pl-9"
               />
             </div>
-            <Button type="submit" variant="outline">
+            <Button type="submit" variant="outline" className="w-full sm:w-auto">
               搜索
             </Button>
           </form>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400 md:max-w-sm">
             当前优先维护文章标签；视频分类仍按独立配置管理。
           </div>
         </div>
@@ -423,24 +423,14 @@ export function AdminArticleTags() {
               当前没有可用标签，请先创建一个标签。
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="px-4">标签</TableHead>
-                  <TableHead className="px-4">Slug</TableHead>
-                  <TableHead className="px-4">描述</TableHead>
-                  <TableHead className="px-4">文章数</TableHead>
-                  <TableHead className="px-4">更新时间</TableHead>
-                  <TableHead className="px-4 text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              <div className="divide-y divide-slate-200 dark:divide-slate-800 md:hidden">
                 {tags.map((tag) => (
-                  <TableRow key={tag.tag_id}>
-                    <TableCell className="px-4">
-                      <div className="flex min-w-0 flex-col gap-2">
+                  <div key={tag.tag_id} className="bg-white px-4 py-4 dark:bg-[#111827]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium text-slate-900 dark:text-slate-100">{tag.display_name}</span>
+                          <span className="text-[15px] font-semibold text-slate-900 dark:text-slate-100">{tag.display_name}</span>
                           {tag.recommend && (
                             <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
                               推荐
@@ -452,24 +442,16 @@ export function AdminArticleTags() {
                             </span>
                           )}
                         </div>
-                        <span className="text-[12px] text-slate-400 dark:text-slate-500">ID: {tag.tag_id}</span>
+                        <p className="mt-2 break-all font-mono text-[12px] text-slate-500 dark:text-slate-400">
+                          {tag.slug_name}
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell className="px-4 font-mono text-[12px] text-slate-500 dark:text-slate-400">{tag.slug_name}</TableCell>
-                    <TableCell className="px-4 whitespace-normal text-[13px] text-slate-500 dark:text-slate-400">
-                      {tag.description || "暂无描述"}
-                    </TableCell>
-                    <TableCell className="px-4 text-slate-600 dark:text-slate-300">{tag.question_count ?? 0}</TableCell>
-                    <TableCell className="px-4 text-[13px] text-slate-500 dark:text-slate-400">
-                      {formatTime(tag.updated_at || tag.created_at)}
-                    </TableCell>
-                    <TableCell className="px-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
                             disabled={deletingTagId === tag.tag_id}
-                            className="inline-flex rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </button>
@@ -488,19 +470,102 @@ export function AdminArticleTags() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+
+                    <p className="mt-3 text-[13px] leading-6 text-slate-500 dark:text-slate-400">
+                      {tag.description || "暂无描述"}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800">ID: {tag.tag_id}</span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800">文章 {tag.question_count ?? 0}</span>
+                      <span>{formatTime(tag.updated_at || tag.created_at)}</span>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">标签</TableHead>
+                      <TableHead className="px-4">Slug</TableHead>
+                      <TableHead className="px-4">描述</TableHead>
+                      <TableHead className="px-4">文章数</TableHead>
+                      <TableHead className="px-4">更新时间</TableHead>
+                      <TableHead className="px-4 text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tags.map((tag) => (
+                      <TableRow key={tag.tag_id}>
+                        <TableCell className="px-4">
+                          <div className="flex min-w-0 flex-col gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-medium text-slate-900 dark:text-slate-100">{tag.display_name}</span>
+                              {tag.recommend && (
+                                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                                  推荐
+                                </span>
+                              )}
+                              {tag.reserved && (
+                                <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                                  保留
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[12px] text-slate-400 dark:text-slate-500">ID: {tag.tag_id}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-4 font-mono text-[12px] text-slate-500 dark:text-slate-400">{tag.slug_name}</TableCell>
+                        <TableCell className="px-4 whitespace-normal text-[13px] text-slate-500 dark:text-slate-400">
+                          {tag.description || "暂无描述"}
+                        </TableCell>
+                        <TableCell className="px-4 text-slate-600 dark:text-slate-300">{tag.question_count ?? 0}</TableCell>
+                        <TableCell className="px-4 text-[13px] text-slate-500 dark:text-slate-400">
+                          {formatTime(tag.updated_at || tag.created_at)}
+                        </TableCell>
+                        <TableCell className="px-4 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                disabled={deletingTagId === tag.tag_id}
+                                className="inline-flex rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => void handleOpenEditDialog(tag)}>
+                                <Pencil className="h-4 w-4" />
+                                编辑标签
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => void handleDelete(tag)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                删除标签
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="shrink-0 whitespace-nowrap text-[13px] text-slate-500 dark:text-slate-400">
+          <p className="text-[13px] text-slate-500 dark:text-slate-400">
             共 {count} 个标签，当前第 {currentPage} / {totalPages} 页
           </p>
-          <Pagination className="justify-end">
+          <Pagination className="justify-start sm:justify-end">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

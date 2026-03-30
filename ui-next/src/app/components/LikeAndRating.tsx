@@ -89,11 +89,11 @@ export function LikeAndRating({
   };
 
   return (
-    <div className="mt-12 flex flex-col items-center justify-center border-t border-slate-100 pt-10 dark:border-slate-800">
+    <div className="mt-10 flex flex-col items-center justify-center border-t border-slate-100 pt-8 dark:border-slate-800 sm:mt-12 sm:pt-10">
       <button
         onClick={handleLike}
         disabled={likePending || likeLocked}
-        className={`mb-10 flex items-center gap-2.5 rounded-full border px-8 py-3.5 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70 ${
+        className={`mb-8 flex w-full items-center justify-center gap-2 rounded-full border px-5 py-3 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70 sm:mb-10 sm:w-auto sm:gap-2.5 sm:px-8 sm:py-3.5 ${
           likeLocked
             ? "scale-105 border-[#009EFF]/40 bg-[#F0F8FF] text-[#009EFF] shadow-[0_4px_12px_rgba(0,158,255,0.15)] dark:border-[#33B1FF]/40 dark:bg-[#33B1FF]/10 dark:text-[#33B1FF] dark:shadow-[0_4px_12px_rgba(51,177,255,0.15)]"
             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700"
@@ -104,24 +104,24 @@ export function LikeAndRating({
             likeLocked ? "scale-110 fill-[#009EFF] dark:fill-[#33B1FF]" : ""
           }`}
         />
-        <span className="text-[15px] font-semibold tracking-wide">
+        <span className="text-[14px] font-semibold tracking-wide sm:text-[15px]">
           {likePending ? "提交中..." : likedByMe ? "已点赞" : ratedByMe ? "已参与" : "赞一个"} · {likeCount}
         </span>
       </button>
 
       <div className="mb-8 h-px w-16 bg-slate-100 dark:bg-slate-800" />
 
-      <div className="mb-2 text-[15px] font-medium text-slate-600 dark:text-slate-400">
+      <div className="mb-2 text-center text-[15px] font-medium text-slate-600 dark:text-slate-400">
         {label}对您有帮助吗？请给个评价吧
       </div>
-      <div className="mb-3 text-[13px] text-slate-400 dark:text-slate-500">
+      <div className="mb-3 text-center text-[13px] text-slate-400 dark:text-slate-500">
         {ratedByMe && myRating > 0
           ? `您已评分 ${myRating} 分 · ${ratingSummary}`
           : likedByMe
             ? `您已点赞，仍可评分一次 · ${ratingSummary}`
             : ratingSummary}
       </div>
-      <div className="flex gap-2" onMouseLeave={() => setHoverRating(0)}>
+      <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2" onMouseLeave={() => setHoverRating(0)}>
         {[1, 2, 3, 4, 5].map((star) => {
           const isFull = activeRating >= star;
           const isHalf = activeRating === star - 0.5;
@@ -160,7 +160,7 @@ export function LikeAndRating({
           );
         })}
       </div>
-      <div className="mt-3 h-5 text-[14px] font-medium">
+      <div className="mt-3 min-h-5 text-center text-[14px] font-medium">
         {feedback ? (
           <span className={feedback.type === "error" ? "text-red-500" : "text-emerald-600 dark:text-emerald-400"}>
             {feedback.text}

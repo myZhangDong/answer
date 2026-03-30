@@ -136,31 +136,31 @@ export function VideoDetail() {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-5 sm:gap-6">
       <div className="mb-5">
         <Link to="/videos" className="inline-flex items-center text-[14px] font-medium text-slate-500 dark:text-slate-400 hover:text-[#009EFF] dark:hover:text-[#33B1FF] transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1" /> 返回视频列表
         </Link>
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
         <main className="flex-1 min-w-0">
-          <div className="rounded-2xl bg-white dark:bg-[#111827] shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 dark:ring-slate-800 p-8 md:p-12 transition-colors">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] ring-1 ring-slate-100/80 transition-colors dark:bg-[#111827] dark:ring-slate-800 sm:p-6 md:p-10 lg:p-12">
             
             {/* Header */}
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-8 mb-8">
-              <h1 className="text-[28px] md:text-[32px] font-bold text-slate-900 dark:text-slate-100 mb-5 leading-tight tracking-tight">
+            <div className="mb-6 border-b border-slate-100 pb-6 dark:border-slate-800 sm:mb-8 sm:pb-8">
+              <h1 className="mb-4 text-[24px] font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100 sm:mb-5 sm:text-[28px] md:text-[32px]">
                 {video.title}
               </h1>
               
-              <div className="flex items-center flex-wrap gap-5 text-[14px] text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-[13px] text-slate-500 dark:text-slate-400 sm:text-[14px]">
+                <div className="flex min-w-0 items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
                   <img 
                     src={video.authorAvatar || "https://api.dicebear.com/7.x/initials/svg?seed=admin"} 
                     alt={video.author} 
                     className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200/50 dark:ring-slate-700/50"
                   />
-                  {video.author}
+                  <span className="truncate">{video.author}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-slate-400" />
@@ -191,11 +191,11 @@ export function VideoDetail() {
             {/* Video Player Mock */}
             {video.embedCode ? (
               <div
-                className="w-full max-w-4xl mx-auto mb-8 rounded-2xl overflow-hidden ring-1 ring-slate-200/50 dark:ring-slate-800"
+                className="mx-auto mb-8 w-full max-w-4xl overflow-hidden rounded-2xl ring-1 ring-slate-200/50 [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:max-w-full dark:ring-slate-800"
                 dangerouslySetInnerHTML={{ __html: video.embedCode }}
               />
             ) : (
-              <div className="aspect-video w-full max-w-4xl mx-auto bg-slate-900 dark:bg-black rounded-2xl overflow-hidden relative flex items-center justify-center group cursor-pointer mb-8 ring-1 ring-slate-200/50 dark:ring-slate-800">
+              <div className="group relative mx-auto mb-8 flex aspect-video w-full max-w-4xl items-center justify-center overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-slate-200/50 dark:bg-black dark:ring-slate-800">
                 <img 
                   src={video.thumbnail} 
                   alt={video.title} 
@@ -207,16 +207,16 @@ export function VideoDetail() {
                     href={video.videoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="relative z-10 w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-[#009EFF] dark:group-hover:bg-[#33B1FF] transition-all duration-300"
-                  >
-                    <PlayCircle className="w-10 h-10 text-white fill-white/20" />
+                  className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#009EFF] dark:group-hover:bg-[#33B1FF] sm:h-20 sm:w-20"
+                >
+                    <PlayCircle className="h-8 w-8 fill-white/20 text-white sm:h-10 sm:w-10" />
                   </a>
                 ) : (
-                  <div className="relative z-10 w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                    <PlayCircle className="w-10 h-10 text-white fill-white/20" />
+                  <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md sm:h-20 sm:w-20">
+                    <PlayCircle className="h-8 w-8 fill-white/20 text-white sm:h-10 sm:w-10" />
                   </div>
                 )}
-                <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-sm font-medium">
+                <div className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm sm:bottom-4 sm:right-4 sm:text-sm">
                   {video.duration}
                 </div>
               </div>
@@ -247,7 +247,7 @@ export function VideoDetail() {
           </div>
         </main>
 
-        <aside className="w-64 shrink-0 hidden lg:flex flex-col gap-6 sticky top-24">
+        <aside className="flex w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-64">
           <HotTutorialsWidget />
         </aside>
       </div>
