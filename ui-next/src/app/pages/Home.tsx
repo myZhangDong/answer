@@ -1,12 +1,17 @@
 import { Clock, Eye, Tag, ChevronLeft, ChevronRight, TrendingUp, ThumbsUp } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { HotDemosWidget, HotTutorialsWidget } from "../components/SidebarWidgets";
-import { ContentArticle, ContentHomepageSettings, fetchArticles, fetchHomepageSettings } from "../api/contentApi";
-
-const CATEGORIES = ["全部", "Web", "iOS", "Android", "Server", "Uniapp", "React Native"];
+import {
+  ContentArticle,
+  ContentArticleTagOption,
+  ContentHomepageSettings,
+  fetchArticleTags,
+  fetchArticles,
+  fetchHomepageSettings,
+} from "../api/contentApi";
 
 const HOT_DEMOS = [
   { name: "ChatDemo (聊天Demo)", views: 256, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=ChatDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
@@ -17,28 +22,36 @@ const HOT_DEMOS = [
 ];
 
 export function Home() {
-  const [activeCategory, setActiveCategory] = useState("全部");
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sortType, setSortType] = useState<"latest" | "hot">("latest");
   const [hotPage, setHotPage] = useState(0);
   const [visibleCount, setVisibleCount] = useState(8);
   const [articles, setArticles] = useState<ContentArticle[]>([]);
+  const [hotArticles, setHotArticles] = useState<ContentArticle[]>([]);
+  const [tagOptions, setTagOptions] = useState<ContentArticleTagOption[]>([]);
   const [homepageSettings, setHomepageSettings] = useState<ContentHomepageSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const activeCategory = searchParams.get("tag") || "";
 
   useEffect(() => {
     let active = true;
 
     const load = async () => {
-      setLoading(true);
-      setError("");
-      const [articlesResult, homepageResult] = await Promise.allSettled([
-        fetchArticles({ page: 1, pageSize: 100, order: "newest" }),
+      const [tagsResult, homepageResult, hotArticlesResult] = await Promise.allSettled([
+        fetchArticleTags(),
         fetchHomepageSettings(),
+        fetchArticles({ page: 1, pageSize: 100, order: "hot" }),
       ]);
 
       if (!active) {
         return;
+      }
+
+      if (tagsResult.status === "fulfilled") {
+        setTagOptions(tagsResult.value.filter((item) => item.slugName && item.displayName));
+      } else {
+        setTagOptions([]);
       }
 
       if (homepageResult.status === "fulfilled") {
@@ -47,24 +60,10 @@ export function Home() {
         setHomepageSettings(null);
       }
 
-      try {
-        if (articlesResult.status !== "fulfilled") {
-          throw articlesResult.reason;
-        }
-        const resp = articlesResult.value;
-        if (!active) {
-          return;
-        }
-        setArticles(resp.list);
-      } catch (err) {
-        if (!active) {
-          return;
-        }
-        setError(err instanceof Error ? err.message : "文章加载失败");
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+      if (hotArticlesResult.status === "fulfilled") {
+        setHotArticles(hotArticlesResult.value.list);
+      } else {
+        setHotArticles([]);
       }
     };
 
@@ -75,31 +74,83 @@ export function Home() {
     };
   }, []);
 
-  const processedArticles = useMemo(() => {
-    return [...articles]
-      .filter((article) => activeCategory === "全部" || article.tag === activeCategory)
-      .sort((a, b) => {
-        if (sortType === "latest") {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }
-        return b.views - a.views;
-      });
-  }, [activeCategory, articles, sortType]);
+  useEffect(() => {
+    let active = true;
 
-  const hotArticles = useMemo(
-    () => [...articles].sort((a, b) => b.views - a.views),
-    [articles],
-  );
+    const loadArticles = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const resp = await fetchArticles({
+          page: 1,
+          pageSize: 100,
+          order: sortType === "latest" ? "newest" : "hot",
+          tag: activeCategory || undefined,
+        });
+        if (!active) {
+          return;
+        }
+        setArticles(resp.list);
+      } catch (err) {
+        if (!active) {
+          return;
+        }
+        setArticles([]);
+        setError(err instanceof Error ? err.message : "文章加载失败");
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    setVisibleCount(8);
+    loadArticles();
+
+    return () => {
+      active = false;
+    };
+  }, [activeCategory, sortType]);
+
+  useEffect(() => {
+    setHotPage(0);
+  }, [activeCategory]);
+
+  const categories = useMemo(() => {
+    const base = [{ slugName: "", displayName: "全部" }];
+    const normalized = tagOptions.map((item) => ({
+      slugName: item.slugName,
+      displayName: item.displayName,
+    }));
+    if (activeCategory && !normalized.some((item) => item.slugName === activeCategory)) {
+      normalized.unshift({
+        slugName: activeCategory,
+        displayName: activeCategory,
+      });
+    }
+    return base.concat(normalized);
+  }, [activeCategory, tagOptions]);
 
   const totalHotPages = Math.max(1, Math.ceil(hotArticles.length / 4));
   const displayedHotArticles = hotArticles.slice(hotPage * 4, (hotPage + 1) * 4);
 
   const nextHotPage = () => setHotPage((p) => (p + 1) % totalHotPages);
   const prevHotPage = () => setHotPage((p) => (p - 1 + totalHotPages) % totalHotPages);
-  const displayedArticles = processedArticles.slice(0, visibleCount);
-  const hasMore = visibleCount < processedArticles.length;
+  const displayedArticles = articles.slice(0, visibleCount);
+  const hasMore = visibleCount < articles.length;
   const homeBanner = homepageSettings?.homeBanner;
   const hotArticlesAd = homepageSettings?.hotArticlesAd;
+
+  const handleCategoryChange = (slugName: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (slugName) {
+      next.set("tag", slugName);
+    } else {
+      next.delete("tag");
+    }
+    setSearchParams(next);
+  };
 
   const renderLinkedImage = (imageUrl: string, linkUrl: string, alt: string, className: string) => {
     const image = (
@@ -175,18 +226,18 @@ export function Home() {
             
             {/* Categories */}
             <div className="flex items-center gap-3 overflow-x-auto pt-1 pl-1 -ml-1 -mt-1 pb-2 scrollbar-hide">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  key={cat.slugName || "all"}
+                  onClick={() => handleCategoryChange(cat.slugName)}
                   className={clsx(
                     "whitespace-nowrap px-5 py-2 rounded-full text-[14px] font-medium transition-all duration-200",
-                    activeCategory === cat
+                    activeCategory === cat.slugName
                       ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm ring-1 ring-slate-900 dark:ring-slate-100"
                       : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white"
                   )}
                 >
-                  {cat}
+                  {cat.displayName}
                 </button>
               ))}
             </div>
@@ -201,6 +252,11 @@ export function Home() {
             {!loading && error && (
               <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 text-sm text-red-500 shadow-sm ring-1 ring-red-100 dark:ring-red-900/30">
                 {error}
+              </div>
+            )}
+            {!loading && !error && displayedArticles.length === 0 && (
+              <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 text-sm text-slate-500 dark:text-slate-400 shadow-sm ring-1 ring-slate-100/80 dark:ring-slate-700/80">
+                {activeCategory ? "当前标签下暂无文章。" : "暂无文章。"}
               </div>
             )}
             {!loading && !error && displayedArticles.map((article) => (
@@ -248,7 +304,7 @@ export function Home() {
 
           {!loading && !error && hasMore && (
             <button
-              onClick={() => setVisibleCount((prev) => Math.min(prev + 8, processedArticles.length))}
+              onClick={() => setVisibleCount((prev) => Math.min(prev + 8, articles.length))}
               className="w-full mt-2 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-[#009EFF] dark:hover:text-[#33B1FF] transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               查看更多 <ChevronRight className="w-4 h-4" />

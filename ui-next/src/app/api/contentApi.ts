@@ -11,6 +11,19 @@ interface BackendTag {
   display_name?: string;
 }
 
+interface BackendTagOption {
+  tag_id?: string;
+  slug_name?: string;
+  display_name?: string;
+  recommend?: boolean;
+  reserved?: boolean;
+}
+
+interface BackendPaged<T> {
+  count: number;
+  list: T[];
+}
+
 interface BackendArticleListItem {
   id: string;
   title: string;
@@ -26,11 +39,6 @@ interface BackendArticleListItem {
 
 interface BackendArticleDetail extends BackendArticleListItem {
   update_time?: number | string;
-}
-
-interface BackendPaged<T> {
-  count: number;
-  list: T[];
 }
 
 interface BackendVideoInfo {
@@ -107,6 +115,7 @@ export interface ContentArticle {
   author: string;
   date: string;
   tag: string;
+  tagSlugs: string[];
   views: number;
   likes: number;
   ratingAvg: number;
@@ -174,11 +183,20 @@ export interface ContentHomepageSettings {
   hotArticlesAd: ContentHomepageBanner;
 }
 
+export interface ContentArticleTagOption {
+  tagId: string;
+  slugName: string;
+  displayName: string;
+  recommend: boolean;
+  reserved: boolean;
+}
+
 export interface FetchListParams {
   page?: number;
   pageSize?: number;
   search?: string;
   order?: string;
+  tag?: string;
 }
 
 type FeedbackCarrier = {
@@ -292,6 +310,8 @@ function mapArticleListItem(item: BackendArticleListItem): ContentArticle {
     author: getAuthor(item.user_info),
     date: formatDate(item.created_at || item.create_time),
     tag: getPrimaryTag(item.tags),
+    tagSlugs:
+      item.tags?.map((tag) => tag.slug_name || "").filter(Boolean) || [],
     views: item.view_count || 0,
     likes: 0,
     ratingAvg: 0,
@@ -509,6 +529,7 @@ export async function fetchArticles(
     page_size: params.pageSize || 20,
     order: params.order || "newest",
     search: params.search,
+    tag: params.tag,
     content_type: 2,
   });
   const resp = await apiRequest<BackendPaged<BackendArticleListItem>>(
@@ -530,6 +551,33 @@ export async function fetchArticleDetail(id: string) {
     `/answer/api/v1/question/info?id=${encodeURIComponent(id)}`,
   );
   return mapArticleDetail(resp);
+}
+
+export async function fetchArticleTags(query = ""): Promise<ContentArticleTagOption[]> {
+  const keyword = query.trim();
+  if (!keyword) {
+    const resp = await apiRequest<BackendPaged<BackendTagOption>>(
+      "/answer/api/v1/tags/page?page=1&page_size=100&query_cond=name",
+    );
+    return (resp.list || []).map((item) => ({
+      tagId: item.tag_id || "",
+      slugName: item.slug_name || "",
+      displayName: item.display_name || item.slug_name || "",
+      recommend: Boolean(item.recommend),
+      reserved: Boolean(item.reserved),
+    }));
+  }
+
+  const resp = await apiRequest<BackendTagOption[]>(
+    `/answer/api/v1/question/tags?tag=${encodeURIComponent(keyword)}`,
+  );
+  return (resp || []).map((item) => ({
+    tagId: item.tag_id || "",
+    slugName: item.slug_name || "",
+    displayName: item.display_name || item.slug_name || "",
+    recommend: Boolean(item.recommend),
+    reserved: Boolean(item.reserved),
+  }));
 }
 
 export async function fetchVideos(

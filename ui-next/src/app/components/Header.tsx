@@ -141,12 +141,14 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link
-                to="/admin/login"
+              <a
+                href="https://console.easemob.com/user/register"
+                target="_blank"
+                rel="noreferrer"
                 className="rounded-[6px] bg-[#009EFF] px-4 py-1.5 text-[14px] font-medium text-white transition-all hover:bg-[#008AE6] focus:outline-none focus:ring-2 focus:ring-[#009EFF] focus:ring-offset-2 dark:bg-[#33B1FF] dark:hover:bg-[#33B1FF]/90 dark:focus:ring-[#33B1FF]"
               >
-                进入后台
-              </Link>
+                注册环信
+              </a>
             )}
           </div>
         </div>
