@@ -3,8 +3,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2, Save, X } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { createVideo, getAdminVideoDetail, updateVideo, type VideoWritePayload } from "../api/adminApi";
 import { useAdminAuth } from "../auth/AdminAuthContext";
-
-const VIDEO_CATEGORIES = ["基础篇", "进阶篇", "群组篇", "AI篇"];
+import { getDefaultVideoCategory, VIDEO_CATEGORY_OPTIONS } from "../config/videoCategories";
 
 interface VideoForm {
   title: string;
@@ -25,7 +24,7 @@ interface VideoForm {
 function buildDefaultVideo(authorName = ""): VideoForm {
   return {
     title: "",
-    category: "基础篇",
+    category: getDefaultVideoCategory(),
     cover: "",
     isRecommend: false,
     isShow: true,
@@ -185,7 +184,7 @@ export function AdminVideoEditor() {
       const detail = result.data;
       setForm({
         title: detail.title,
-        category: detail.category || VIDEO_CATEGORIES[0],
+        category: detail.category || getDefaultVideoCategory(),
         cover: detail.cover,
         isRecommend: detail.isRecommend,
         isShow: detail.isShow,
@@ -221,7 +220,7 @@ export function AdminVideoEditor() {
       const detail = result.data;
       setForm({
         title: detail.title,
-        category: detail.category || VIDEO_CATEGORIES[0],
+        category: detail.category || getDefaultVideoCategory(),
         cover: detail.cover,
         isRecommend: detail.isRecommend,
         isShow: detail.isShow,
@@ -344,7 +343,7 @@ export function AdminVideoEditor() {
                 <Select
                   value={form.category}
                   onChange={set("category")}
-                  options={VIDEO_CATEGORIES.map((item) => ({ label: item, value: item }))}
+                  options={VIDEO_CATEGORY_OPTIONS}
                 />
               </Field>
               <Field label="时长（秒）" hint="前台会自动格式化为 MM:SS">

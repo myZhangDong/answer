@@ -1,4 +1,4 @@
-import { FileText, FolderGit2, LogOut, Settings2, Users, Video } from "lucide-react";
+import { FileText, FolderGit2, LogOut, Settings2, Tag, Users, Video } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { LogoSvg } from "../components/LogoSvg";
 import { useAdminAuth } from "../auth/AdminAuthContext";
@@ -13,6 +13,11 @@ const adminNavigation = [
     to: "/admin/videos",
     label: "视频管理",
     icon: Video,
+  },
+  {
+    to: "/admin/article-tags",
+    label: "文章标签",
+    icon: Tag,
   },
   {
     to: "/admin/projects",

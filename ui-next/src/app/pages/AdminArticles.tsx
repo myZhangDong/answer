@@ -49,6 +49,22 @@ export function AdminArticles() {
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   const pageItems = useMemo(() => buildPageItems(currentPage, totalPages), [currentPage, totalPages]);
+  const selectableTagOptions = useMemo(() => {
+    if (!currentTag) {
+      return tagOptions;
+    }
+    const exists = tagOptions.some((item) => item.slug_name === currentTag);
+    if (exists) {
+      return tagOptions;
+    }
+    return [
+      {
+        slug_name: currentTag,
+        display_name: `${currentTag}（已失效）`,
+      },
+      ...tagOptions,
+    ];
+  }, [currentTag, tagOptions]);
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
@@ -212,7 +228,7 @@ export function AdminArticles() {
                 className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 pr-10 text-[14px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009EFF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-[#33B1FF]/40"
               >
                 <option value="">全部标签</option>
-                {tagOptions.map((tag) => (
+                {selectableTagOptions.map((tag) => (
                   <option key={tag.slug_name} value={tag.slug_name}>
                     {tag.display_name}
                   </option>

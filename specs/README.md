@@ -34,6 +34,10 @@
   - 用于单独跟踪内容门户下“匿名点赞 + 匿名评分”的产品规则、接口边界、去重方式和数据结构
 - `specs/004-anonymous-feedback-tasks.md`
   - 用于单独跟踪 `004` 规格的执行步骤、阶段验收和三类内容接入进度
+- `specs/005-ui-next-content-taxonomy-spec.md`
+  - 用于单独跟踪 `ui-next` 后台文章标签管理、文章标签录入闭环，以及视频分类配置化边界
+- `specs/005-ui-next-content-taxonomy-tasks.md`
+  - 用于单独跟踪 `005` 规格的执行步骤、阶段验收，以及文章标签管理与视频分类配置化的推进状态
 
 ## 文件职责
 

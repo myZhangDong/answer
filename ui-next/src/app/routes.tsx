@@ -13,6 +13,7 @@ import { AdminLogin } from "./pages/AdminLogin";
 import { AdminRouteGuard } from "./routes/AdminRouteGuard";
 import { AdminArticles } from "./pages/AdminArticles";
 import { AdminArticleEditor } from "./pages/AdminArticleEditor";
+import { AdminArticleTags } from "./pages/AdminArticleTags";
 import { AdminVideos } from "./pages/AdminVideos";
 import { AdminVideoEditor } from "./pages/AdminVideoEditor";
 import { AdminProjects } from "./pages/AdminProjects";
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
           {
             path: "articles/:id/edit",
             Component: AdminArticleEditor,
+          },
+          {
+            path: "article-tags",
+            Component: AdminArticleTags,
           },
           {
             path: "videos",

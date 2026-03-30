@@ -28,10 +28,36 @@ import type {
 import { apiRequest } from "./client";
 
 export interface AdminTagOption {
+  tag_id?: string;
   slug_name: string;
   display_name: string;
   recommend?: boolean;
   reserved?: boolean;
+}
+
+export interface AdminArticleTagRecord extends AdminTagOption {
+  tag_id: string;
+  description: string;
+  original_text: string;
+  question_count: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface AdminArticleTagListResult {
+  count: number;
+  list: AdminArticleTagRecord[];
+}
+
+export interface AdminArticleTagWritePayload {
+  slug_name: string;
+  display_name: string;
+  original_text: string;
+}
+
+export interface AdminArticleTagUpdatePayload extends AdminArticleTagWritePayload {
+  tag_id: string;
+  edit_summary?: string;
 }
 
 export interface AdminArticleSummary {
@@ -206,8 +232,22 @@ interface BackendUserInfo {
 }
 
 interface BackendQuestionTag {
+  tag_id?: string;
   slug_name: string;
   display_name: string;
+  recommend?: boolean;
+  reserved?: boolean;
+}
+
+interface BackendTagInfo {
+  tag_id: string;
+  slug_name: string;
+  display_name: string;
+  description?: string;
+  original_text?: string;
+  question_count?: number;
+  created_at?: number;
+  updated_at?: number;
   recommend?: boolean;
   reserved?: boolean;
 }
@@ -414,11 +454,171 @@ function mapAdminProjectDetail(item: BackendProjectInfo): AdminProjectDetail {
   };
 }
 
+function mapAdminArticleTagRecord(item: BackendTagInfo): AdminArticleTagRecord {
+  return {
+    tag_id: item.tag_id,
+    slug_name: item.slug_name,
+    display_name: item.display_name,
+    description: item.description || "",
+    original_text: item.original_text || "",
+    question_count: Number(item.question_count || 0),
+    created_at: Number(item.created_at || 0),
+    updated_at: Number(item.updated_at || 0),
+    recommend: item.recommend,
+    reserved: item.reserved,
+  };
+}
+
 export async function getArticleTagOptions(query = ""): Promise<ApiResponse<AdminTagOption[]>> {
-  return request<AdminTagOption[]>(
-    `/answer/api/v1/question/tags?tag=${encodeURIComponent(query)}`,
+  const keyword = query.trim();
+
+  if (!keyword) {
+    try {
+      const data = await apiRequest<BackendPaged<BackendTagInfo>>(
+        "/answer/api/v1/tags/page?page=1&page_size=100&query_cond=name",
+        { method: "GET" },
+      );
+      return {
+        success: true,
+        data: (data.list || []).map((item) => ({
+          tag_id: item.tag_id,
+          slug_name: item.slug_name,
+          display_name: item.display_name,
+          recommend: item.recommend,
+          reserved: item.reserved,
+        })),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "文章标签加载失败，请稍后重试。",
+      };
+    }
+  }
+
+  const searchResult = await request<AdminTagOption[]>(
+    `/answer/api/v1/question/tags?tag=${encodeURIComponent(keyword)}`,
     { method: "GET" },
   );
+  if (searchResult.success && (searchResult.data?.length || 0) > 0) {
+    return searchResult;
+  }
+
+  try {
+    const displayData = await apiRequest<BackendPaged<BackendTagInfo>>(
+      `/answer/api/v1/tags/page?page=1&page_size=100&query_cond=name&display_name=${encodeURIComponent(keyword)}`,
+      { method: "GET" },
+    );
+    if ((displayData.list || []).length > 0) {
+      return {
+        success: true,
+        data: displayData.list.map((item) => ({
+          tag_id: item.tag_id,
+          slug_name: item.slug_name,
+          display_name: item.display_name,
+          recommend: item.recommend,
+          reserved: item.reserved,
+        })),
+      };
+    }
+  } catch {
+    // ignore and fall through to the original search result
+  }
+
+  return searchResult;
+}
+
+export async function getAdminArticleTags(params?: {
+  page?: number;
+  pageSize?: number;
+  displayName?: string;
+}): Promise<ApiResponse<AdminArticleTagListResult>> {
+  const query = new URLSearchParams();
+  query.set("page", String(params?.page || 1));
+  query.set("page_size", String(params?.pageSize || 20));
+  query.set("query_cond", "name");
+  if (params?.displayName) {
+    query.set("display_name", params.displayName);
+  }
+
+  try {
+    const data = await apiRequest<BackendPaged<BackendTagInfo>>(
+      `/answer/api/v1/tags/page?${query.toString()}`,
+      { method: "GET" },
+    );
+    return {
+      success: true,
+      data: {
+        count: data.count || 0,
+        list: (data.list || []).map(mapAdminArticleTagRecord),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "标签列表加载失败，请稍后重试。",
+    };
+  }
+}
+
+export async function getAdminArticleTagDetail(tagId: string): Promise<ApiResponse<AdminArticleTagRecord>> {
+  try {
+    const data = await apiRequest<BackendTagInfo>(
+      `/answer/api/v1/tag?id=${encodeURIComponent(tagId)}`,
+      { method: "GET" },
+    );
+    return {
+      success: true,
+      data: mapAdminArticleTagRecord(data),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "标签详情加载失败，请稍后重试。",
+    };
+  }
+}
+
+export async function createAdminArticleTag(
+  payload: AdminArticleTagWritePayload,
+): Promise<ApiResponse<{ slug_name: string }>> {
+  return request<{ slug_name: string }>("/answer/api/v1/tag", {
+    method: "POST",
+    body: JSON.stringify({
+      slug_name: payload.slug_name,
+      display_name: payload.display_name,
+      original_text: payload.original_text,
+    }),
+  });
+}
+
+export async function updateAdminArticleTag(
+  payload: AdminArticleTagUpdatePayload,
+): Promise<ApiResponse<{ wait_for_review?: boolean }>> {
+  return request<{ wait_for_review?: boolean }>("/answer/api/v1/tag", {
+    method: "PUT",
+    body: JSON.stringify({
+      tag_id: payload.tag_id,
+      slug_name: payload.slug_name,
+      display_name: payload.display_name,
+      original_text: payload.original_text,
+      edit_summary: payload.edit_summary || "",
+    }),
+  });
+}
+
+export async function deleteAdminArticleTag(tagId: string): Promise<ApiResponse> {
+  return request("/answer/api/v1/tag", {
+    method: "DELETE",
+    body: JSON.stringify({ tag_id: tagId }),
+  });
+}
+
+export async function recoverAdminArticleTag(tagId: string): Promise<ApiResponse> {
+  return request("/answer/api/v1/tag/recover", {
+    method: "POST",
+    body: JSON.stringify({ tag_id: tagId }),
+  });
 }
 
 export async function getAdminArticles(params?: {

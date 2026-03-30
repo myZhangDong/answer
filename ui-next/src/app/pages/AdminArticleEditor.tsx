@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, ArrowLeft, CheckCircle2, Eye, Save, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, Eye, Save, Tag, X } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { createArticle, getAdminArticleDetail, getArticleTagOptions, updateArticle, type AdminTagOption } from "../api/adminApi";
 import { MarkdownEditor } from "../components/MarkdownEditor";
@@ -15,6 +15,13 @@ interface ArticleForm {
   coverUrl: string;
   content: string;
 }
+
+type ArticleEditorLocationState = {
+  from?: string;
+  restoredDraft?: ArticleForm;
+  refreshedFromTagManager?: boolean;
+  toast?: { type: "success" | "error"; msg: string };
+} | null;
 
 function buildDefaultArticle(author = "", tag = "Web"): ArticleForm {
   return {
@@ -143,8 +150,8 @@ export function AdminArticleEditor() {
   const isEditMode = Boolean(id);
   const { user } = useAdminAuth();
   const authorName = user?.display_name || user?.username || user?.e_mail || "";
-  const returnTo =
-    ((location.state as { from?: string } | null)?.from as string | undefined) || "/admin/articles";
+  const navigationState = location.state as ArticleEditorLocationState;
+  const returnTo = (navigationState?.from as string | undefined) || "/admin/articles";
 
   const [form, setForm] = useState<ArticleForm>(() => buildDefaultArticle(authorName));
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -161,11 +168,38 @@ export function AdminArticleEditor() {
     () => tagOptions[0]?.display_name || "Web",
     [tagOptions],
   );
+  const selectableTagOptions = useMemo(() => {
+    if (!form.tag) {
+      return tagOptions;
+    }
+    const exists = tagOptions.some((item) => item.display_name === form.tag);
+    if (exists) {
+      return tagOptions;
+    }
+    return [{ slug_name: `legacy-${form.tag}`, display_name: `${form.tag}（已失效）` }, ...tagOptions];
+  }, [form.tag, tagOptions]);
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
     window.setTimeout(() => setToast(null), 3500);
   };
+
+  useEffect(() => {
+    if (!navigationState?.toast) {
+      return;
+    }
+    setToast(navigationState.toast);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+    window.setTimeout(() => setToast(null), 3500);
+  }, [location.pathname, location.search, navigate, navigationState]);
+
+  useEffect(() => {
+    if (!navigationState?.refreshedFromTagManager || navigationState.toast) {
+      return;
+    }
+    showToast("success", "已返回文章编辑页，请重新选择或确认标签");
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, navigate, navigationState]);
 
   useEffect(() => {
     let cancelled = false;
@@ -184,6 +218,15 @@ export function AdminArticleEditor() {
 
       setTagOptions(tagResult.data);
       setTagsLoading(false);
+
+      if (navigationState?.restoredDraft) {
+        setForm({
+          ...navigationState.restoredDraft,
+          author: navigationState.restoredDraft.author || authorName,
+          tag: navigationState.restoredDraft.tag || tagResult.data[0]?.display_name || "Web",
+        });
+        return;
+      }
 
       if (!isEditMode) {
         setForm((current) => ({
@@ -224,7 +267,7 @@ export function AdminArticleEditor() {
     return () => {
       cancelled = true;
     };
-  }, [authorName, id, isEditMode]);
+  }, [authorName, id, isEditMode, navigationState]);
 
   const resetForm = () => {
     if (isEditMode && id) {
@@ -276,6 +319,16 @@ export function AdminArticleEditor() {
               ? `文章已更新，内容 ID：${result.data.id}`
               : `文章已发布成功，内容 ID：${result.data.id}`,
         },
+      },
+    });
+  };
+
+  const handleGoToTagManager = () => {
+    navigate("/admin/article-tags", {
+      state: {
+        returnTo: `${location.pathname}${location.search}`,
+        returnLabel: isEditMode ? "返回编辑文章" : "返回新建文章",
+        articleDraft: form,
       },
     });
   };
@@ -335,15 +388,28 @@ export function AdminArticleEditor() {
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="技术标签" required hint="优先按后端已有标签选择">
-              <Select
-                value={form.tag}
-                onChange={set("tag")}
-                options={
-                  tagOptions.length > 0
-                    ? tagOptions
-                    : [{ slug_name: "loading", display_name: tagsLoading ? "标签加载中..." : "暂无可用标签" }]
-                }
-              />
+              <div className="flex flex-col gap-2">
+                <Select
+                  value={form.tag}
+                  onChange={set("tag")}
+                  options={
+                    tagOptions.length > 0 || form.tag
+                      ? selectableTagOptions
+                      : [{ slug_name: "loading", display_name: tagsLoading ? "标签加载中..." : "暂无可用标签" }]
+                  }
+                />
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-slate-200 px-3 py-2 text-[12px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                  <span>{tagOptions.length > 0 ? "标签不合适？可以先去标签管理补充。" : "当前没有可用标签，请先创建标签。"}</span>
+                  <button
+                    type="button"
+                    onClick={handleGoToTagManager}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium text-[#009EFF] transition-colors hover:bg-[#009EFF]/8 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF]/10"
+                  >
+                    <Tag className="h-3.5 w-3.5" />
+                    去创建标签
+                  </button>
+                </div>
+              </div>
             </Field>
             <Field label="封面图 URL" hint="当前后端文章写接口暂不支持落库">
               <Input value={form.coverUrl} onChange={set("coverUrl")} placeholder="https://..." />

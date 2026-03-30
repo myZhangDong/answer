@@ -4,8 +4,7 @@ import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { clsx } from "clsx";
 import { ContentVideo, fetchVideos } from "../api/contentApi";
-
-const CATEGORIES = ["全部", "基础篇", "进阶篇", "群组篇", "AI篇"];
+import { VIDEO_CATEGORY_FILTER_OPTIONS } from "../config/videoCategories";
 
 export function VideoTutorials() {
   const [activeCategory, setActiveCategory] = useState("全部");
@@ -67,7 +66,7 @@ export function VideoTutorials() {
 
           {/* Categories */}
           <div className="flex items-center gap-3 overflow-x-auto pt-1 pl-1 -ml-1 -mt-1 pb-2 scrollbar-hide">
-            {CATEGORIES.map((cat) => (
+            {VIDEO_CATEGORY_FILTER_OPTIONS.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
