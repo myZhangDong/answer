@@ -117,18 +117,21 @@ func (pr *projectRepo) GetProject(ctx context.Context, id string) (project *enti
 func (pr *projectRepo) GetProjectList(ctx context.Context, req *schema.ProjectPageReq) (projectList []*entity.Project, total int64, err error) {
 	projectList = make([]*entity.Project, 0)
 
-	session := pr.data.DB.Context(ctx).Where("status = ?", entity.ProjectStatusAvailable)
+	session := pr.data.DB.Context(ctx).
+		Table(entity.Project{}.TableName()).
+		Select("`project`.*").
+		Where("`project`.status = ?", entity.ProjectStatusAvailable)
 
 	// 搜索条件
 	if len(req.Search) > 0 {
-		session = session.And("(title LIKE ? OR description LIKE ?)",
+		session = session.And("(`project`.title LIKE ? OR `project`.description LIKE ?)",
 			fmt.Sprintf("%%%s%%", req.Search),
 			fmt.Sprintf("%%%s%%", req.Search))
 	}
 
 	// 代码类型过滤
 	if req.CodeType > 0 {
-		session = session.And("code_type = ?", req.CodeType)
+		session = session.And("`project`.code_type = ?", req.CodeType)
 	}
 
 	// 标签过滤
@@ -136,7 +139,7 @@ func (pr *projectRepo) GetProjectList(ctx context.Context, req *schema.ProjectPa
 		tags := strings.Split(req.Tags, ",")
 		for _, tag := range tags {
 			if len(strings.TrimSpace(tag)) > 0 {
-				session = session.And("tags LIKE ?", fmt.Sprintf("%%%s%%", strings.TrimSpace(tag)))
+				session = session.And("`project`.tags LIKE ?", fmt.Sprintf("%%%s%%", strings.TrimSpace(tag)))
 			}
 		}
 	}
@@ -144,35 +147,42 @@ func (pr *projectRepo) GetProjectList(ctx context.Context, req *schema.ProjectPa
 	// 排序
 	switch req.OrderBy {
 	case "newest":
-		session = session.OrderBy("created_at DESC")
+		session = session.OrderBy("`project`.created_at DESC")
 	case "active":
-		session = session.OrderBy("updated_at DESC")
+		session = session.OrderBy("`project`.updated_at DESC")
 	case "hot":
-		// 这里可以根据浏览量或其他热度指标排序，暂时用创建时间
-		session = session.OrderBy("created_at DESC")
+		session = session.
+			Join("LEFT", "question", "`project`.question_id = `question`.id").
+			OrderBy("`question`.view_count DESC, `project`.created_at DESC")
 	default:
-		session = session.OrderBy("created_at DESC")
+		session = session.OrderBy("`project`.created_at DESC")
 	}
 
 	// 获取总数
-	countSession := pr.data.DB.Context(ctx).Where("status = ?", entity.ProjectStatusAvailable)
+	countSession := pr.data.DB.Context(ctx).
+		Table(entity.Project{}.TableName()).
+		Where("`project`.status = ?", entity.ProjectStatusAvailable)
+
+	if req.OrderBy == "hot" {
+		countSession = countSession.Join("LEFT", "question", "`project`.question_id = `question`.id")
+	}
 
 	// 重新应用搜索条件
 	if len(req.Search) > 0 {
-		countSession = countSession.And("(title LIKE ? OR description LIKE ?)",
+		countSession = countSession.And("(`project`.title LIKE ? OR `project`.description LIKE ?)",
 			fmt.Sprintf("%%%s%%", req.Search),
 			fmt.Sprintf("%%%s%%", req.Search))
 	}
 
 	if req.CodeType > 0 {
-		countSession = countSession.And("code_type = ?", req.CodeType)
+		countSession = countSession.And("`project`.code_type = ?", req.CodeType)
 	}
 
 	if len(req.Tags) > 0 {
 		tags := strings.Split(req.Tags, ",")
 		for _, tag := range tags {
 			if len(strings.TrimSpace(tag)) > 0 {
-				countSession = countSession.And("tags LIKE ?", fmt.Sprintf("%%%s%%", strings.TrimSpace(tag)))
+				countSession = countSession.And("`project`.tags LIKE ?", fmt.Sprintf("%%%s%%", strings.TrimSpace(tag)))
 			}
 		}
 	}

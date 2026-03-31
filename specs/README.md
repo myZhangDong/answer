@@ -42,6 +42,10 @@
   - 用于单独跟踪 `ui-next` 前台与后台在移动端的响应式适配范围、优先级、边界和 Tailwind 实施原则
 - `specs/006-ui-next-mobile-adaptation-tasks.md`
   - 用于单独跟踪 `006` 规格的执行步骤、阶段验收，以及前台完整适配与后台基础可用的推进状态
+- `specs/007-ui-next-home-sidebar-hot-content-spec.md`
+  - 用于单独跟踪 `ui-next` 首页右侧“热门 Demo”“热门教程”的真实数据接入、排序口径和前后端边界
+- `specs/007-ui-next-home-sidebar-hot-content-tasks.md`
+  - 用于单独跟踪 `007` 规格的执行步骤、阶段验收，以及首页与详情页热门模块真实数据接入的推进状态
 
 ## 文件职责
 

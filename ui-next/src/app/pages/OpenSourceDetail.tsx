@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import {
   ContentProject,
   fetchContentFeedback,
+  fetchHotProjects,
   fetchProjectDetail,
   submitContentLike,
   submitContentRating,
@@ -18,22 +19,14 @@ import {
   markContentFeedbackVisitorAction,
 } from "../utils/contentFeedbackVisitor";
 
-const placeholderImg = "/placeholder-image.svg";
-
-const HOT_DEMOS = [
-  { name: "ChatDemo (聊天Demo)", views: 256, icon: placeholderImg },
-  { name: "VideoCallDemo", views: 198, icon: placeholderImg },
-  { name: "CustomerService UI", views: 145, icon: placeholderImg },
-  { name: "LiveStreamingDemo", views: 112, icon: placeholderImg },
-  { name: "VoiceRoomDemo", views: 98, icon: placeholderImg },
-];
-
 const formatNumber = (num: number) => num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString();
 
 export function OpenSourceDetail() {
   const { id } = useParams();
   const [project, setProject] = useState<ContentProject | null>(null);
+  const [hotProjects, setHotProjects] = useState<ContentProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hotProjectsLoading, setHotProjectsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -45,12 +38,28 @@ export function OpenSourceDetail() {
     const load = async () => {
       setLoading(true);
       setError("");
+      setHotProjectsLoading(true);
       try {
-        const resp = await fetchProjectDetail(id);
+        const [projectResult, hotProjectsResult] = await Promise.allSettled([
+          fetchProjectDetail(id),
+          fetchHotProjects(),
+        ]);
+
         if (!active) {
           return;
         }
-        setProject(resp);
+
+        if (hotProjectsResult.status === "fulfilled") {
+          setHotProjects(hotProjectsResult.value.filter((item) => item.id !== id));
+        } else {
+          setHotProjects([]);
+        }
+
+        if (projectResult.status !== "fulfilled") {
+          throw projectResult.reason;
+        }
+
+        setProject(projectResult.value);
         const localVisitorState = getContentFeedbackVisitorState("project", id);
         void fetchContentFeedback("project", id)
           .then((feedback) => {
@@ -94,6 +103,7 @@ export function OpenSourceDetail() {
       } finally {
         if (active) {
           setLoading(false);
+          setHotProjectsLoading(false);
         }
       }
     };
@@ -257,7 +267,7 @@ export function OpenSourceDetail() {
         </main>
 
         <aside className="flex w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-64">
-          <HotDemosWidget demos={HOT_DEMOS} />
+          <HotDemosWidget demos={hotProjects} loading={hotProjectsLoading} />
         </aside>
       </div>
     </div>

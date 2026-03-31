@@ -10,16 +10,12 @@ import {
   ContentHomepageSettings,
   fetchArticleTags,
   fetchArticles,
+  fetchHotProjects,
+  fetchHotVideos,
   fetchHomepageSettings,
+  ContentProject,
+  ContentVideo,
 } from "../api/contentApi";
-
-const HOT_DEMOS = [
-  { name: "ChatDemo (聊天Demo)", views: 256, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=ChatDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
-  { name: "VideoCallDemo", views: 198, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=VideoCallDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
-  { name: "CustomerService UI", views: 145, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=CustomerServiceUI&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
-  { name: "LiveStreamingDemo", views: 112, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=LiveStreamingDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
-  { name: "VoiceRoomDemo", views: 98, icon: "https://api.dicebear.com/7.x/shapes/svg?seed=VoiceRoomDemo&radius=15&backgroundColor=009EFF,33B1FF,14b8a6,8b5cf6,ec4899" },
-];
 
 export function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,20 +24,29 @@ export function Home() {
   const [visibleCount, setVisibleCount] = useState(8);
   const [articles, setArticles] = useState<ContentArticle[]>([]);
   const [hotArticles, setHotArticles] = useState<ContentArticle[]>([]);
+  const [hotProjects, setHotProjects] = useState<ContentProject[]>([]);
+  const [hotVideos, setHotVideos] = useState<ContentVideo[]>([]);
   const [tagOptions, setTagOptions] = useState<ContentArticleTagOption[]>([]);
   const [homepageSettings, setHomepageSettings] = useState<ContentHomepageSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hotProjectsLoading, setHotProjectsLoading] = useState(true);
+  const [hotVideosLoading, setHotVideosLoading] = useState(true);
   const activeCategory = searchParams.get("tag") || "";
 
   useEffect(() => {
     let active = true;
 
     const load = async () => {
-      const [tagsResult, homepageResult, hotArticlesResult] = await Promise.allSettled([
+      setHotProjectsLoading(true);
+      setHotVideosLoading(true);
+
+      const [tagsResult, homepageResult, hotArticlesResult, hotProjectsResult, hotVideosResult] = await Promise.allSettled([
         fetchArticleTags(),
         fetchHomepageSettings(),
         fetchArticles({ page: 1, pageSize: 100, order: "hot" }),
+        fetchHotProjects(),
+        fetchHotVideos(),
       ]);
 
       if (!active) {
@@ -65,6 +70,21 @@ export function Home() {
       } else {
         setHotArticles([]);
       }
+
+      if (hotProjectsResult.status === "fulfilled") {
+        setHotProjects(hotProjectsResult.value);
+      } else {
+        setHotProjects([]);
+      }
+
+      if (hotVideosResult.status === "fulfilled") {
+        setHotVideos(hotVideosResult.value);
+      } else {
+        setHotVideos([]);
+      }
+
+      setHotProjectsLoading(false);
+      setHotVideosLoading(false);
     };
 
     load();
@@ -369,10 +389,10 @@ export function Home() {
           </div>
 
           {/* Hot Demos */}
-          <HotDemosWidget demos={HOT_DEMOS} />
+          <HotDemosWidget demos={hotProjects} loading={hotProjectsLoading} />
 
           {/* Hot Tutorials */}
-          <HotTutorialsWidget />
+          <HotTutorialsWidget tutorials={hotVideos} loading={hotVideosLoading} />
         </aside>
       </div>
     </div>

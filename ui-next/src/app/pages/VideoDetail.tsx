@@ -8,6 +8,7 @@ import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import {
   ContentVideo,
   fetchContentFeedback,
+  fetchHotVideos,
   fetchVideoDetail,
   submitContentLike,
   submitContentRating,
@@ -20,7 +21,9 @@ import {
 export function VideoDetail() {
   const { id } = useParams();
   const [video, setVideo] = useState<ContentVideo | null>(null);
+  const [hotVideos, setHotVideos] = useState<ContentVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hotVideosLoading, setHotVideosLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -32,12 +35,28 @@ export function VideoDetail() {
     const load = async () => {
       setLoading(true);
       setError("");
+      setHotVideosLoading(true);
       try {
-        const resp = await fetchVideoDetail(id);
+        const [videoResult, hotVideosResult] = await Promise.allSettled([
+          fetchVideoDetail(id),
+          fetchHotVideos(),
+        ]);
+
         if (!active) {
           return;
         }
-        setVideo(resp);
+
+        if (hotVideosResult.status === "fulfilled") {
+          setHotVideos(hotVideosResult.value.filter((item) => item.id !== id));
+        } else {
+          setHotVideos([]);
+        }
+
+        if (videoResult.status !== "fulfilled") {
+          throw videoResult.reason;
+        }
+
+        setVideo(videoResult.value);
         const localVisitorState = getContentFeedbackVisitorState("video", id);
         void fetchContentFeedback("video", id)
           .then((feedback) => {
@@ -81,6 +100,7 @@ export function VideoDetail() {
       } finally {
         if (active) {
           setLoading(false);
+          setHotVideosLoading(false);
         }
       }
     };
@@ -248,7 +268,7 @@ export function VideoDetail() {
         </main>
 
         <aside className="flex w-full shrink-0 flex-col gap-6 lg:sticky lg:top-24 lg:w-64">
-          <HotTutorialsWidget />
+          <HotTutorialsWidget tutorials={hotVideos} loading={hotVideosLoading} />
         </aside>
       </div>
     </div>

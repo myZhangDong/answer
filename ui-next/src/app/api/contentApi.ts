@@ -600,6 +600,15 @@ export async function fetchVideos(
   };
 }
 
+export async function fetchHotVideos(): Promise<ContentVideo[]> {
+  const resp = await fetchVideos({
+    page: 1,
+    pageSize: 4,
+    order: "hot",
+  });
+  return resp.list;
+}
+
 export async function fetchVideoDetail(id: string) {
   const resp = await apiRequest<BackendVideoInfo>(
     `/answer/api/v1/video/info?id=${encodeURIComponent(id)}`,
@@ -624,6 +633,15 @@ export async function fetchProjects(
     count: resp.count || 0,
     list,
   };
+}
+
+export async function fetchHotProjects(): Promise<ContentProject[]> {
+  const resp = await fetchProjects({
+    page: 1,
+    pageSize: 2,
+    order: "hot",
+  });
+  return resp.list;
 }
 
 export async function fetchProjectDetail(id: string) {

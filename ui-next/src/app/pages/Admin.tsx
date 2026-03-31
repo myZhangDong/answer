@@ -79,7 +79,6 @@ export function Admin() {
               <p className="text-[12px] font-medium text-slate-700 dark:text-slate-200">
                 {user?.display_name || user?.username || user?.e_mail || "管理员"}
               </p>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">复用现有后台会话</p>
             </div>
             <button
               onClick={async () => {

@@ -1733,9 +1733,10 @@ ui:
   nav_menus:
     dashboard: 后台管理
     contents: 内容管理
-    questions: 集成问题
+    questions: 常见问题
     answers: 回答
     videos: 视频教程
+    projects: 开源项目
     users: 用户管理
     badges: 徽章
     flags: 举报管理
