@@ -1,26 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, ImagePlus, LoaderCircle, Save, Upload, X } from "lucide-react";
 import { uploadFile } from "../api/adminApi";
 import {
   getAdminHomepageSettings,
-  getAdminLanguageOptions,
   getSiteBrandingSettings,
   getSiteGeneralSettings,
-  getSiteInterfaceSettings,
   getSiteSeoSettings,
-  type AdminLanguageOption,
   type SiteBrandingSettings,
   type SiteGeneralSettings,
   type SiteHomepageBannerSettings,
   type SiteHomepageSettings,
-  type SiteInterfaceSettings,
   type SiteSeoSettings,
   updateAdminHomepageSettings,
   updateSiteBrandingSettings,
   updateSiteGeneralSettings,
-  updateSiteInterfaceSettings,
   updateSiteSeoSettings,
 } from "../api/siteSettingsApi";
+import { useSiteInfo } from "../site/SiteInfoContext";
 import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 function SectionCard({
@@ -252,11 +248,6 @@ const DEFAULT_GENERAL: SiteGeneralSettings = {
   check_update: true,
 };
 
-const DEFAULT_INTERFACE: SiteInterfaceSettings = {
-  language: "zh-CN",
-  time_zone: "Asia/Shanghai",
-};
-
 const DEFAULT_BRANDING: SiteBrandingSettings = {
   logo: "",
   mobile_logo: "",
@@ -280,50 +271,15 @@ const DEFAULT_HOMEPAGE: SiteHomepageSettings = {
   hot_articles_ad: { ...DEFAULT_BANNER },
 };
 
-const FALLBACK_TIMEZONES = [
-  "Asia/Shanghai",
-  "Asia/Tokyo",
-  "UTC",
-  "Europe/London",
-  "America/Los_Angeles",
-  "America/New_York",
-];
-
 export function AdminSiteSettings() {
-  const [languages, setLanguages] = useState<AdminLanguageOption[]>([]);
+  const { refreshSiteInfo } = useSiteInfo();
   const [general, setGeneral] = useState<SiteGeneralSettings>(DEFAULT_GENERAL);
-  const [siteInterface, setSiteInterface] = useState<SiteInterfaceSettings>(DEFAULT_INTERFACE);
   const [branding, setBranding] = useState<SiteBrandingSettings>(DEFAULT_BRANDING);
   const [seo, setSeo] = useState<SiteSeoSettings>(DEFAULT_SEO);
   const [homepage, setHomepage] = useState<SiteHomepageSettings>(DEFAULT_HOMEPAGE);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
-
-  const timezoneOptions = useMemo(() => {
-    const intlWithSupportedValuesOf = Intl as typeof Intl & {
-      supportedValuesOf?: (key: string) => string[];
-    };
-    if (typeof intlWithSupportedValuesOf.supportedValuesOf === "function") {
-      const supported = intlWithSupportedValuesOf.supportedValuesOf("timeZone");
-      if (supported.length > 0) {
-        return supported;
-      }
-    }
-    return FALLBACK_TIMEZONES;
-  }, []);
-
-  const languageOptions = useMemo(() => {
-    if (languages.length > 0) {
-      return languages;
-    }
-    return [
-      {
-        label: siteInterface.language || DEFAULT_INTERFACE.language,
-        value: siteInterface.language || DEFAULT_INTERFACE.language,
-      },
-    ];
-  }, [languages, siteInterface.language]);
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
@@ -336,10 +292,8 @@ export function AdminSiteSettings() {
     const load = async () => {
       setLoading(true);
       try {
-        const [languageResult, generalResult, interfaceResult, brandingResult, seoResult, homepageResult] = await Promise.allSettled([
-          getAdminLanguageOptions(),
+        const [generalResult, brandingResult, seoResult, homepageResult] = await Promise.allSettled([
           getSiteGeneralSettings(),
-          getSiteInterfaceSettings(),
           getSiteBrandingSettings(),
           getSiteSeoSettings(),
           getAdminHomepageSettings(),
@@ -349,14 +303,9 @@ export function AdminSiteSettings() {
           return;
         }
 
-        setLanguages(languageResult.status === "fulfilled" ? languageResult.value || [] : []);
         setGeneral({
           ...DEFAULT_GENERAL,
           ...(generalResult.status === "fulfilled" ? generalResult.value : {}),
-        });
-        setSiteInterface({
-          ...DEFAULT_INTERFACE,
-          ...(interfaceResult.status === "fulfilled" ? interfaceResult.value : {}),
         });
         setBranding({
           ...DEFAULT_BRANDING,
@@ -382,9 +331,7 @@ export function AdminSiteSettings() {
         });
 
         const failedCount = [
-          languageResult,
           generalResult,
-          interfaceResult,
           brandingResult,
           seoResult,
           homepageResult,
@@ -413,6 +360,7 @@ export function AdminSiteSettings() {
     setSavingKey(key);
     try {
       await action();
+      await refreshSiteInfo();
       showToast("success", successMsg);
     } catch (error) {
       showToast("error", error instanceof Error ? error.message : `${successMsg}失败`);
@@ -447,12 +395,6 @@ export function AdminSiteSettings() {
           {toast.msg}
         </div>
       )}
-
-      <SectionCard title="网站设置" description="统一管理站点基础信息、品牌资源、SEO 和首页运营位。">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
-          第一阶段已接入 `general`、`interface`、`branding`、`seo` 和首页运营位配置。旧 `ui/` 后台仍保留为迁移期 fallback。
-        </div>
-      </SectionCard>
 
       <SectionCard title="基础信息" description="对应旧后台 General 配置。">
         <form
@@ -502,48 +444,8 @@ export function AdminSiteSettings() {
         </form>
       </SectionCard>
 
-      <SectionCard title="界面与品牌" description="对应旧后台 Interface 和 Branding 配置。">
+      <SectionCard title="品牌资源" description="配置站点图标和浏览器标签页资源。">
         <div className="flex flex-col gap-8">
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void saveSection("interface", () => updateSiteInterfaceSettings(siteInterface), "界面配置已更新");
-            }}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="默认语言">
-                <select
-                  value={siteInterface.language}
-                  onChange={(e) => setSiteInterface((current) => ({ ...current, language: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009EFF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-[#33B1FF]/40"
-                >
-                  {languageOptions.map((language) => (
-                    <option key={language.value} value={language.value}>
-                      {language.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="时区">
-                <select
-                  value={siteInterface.time_zone}
-                  onChange={(e) => setSiteInterface((current) => ({ ...current, time_zone: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009EFF]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-[#33B1FF]/40"
-                >
-                  {timezoneOptions.map((timezone) => (
-                    <option key={timezone} value={timezone}>
-                      {timezone}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-            <div>
-              <SaveButton loading={savingKey === "interface"}>保存界面配置</SaveButton>
-            </div>
-          </form>
-
           <form
             className="flex flex-col gap-4"
             onSubmit={(e) => {
@@ -552,20 +454,6 @@ export function AdminSiteSettings() {
             }}
           >
             <div className="grid gap-4 lg:grid-cols-2">
-              <UploadField
-                label="Logo"
-                value={branding.logo}
-                onChange={(value) => setBranding((current) => ({ ...current, logo: value }))}
-                uploadType="branding-image"
-                onToast={showToast}
-              />
-              <UploadField
-                label="Mobile Logo"
-                value={branding.mobile_logo}
-                onChange={(value) => setBranding((current) => ({ ...current, mobile_logo: value }))}
-                uploadType="branding-image"
-                onToast={showToast}
-              />
               <UploadField
                 label="Square Icon"
                 value={branding.square_icon}

@@ -43,11 +43,36 @@ export interface SiteHomepageSettings {
   hot_articles_ad: SiteHomepageBannerSettings;
 }
 
+export interface PublicSiteInfoSettings {
+  general: SiteGeneralSettings;
+  branding: SiteBrandingSettings;
+  homepage: SiteHomepageSettings;
+  siteSeo: SiteSeoSettings;
+}
+
+interface PublicSiteInfoResponse {
+  general?: Partial<SiteGeneralSettings> | null;
+  branding?: Partial<SiteBrandingSettings> | null;
+  homepage?: Partial<SiteHomepageSettings> | null;
+  site_seo?: Partial<SiteSeoSettings> | null;
+}
+
 const EMPTY_BANNER: SiteHomepageBannerSettings = {
   enabled: false,
   image_url: "",
   link_url: "",
 };
+
+function normalizeGeneralSettings(data?: Partial<SiteGeneralSettings> | null): SiteGeneralSettings {
+  return {
+    name: data?.name || "",
+    short_description: data?.short_description || "",
+    description: data?.description || "",
+    site_url: data?.site_url || "",
+    contact_email: data?.contact_email || "",
+    check_update: data?.check_update ?? true,
+  };
+}
 
 function normalizeHomepageSettings(data?: Partial<SiteHomepageSettings> | null): SiteHomepageSettings {
   return {
@@ -70,6 +95,13 @@ function normalizeBrandingSettings(data?: Partial<SiteBrandingSettings> | null):
     mobile_logo: normalizeUploadedAssetUrl(data?.mobile_logo),
     square_icon: normalizeUploadedAssetUrl(data?.square_icon),
     favicon: normalizeUploadedAssetUrl(data?.favicon),
+  };
+}
+
+function normalizeSeoSettings(data?: Partial<SiteSeoSettings> | null): SiteSeoSettings {
+  return {
+    permalink: data?.permalink ?? 4,
+    robots: data?.robots || "",
   };
 }
 
@@ -151,4 +183,16 @@ export async function getPublicHomepageSettings() {
     method: "GET",
   });
   return normalizeHomepageSettings(data);
+}
+
+export async function getPublicSiteInfo() {
+  const data = await apiRequest<PublicSiteInfoResponse>("/answer/api/v1/siteinfo", {
+    method: "GET",
+  });
+  return {
+    general: normalizeGeneralSettings(data?.general),
+    branding: normalizeBrandingSettings(data?.branding),
+    homepage: normalizeHomepageSettings(data?.homepage),
+    siteSeo: normalizeSeoSettings(data?.site_seo),
+  } satisfies PublicSiteInfoSettings;
 }
