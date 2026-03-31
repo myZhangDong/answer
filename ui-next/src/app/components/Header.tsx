@@ -17,6 +17,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
+import {
+  EASEMOB_CONSOLE_REGISTER_URL,
+  trackConsoleRegisterClick,
+} from "../utils/consoleRegister";
 
 export function Header() {
   const [isDark, setIsDark] = useState(false);
@@ -81,6 +85,14 @@ export function Header() {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
       setIsDark(true);
+    }
+  };
+
+  const handleConsoleRegisterClick = (source: "header_desktop" | "header_mobile") => {
+    trackConsoleRegisterClick({ source });
+    if (source === "header_mobile") {
+      setMobileNavOpen(false);
+      setMobileSearchOpen(false);
     }
   };
 
@@ -179,9 +191,10 @@ export function Header() {
                       </button>
                     ) : (
                       <a
-                        href="https://console.easemob.com/user/register"
+                        href={EASEMOB_CONSOLE_REGISTER_URL}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() => handleConsoleRegisterClick("header_mobile")}
                         className="inline-flex items-center justify-center rounded-xl border border-[#009EFF]/20 bg-white px-4 py-2.5 text-[14px] font-medium text-[#009EFF] transition-colors hover:bg-[#009EFF]/6 dark:border-[#33B1FF]/20 dark:bg-slate-900 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF]/10"
                       >
                         注册环信
@@ -281,9 +294,10 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <a
-                href="https://console.easemob.com/user/register"
+                href={EASEMOB_CONSOLE_REGISTER_URL}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => handleConsoleRegisterClick("header_desktop")}
                 className="rounded-[10px] bg-[#009EFF] px-3 py-2 text-[13px] font-medium text-white transition-all hover:bg-[#008AE6] focus:outline-none focus:ring-2 focus:ring-[#009EFF] focus:ring-offset-2 dark:bg-[#33B1FF] dark:hover:bg-[#33B1FF]/90 dark:focus:ring-[#33B1FF] sm:px-4 sm:py-1.5 sm:text-[14px]"
               >
                 <span className="sm:hidden">注册</span>

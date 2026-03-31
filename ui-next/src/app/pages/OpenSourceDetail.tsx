@@ -262,7 +262,12 @@ export function OpenSourceDetail() {
             />
 
             {/* CTA Banner */}
-            <CtaBanner />
+            <CtaBanner
+              source="project_detail_bottom"
+              contentType="project"
+              contentId={project.id}
+              contentTitle={project.name}
+            />
           </article>
         </main>
 

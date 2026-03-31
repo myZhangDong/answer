@@ -263,7 +263,12 @@ export function VideoDetail() {
               onRate={handleRate}
             />
 
-            <CtaBanner />
+            <CtaBanner
+              source="video_detail_bottom"
+              contentType="video"
+              contentId={video.id}
+              contentTitle={video.title}
+            />
           </div>
         </main>
 

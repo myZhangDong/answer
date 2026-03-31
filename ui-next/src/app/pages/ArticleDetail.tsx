@@ -217,7 +217,12 @@ export function ArticleDetail() {
               onLike={handleLike}
               onRate={handleRate}
             />
-            <CtaBanner />
+            <CtaBanner
+              source="article_detail_bottom"
+              contentType="article"
+              contentId={article.id}
+              contentTitle={article.title}
+            />
           </article>
         </main>
 

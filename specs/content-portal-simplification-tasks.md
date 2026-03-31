@@ -91,6 +91,8 @@
 - [x] 拆分 `ui-next` 管理员登录独立任务清单：`specs/ui-next-admin-auth-tasks.md`
 - [x] 拆分 `ui-next` 移动端适配独立规格：`specs/006-ui-next-mobile-adaptation-spec.md`
 - [x] 拆分 `ui-next` 移动端适配独立任务清单：`specs/006-ui-next-mobile-adaptation-tasks.md`
+- [x] 拆分 `ui-next` 注册环信 CTA 与 console 跳转埋点独立规格：`specs/008-ui-next-console-register-cta-spec.md`
+- [x] 拆分 `ui-next` 注册环信 CTA 与 console 跳转埋点独立任务清单：`specs/008-ui-next-console-register-cta-tasks.md`
 
 备注：
 
@@ -99,6 +101,7 @@
 - 执行状态以 `specs/ui-next-admin-auth-tasks.md` 为准
 - `ui-next` 移动端适配后续以 `006` 规格为范围依据，优先使用 Tailwind 响应式能力完成前台完整适配与后台基础可用适配
 - `006` 的执行状态以后续 `tasks` 文件为准，不再混写到主任务清单
+- `008` 后续以独立规格跟踪前台公开注册 CTA、来源参数和点击埋点，不再混写在 Header/CTA 的旧备注里
 
 ## Phase 2：前台路由与导航收口
 
@@ -184,7 +187,7 @@
 - [x] `ui-next` 视频、项目后台已统一为默认列表页 + 独立编辑页路由；本轮不做搜索，只保留分页管理
 - [x] Phase 2 当前先在 `ui-next` 前台壳层执行收口，旧 `ui/` 暂不处理
 - [x] `ui-next` 前台 Header 已移除普通用户注册/假登录入口，只保留搜索和管理员后台入口
-- [x] `ui-next` 公共 CTA 已改为后台发布导向，不再出现普通用户注册平台入口
+- [x] `ui-next` 首页 Header 与详情页底部公开注册 CTA 已统一切到环信 Console 注册页，并补充 `from=community` 参数和前端点击埋点
 
 ## Phase 4：前端 service 白名单化
 

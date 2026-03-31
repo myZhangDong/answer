@@ -46,6 +46,10 @@
   - 用于单独跟踪 `ui-next` 首页右侧“热门 Demo”“热门教程”的真实数据接入、排序口径和前后端边界
 - `specs/007-ui-next-home-sidebar-hot-content-tasks.md`
   - 用于单独跟踪 `007` 规格的执行步骤、阶段验收，以及首页与详情页热门模块真实数据接入的推进状态
+- `specs/008-ui-next-console-register-cta-spec.md`
+  - 用于单独跟踪 `ui-next` 前台注册环信 CTA 的文案收口、console 跳转参数统一和点击埋点接入
+- `specs/008-ui-next-console-register-cta-tasks.md`
+  - 用于单独跟踪 `008` 规格的执行步骤、阶段验收，以及 Header 与详情页底部 CTA 的推进状态
 
 ## 文件职责
 
