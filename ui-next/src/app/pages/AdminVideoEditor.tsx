@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, ArrowLeft, CheckCircle2, Save, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, ImagePlus, LoaderCircle, Save, Upload, X } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { createVideo, getAdminVideoDetail, updateVideo, type VideoWritePayload } from "../api/adminApi";
+import { createVideo, getAdminVideoDetail, updateVideo, uploadFile, type VideoWritePayload } from "../api/adminApi";
 import { useAdminAuth } from "../auth/AdminAuthContext";
 import { getDefaultVideoCategory, VIDEO_CATEGORY_OPTIONS } from "../config/videoCategories";
+import { normalizeUploadedAssetUrl } from "../utils/assetUrl";
 
 interface VideoForm {
   title: string;
@@ -137,6 +138,90 @@ function Select({
   );
 }
 
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+  onToast,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  onToast: (type: "success" | "error", msg: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const previewUrl = normalizeUploadedAssetUrl(value);
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    setUploading(true);
+    const result = await uploadFile(file, "video-thumbnail");
+    setUploading(false);
+
+    if (!result.success || !result.data) {
+      onToast("error", result.error || `${label}上传失败`);
+      return;
+    }
+
+    onChange(normalizeUploadedAssetUrl(result.data.url));
+    onToast("success", `${label}上传成功`);
+  };
+
+  return (
+    <Field label={label} hint="支持上传图片，或手动粘贴不超过 500 字符的地址">
+      <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start">
+          <div className="flex h-28 w-full items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-800 md:w-44">
+            {previewUrl ? (
+              <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
+                <ImagePlus className="h-6 w-6" />
+                <span className="text-[12px]">未上传</span>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-3">
+            <Input
+              value={value}
+              onChange={(nextValue) => onChange(normalizeUploadedAssetUrl(nextValue))}
+              placeholder="可直接粘贴图片地址，或使用上传按钮"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                {uploading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "上传中..." : "上传图片"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                />
+              </label>
+              {value && (
+                <button
+                  type="button"
+                  onClick={() => onChange("")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                >
+                  <X className="h-4 w-4" />
+                  清空
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Field>
+  );
+}
+
 export function AdminVideoEditor() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -249,10 +334,16 @@ export function AdminVideoEditor() {
       return;
     }
 
+    const normalizedCover = normalizeUploadedAssetUrl(form.cover);
+    if (normalizedCover.length > 500) {
+      showToast("error", "封面图地址不能超过 500 个字符，请优先使用上传功能");
+      return;
+    }
+
     const payload: VideoWritePayload = {
       title: form.title.trim(),
       category: form.category,
-      cover: form.cover.trim(),
+      cover: normalizedCover,
       isRecommend: form.isRecommend,
       isShow: form.isShow,
       duration,
@@ -352,9 +443,12 @@ export function AdminVideoEditor() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Field label="封面图 URL">
-                <Input value={form.cover} onChange={set("cover")} placeholder="https://..." />
-              </Field>
+              <ImageUploadField
+                label="封面图"
+                value={form.cover}
+                onChange={(value) => set("cover")(value)}
+                onToast={showToast}
+              />
               <Field label="外链地址" hint="没有嵌入代码时可作为播放跳转地址">
                 <Input value={form.externalLink} onChange={set("externalLink")} placeholder="https://..." />
               </Field>

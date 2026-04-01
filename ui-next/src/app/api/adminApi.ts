@@ -232,6 +232,11 @@ interface BackendUserInfo {
   display_name?: string;
 }
 
+interface BackendQuestionOperator {
+  username?: string;
+  display_name?: string;
+}
+
 interface BackendQuestionTag {
   tag_id?: string;
   slug_name: string;
@@ -257,6 +262,7 @@ interface BackendQuestionInfo {
   id: string;
   url_title: string;
   title: string;
+  author_name?: string;
   content?: string;
   html?: string;
   description?: string;
@@ -265,6 +271,7 @@ interface BackendQuestionInfo {
   vote_count?: number;
   create_time?: number | string;
   created_at?: number | string;
+  operator?: BackendQuestionOperator;
   user_info?: BackendUserInfo;
 }
 
@@ -362,6 +369,10 @@ function getAuthor(user?: BackendUserInfo) {
   return user?.display_name || user?.username || "管理员";
 }
 
+function getArticleAuthor(authorName?: string, operator?: BackendQuestionOperator, user?: BackendUserInfo) {
+  return authorName || operator?.display_name || operator?.username || getAuthor(user);
+}
+
 function getPrimaryTag(tags?: BackendQuestionTag[]) {
   return tags?.[0]?.display_name || tags?.[0]?.slug_name || "未分类";
 }
@@ -371,7 +382,7 @@ function mapAdminArticleSummary(item: BackendQuestionInfo): AdminArticleSummary 
     id: item.id,
     urlTitle: item.url_title,
     title: item.title,
-    author: getAuthor(item.user_info),
+    author: getArticleAuthor(item.author_name, item.operator, item.user_info),
     date: formatDate(item.created_at || item.create_time),
     tag: getPrimaryTag(item.tags),
     excerpt: item.description || excerptFromText(item.content || item.html || ""),
@@ -772,6 +783,7 @@ export async function createArticle(
         url_title: payload.title,
         content: payload.content,
         type: 2,
+        author_name: payload.author.trim(),
         tags: [
           {
             slug_name: matchedTag.slug_name,
@@ -830,6 +842,7 @@ export async function updateArticle(
         id,
         title: payload.title,
         content: payload.content,
+        author_name: payload.author.trim(),
         tags: [
           {
             slug_name: matchedTag.slug_name,

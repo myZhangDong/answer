@@ -336,6 +336,16 @@ func (qs *QuestionCommon) Info(ctx context.Context, questionID string, loginUser
 	resp.UserInfo = userInfoMap[questionInfo.UserID]
 	resp.UpdateUserInfo = userInfoMap[questionInfo.LastEditUserID]
 	resp.LastAnsweredUserInfo = userInfoMap[resp.LastAnsweredUserID]
+	metaInfo, err := qs.metaCommonService.GetMetaByObjectIdAndKey(ctx, questionInfo.ID, entity.QuestionArticleAuthorKey)
+	if err == nil {
+		resp.AuthorName = strings.TrimSpace(metaInfo.Value)
+	}
+	if resp.AuthorName == "" && resp.UserInfo != nil {
+		resp.AuthorName = strings.TrimSpace(resp.UserInfo.DisplayName)
+		if resp.AuthorName == "" {
+			resp.AuthorName = strings.TrimSpace(resp.UserInfo.Username)
+		}
+	}
 	if len(loginUserID) == 0 {
 		return resp, nil
 	}

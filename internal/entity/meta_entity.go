@@ -22,11 +22,12 @@ package entity
 import "time"
 
 const (
-	QuestionEditSummaryKey = "question.edit.summary"
-	QuestionCloseReasonKey = "question.close.reason"
-	AnswerEditSummaryKey   = "answer.edit.summary"
-	TagEditSummaryKey      = "tag.edit.summary"
-	ObjectReactSummaryKey  = "object.react.summary"
+	QuestionEditSummaryKey   = "question.edit.summary"
+	QuestionCloseReasonKey   = "question.close.reason"
+	QuestionArticleAuthorKey = "question.article.author"
+	AnswerEditSummaryKey     = "answer.edit.summary"
+	TagEditSummaryKey        = "tag.edit.summary"
+	ObjectReactSummaryKey    = "object.react.summary"
 )
 
 // Meta meta

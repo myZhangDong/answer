@@ -147,6 +147,32 @@ func NewQuestionService(
 	}
 }
 
+func (qs *QuestionService) saveArticleAuthorMeta(ctx context.Context, objectID, authorName string) error {
+	objectID = uid.DeShortID(objectID)
+	authorName = strings.TrimSpace(authorName)
+	return qs.metaService.AddOrUpdateMetaByObjectIdAndKey(ctx, objectID, entity.QuestionArticleAuthorKey, func(meta *entity.Meta, exist bool) (*entity.Meta, error) {
+		if exist {
+			meta.Key = entity.QuestionArticleAuthorKey
+			meta.Value = authorName
+			return meta, nil
+		}
+		return &entity.Meta{
+			ObjectID: objectID,
+			Key:      entity.QuestionArticleAuthorKey,
+			Value:    authorName,
+		}, nil
+	})
+}
+
+func (qs *QuestionService) getArticleAuthorMeta(ctx context.Context, objectID string) string {
+	objectID = uid.DeShortID(objectID)
+	metaInfo, err := qs.metaService.GetMetaByObjectIdAndKey(ctx, objectID, entity.QuestionArticleAuthorKey)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(metaInfo.Value)
+}
+
 func (qs *QuestionService) CloseQuestion(ctx context.Context, req *schema.CloseQuestionReq) error {
 	questionInfo, has, err := qs.questionRepo.GetQuestion(ctx, req.ID)
 	if err != nil {
@@ -357,6 +383,11 @@ func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.Question
 	err = qs.questionRepo.AddQuestion(ctx, question)
 	if err != nil {
 		return
+	}
+	if question.Type == entity.ContentTypeArticle {
+		if err = qs.saveArticleAuthorMeta(ctx, question.ID, req.AuthorName); err != nil {
+			return nil, err
+		}
 	}
 	question.Status = qs.reviewService.AddQuestionReview(ctx, question, req.Tags, req.IP, req.UserAgent)
 	if err := qs.questionRepo.UpdateQuestionStatus(ctx, question.ID, question.Status); err != nil {
@@ -1016,6 +1047,11 @@ func (qs *QuestionService) UpdateQuestion(ctx context.Context, req *schema.Quest
 		return
 	}
 	if canUpdate {
+		if dbinfo.Type == entity.ContentTypeArticle {
+			if err = qs.saveArticleAuthorMeta(ctx, question.ID, req.AuthorName); err != nil {
+				return nil, err
+			}
+		}
 		qs.activityQueueService.Send(ctx, &schema.ActivityMsg{
 			UserID:           req.UserID,
 			ObjectID:         question.ID,
@@ -1762,6 +1798,9 @@ func (qs *QuestionService) FormatContentPage(
 			Show:             contentInfo.Show,
 			Operator:         &schema.QuestionPageRespOperator{ID: contentInfo.UserID},
 		}
+		if contentInfo.Type == entity.ContentTypeArticle {
+			t.AuthorName = qs.getArticleAuthorMeta(ctx, contentInfo.ID)
+		}
 
 		contentIDs = append(contentIDs, contentInfo.ID)
 		userIDs = append(userIDs, contentInfo.UserID)
@@ -1838,6 +1877,12 @@ func (qs *QuestionService) FormatContentPage(
 				item.Operator.Rank = userInfo.Rank
 				item.Operator.Status = userInfo.Status
 				item.Operator.Avatar = userInfo.Avatar
+			}
+		}
+		if item.AuthorName == "" {
+			item.AuthorName = strings.TrimSpace(item.Operator.DisplayName)
+			if item.AuthorName == "" {
+				item.AuthorName = strings.TrimSpace(item.Operator.Username)
 			}
 		}
 	}

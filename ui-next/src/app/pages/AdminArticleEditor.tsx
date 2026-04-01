@@ -378,7 +378,7 @@ export function AdminArticleEditor() {
           </Field>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Field label="作者" hint="由当前登录管理员身份推导">
+            <Field label="作者" hint="会按填写值显示在文章列表和详情页">
               <Input value={form.author} onChange={set("author")} placeholder="用户名" />
             </Field>
             <Field label="发布日期" hint="当前后端写接口暂不单独持久化此字段">
@@ -426,7 +426,7 @@ export function AdminArticleEditor() {
           </Field>
 
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] leading-6 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200">
-            当前文章后台继续复用现有 `question(type=2)` 写接口。实际落库字段为标题、正文和标签；作者来自当前登录管理员，封面、摘要、发布日期暂不作为独立后端字段写入。
+            当前文章后台继续复用现有 `question(type=2)` 写接口。实际落库字段为标题、正文和标签；作者会作为文章扩展信息单独保存，封面、摘要、发布日期暂不作为独立后端字段写入。
           </div>
         </div>
 

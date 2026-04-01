@@ -88,6 +88,8 @@ type QuestionAdd struct {
 	Type int `validate:"omitempty,oneof=1 2" json:"type"`
 	// user id
 	UserID string `json:"-"`
+	// article author display name
+	AuthorName string `validate:"omitempty,lte=100" json:"author_name"`
 	QuestionPermission
 	CaptchaID   string `json:"captcha_id"` // captcha_id
 	CaptchaCode string `json:"captcha_code"`
@@ -207,6 +209,7 @@ type QuestionUpdate struct {
 	EditSummary string `validate:"omitempty" json:"edit_summary"`
 	// user id
 	UserID       string `json:"-"`
+	AuthorName   string `validate:"omitempty,lte=100" json:"author_name"`
 	NoNeedReview bool   `json:"-"`
 	QuestionPermission
 	CaptchaID   string `json:"captcha_id"` // captcha_id
@@ -254,6 +257,7 @@ type QuestionInfoResp struct {
 	ID                   string         `json:"id" `
 	Title                string         `json:"title"`
 	UrlTitle             string         `json:"url_title"`
+	AuthorName           string         `json:"author_name,omitempty"`
 	Content              string         `json:"content"`
 	HTML                 string         `json:"html"`
 	Description          string         `json:"description"`
@@ -450,6 +454,7 @@ type ContentPageResp struct {
 	CreatedAt            int64                     `json:"created_at"`
 	Title                string                    `json:"title"`
 	UrlTitle             string                    `json:"url_title"`
+	AuthorName           string                    `json:"author_name,omitempty"`
 	Description          string                    `json:"description"`
 	Status               int                       `json:"status"`
 	Type                 int                       `json:"type"`
