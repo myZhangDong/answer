@@ -638,6 +638,7 @@ export async function getAdminArticles(params?: {
   pageSize?: number;
   order?: string;
   tag?: string;
+  query?: string;
 }): Promise<ApiResponse<AdminArticleListResult>> {
   const query = new URLSearchParams();
   query.set("page", String(params?.page || 1));
@@ -646,6 +647,9 @@ export async function getAdminArticles(params?: {
   query.set("content_type", "2");
   if (params?.tag) {
     query.set("tag", params.tag);
+  }
+  if (params?.query) {
+    query.set("search", params.query);
   }
 
   try {
@@ -904,11 +908,15 @@ export async function getAdminVideos(params?: {
   page?: number;
   pageSize?: number;
   order?: string;
+  query?: string;
 }): Promise<ApiResponse<AdminVideoListResult>> {
   const query = new URLSearchParams();
   query.set("page", String(params?.page || 1));
   query.set("page_size", String(params?.pageSize || 10));
   query.set("order", params?.order || "newest");
+  if (params?.query) {
+    query.set("search", params.query);
+  }
 
   try {
     const data = await apiRequest<BackendPaged<BackendVideoInfo>>(
@@ -1063,11 +1071,15 @@ export async function getAdminProjects(params?: {
   page?: number;
   pageSize?: number;
   order?: string;
+  query?: string;
 }): Promise<ApiResponse<AdminProjectListResult>> {
   const query = new URLSearchParams();
   query.set("page", String(params?.page || 1));
   query.set("page_size", String(params?.pageSize || 10));
   query.set("order", params?.order || "newest");
+  if (params?.query) {
+    query.set("search", params.query);
+  }
 
   try {
     const data = await apiRequest<BackendPaged<BackendProjectInfo>>(

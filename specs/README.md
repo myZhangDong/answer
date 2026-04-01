@@ -54,6 +54,10 @@
   - 用于单独跟踪 `ui-next` 开源项目列表卡片“获取 Demo 示例”从滑块+短信切换为图片验证码+直接提交 CRM 表单的范围、字段映射和前后端边界
 - `specs/009-ui-next-open-source-demo-form-tasks.md`
   - 用于单独跟踪 `009` 规格的执行步骤、阶段验收，以及图片验证码、UTM 透传和 CRM 提交链路的推进状态
+- `specs/010-ui-next-admin-content-list-search-spec.md`
+  - 用于单独跟踪 `ui-next` 后台文章、视频、项目列表搜索，统一 URL 状态，以及文章列表最小后端搜索补口范围
+- `specs/010-ui-next-admin-content-list-search-tasks.md`
+  - 用于单独跟踪 `010` 规格的执行步骤、阶段验收，以及三类后台列表搜索的接入进度
 
 ## 文件职责
 

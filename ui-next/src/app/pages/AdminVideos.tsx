@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, ExternalLink, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, ExternalLink, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { deleteVideo, getAdminVideos, type AdminVideoSummary } from "../api/adminApi";
 import {
@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../components/ui/pagination";
+import { Input } from "../components/ui/input";
 
 const PAGE_SIZE = 10;
 
@@ -42,8 +43,10 @@ export function AdminVideos() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const [searchDraft, setSearchDraft] = useState(searchParams.get("query") || "");
 
   const currentPage = Math.max(1, Number(searchParams.get("page")) || 1);
+  const currentQuery = searchParams.get("query") || "";
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const pageItems = useMemo(() => buildPageItems(currentPage, totalPages), [currentPage, totalPages]);
 
@@ -62,6 +65,10 @@ export function AdminVideos() {
   }, [location.pathname, location.search, location.state, navigate]);
 
   useEffect(() => {
+    setSearchDraft(currentQuery);
+  }, [currentQuery]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadVideos = async () => {
@@ -69,6 +76,7 @@ export function AdminVideos() {
       const result = await getAdminVideos({
         page: currentPage,
         pageSize: PAGE_SIZE,
+        query: currentQuery || undefined,
       });
       if (cancelled) {
         return;
@@ -95,11 +103,21 @@ export function AdminVideos() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, searchParams, setSearchParams]);
+  }, [currentPage, currentQuery, searchParams, setSearchParams]);
 
-  const updatePage = (page: number) => {
+  const updateQuery = (patch: { page?: number; query?: string }) => {
     const next = new URLSearchParams(searchParams);
-    next.set("page", String(page));
+    if (patch.page !== undefined) {
+      next.set("page", String(patch.page));
+    }
+    if (patch.query !== undefined) {
+      if (patch.query.trim()) {
+        next.set("query", patch.query.trim());
+      } else {
+        next.delete("query");
+      }
+      next.set("page", "1");
+    }
     setSearchParams(next);
   };
 
@@ -119,6 +137,7 @@ export function AdminVideos() {
     const listResult = await getAdminVideos({
       page: currentPage,
       pageSize: PAGE_SIZE,
+      query: currentQuery || undefined,
     });
     if (!listResult.success || !listResult.data) {
       return;
@@ -127,7 +146,7 @@ export function AdminVideos() {
     setCount(listResult.data.count);
     const nextTotalPages = Math.max(1, Math.ceil(listResult.data.count / PAGE_SIZE));
     if (currentPage > nextTotalPages) {
-      updatePage(nextTotalPages);
+      updateQuery({ page: nextTotalPages });
     }
   };
 
@@ -168,9 +187,41 @@ export function AdminVideos() {
           </button>
         </div>
 
-        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
-          当前先支持分页管理，不做搜索；后续会和视频、项目列表一起补统一搜索。
-        </div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            updateQuery({ query: searchDraft });
+          }}
+          className="mt-5 flex flex-col gap-3 sm:flex-row"
+        >
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={searchDraft}
+              onChange={(event) => setSearchDraft(event.target.value)}
+              placeholder="按视频标题或简介搜索"
+              className="pl-9"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              查询
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchDraft("");
+                updateQuery({ query: "" });
+              }}
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              清空
+            </button>
+          </div>
+        </form>
 
         <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
           {loading ? (
@@ -179,7 +230,7 @@ export function AdminVideos() {
             </div>
           ) : videos.length === 0 ? (
             <div className="px-6 py-14 text-center text-[14px] text-slate-500 dark:text-slate-400">
-              当前还没有视频内容。
+              当前搜索条件下没有视频内容。
             </div>
           ) : (
             <div className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -284,7 +335,7 @@ export function AdminVideos() {
                   onClick={(e) => {
                     e.preventDefault();
                     if (currentPage > 1) {
-                      updatePage(currentPage - 1);
+                      updateQuery({ page: currentPage - 1 });
                     }
                   }}
                 />
@@ -302,7 +353,7 @@ export function AdminVideos() {
                       onClick={(e) => {
                         e.preventDefault();
                         if (item !== currentPage) {
-                          updatePage(item);
+                          updateQuery({ page: item });
                         }
                       }}
                     >
@@ -317,7 +368,7 @@ export function AdminVideos() {
                   onClick={(e) => {
                     e.preventDefault();
                     if (currentPage < totalPages) {
-                      updatePage(currentPage + 1);
+                      updateQuery({ page: currentPage + 1 });
                     }
                   }}
                 />

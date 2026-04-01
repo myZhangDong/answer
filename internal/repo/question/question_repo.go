@@ -462,7 +462,7 @@ func (qr *questionRepo) GetQuestionPage(ctx context.Context, page, pageSize int,
 
 // GetContentPage query content (questions and articles) page
 func (qr *questionRepo) GetContentPage(ctx context.Context, page, pageSize int,
-	tagIDs []string, userID, orderCond string, inDays int, contentType int, showHidden, showPending bool) (
+	tagIDs []string, userID, orderCond, search string, inDays int, contentType int, showHidden, showPending bool) (
 	contentList []*entity.Question, total int64, err error) {
 	contentList = make([]*entity.Question, 0)
 	session := qr.data.DB.Context(ctx)
@@ -493,6 +493,9 @@ func (qr *questionRepo) GetContentPage(ctx context.Context, page, pageSize int,
 		}
 	} else {
 		session.And("question.show = ?", entity.QuestionShow)
+	}
+	if keyword := strings.TrimSpace(search); keyword != "" {
+		session.And("question.title LIKE ?", "%"+keyword+"%")
 	}
 	if inDays > 0 {
 		session.And("question.created_at > ?", time.Now().AddDate(0, 0, -inDays))

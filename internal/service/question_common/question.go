@@ -62,7 +62,7 @@ type QuestionRepo interface {
 	GetQuestionList(ctx context.Context, question *entity.Question) (questions []*entity.Question, err error)
 	GetQuestionPage(ctx context.Context, page, pageSize int, tagIDs []string, userID, orderCond string, inDays int, showHidden, showPending bool) (
 		questionList []*entity.Question, total int64, err error)
-	GetContentPage(ctx context.Context, page, pageSize int, tagIDs []string, userID, orderCond string, inDays int, contentType int, showHidden, showPending bool) (contentList []*entity.Question, total int64, err error)
+	GetContentPage(ctx context.Context, page, pageSize int, tagIDs []string, userID, orderCond, search string, inDays int, contentType int, showHidden, showPending bool) (contentList []*entity.Question, total int64, err error)
 	GetRecommendQuestionPageByTags(ctx context.Context, userID string, tagIDs, followedQuestionIDs []string, page, pageSize int) (questionList []*entity.Question, total int64, err error)
 	UpdateQuestionStatus(ctx context.Context, questionID string, status int) (err error)
 	UpdateQuestionStatusWithOutUpdateTime(ctx context.Context, question *entity.Question) (err error)

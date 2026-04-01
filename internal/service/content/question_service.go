@@ -1757,7 +1757,7 @@ func (qs *QuestionService) GetContentPage(ctx context.Context, req *schema.Conte
 	}
 
 	contentList, total, err := qs.questionRepo.GetContentPage(ctx, req.Page, req.PageSize,
-		tagIDs, userIDBeSearched, req.OrderCond, req.InDays, req.ContentType, false, false)
+		tagIDs, userIDBeSearched, req.OrderCond, req.Search, req.InDays, req.ContentType, false, false)
 	if err != nil {
 		return nil, 0, err
 	}

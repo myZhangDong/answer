@@ -353,6 +353,7 @@ func (qc *QuestionController) QuestionPage(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param data body schema.ContentPageReq  true "ContentPageReq"
+// @Param search query string false "search keyword"
 // @Success 200 {object} handler.RespBody{data=pager.PageModel{list=[]schema.ContentPageResp}}
 // @Router /answer/api/v1/content/page [get]
 func (qc *QuestionController) ContentPage(ctx *gin.Context) {

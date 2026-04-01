@@ -95,6 +95,8 @@
 - [x] 拆分 `ui-next` 注册环信 CTA 与 console 跳转埋点独立任务清单：`specs/008-ui-next-console-register-cta-tasks.md`
 - [x] 拆分 `ui-next` 开源项目列表 Demo 获取表单独立规格：`specs/009-ui-next-open-source-demo-form-spec.md`
 - [x] 拆分 `ui-next` 开源项目列表 Demo 获取表单独立任务清单：`specs/009-ui-next-open-source-demo-form-tasks.md`
+- [x] 拆分 `ui-next` 后台内容列表搜索独立规格：`specs/010-ui-next-admin-content-list-search-spec.md`
+- [x] 拆分 `ui-next` 后台内容列表搜索独立任务清单：`specs/010-ui-next-admin-content-list-search-tasks.md`
 
 备注：
 
@@ -105,6 +107,7 @@
 - `006` 的执行状态以后续 `tasks` 文件为准，不再混写到主任务清单
 - `008` 后续以独立规格跟踪前台公开注册 CTA、来源参数和点击埋点，不再混写在 Header/CTA 的旧备注里
 - `009` 后续以独立规格跟踪开源项目列表卡片 Demo 获取弹窗从滑块+短信切换为图片验证码+CRM 直提，不再混写在项目列表页实现备注里
+- `010` 后续以独立规格跟踪 `ui-next` 后台文章、视频、项目列表搜索，不再混写在后台列表页备注和临时提示文案里
 
 ## Phase 2：前台路由与导航收口
 
@@ -188,7 +191,8 @@
 - [x] `ui-next` 文章后台已补齐作者展示值持久化，创建/编辑填写的作者会同步显示在文章列表与详情页
 - [x] `ui-next` 视频后台已补齐真实列表、查看跳转、编辑、删除与新建闭环，复用 `/answer/api/v1/video/*` 管理接口
 - [x] `ui-next` 项目后台已补齐真实列表、查看跳转、编辑、删除与新建闭环，复用 `/answer/api/v1/project*` 管理接口
-- [x] `ui-next` 视频、项目后台已统一为默认列表页 + 独立编辑页路由；本轮不做搜索，只保留分页管理
+- [x] `ui-next` 视频、项目后台已统一为默认列表页 + 独立编辑页路由，并补齐关键字搜索
+- [x] `ui-next` 后台文章、视频、项目列表已统一使用 `query` URL 状态；文章额外补齐 `/answer/api/v1/content/page` 标题搜索能力
 - [x] Phase 2 当前先在 `ui-next` 前台壳层执行收口，旧 `ui/` 暂不处理
 - [x] `ui-next` 前台 Header 已移除普通用户注册/假登录入口，只保留搜索和管理员后台入口
 - [x] `ui-next` 首页 Header 与详情页底部公开注册 CTA 已统一切到环信 Console 注册页，并补充 `from=community` 参数和前端点击埋点
