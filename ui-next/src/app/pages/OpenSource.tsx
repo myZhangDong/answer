@@ -1,7 +1,7 @@
 import { ThumbsUp, Github, Eye, ChevronRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { DemoModal, isDemoVerified } from "../components/DemoModal";
+import { DemoModal } from "../components/DemoModal";
 import { ContentProject, fetchProjects } from "../api/contentApi";
 
 // Language color mapping
@@ -22,8 +22,9 @@ export function OpenSource() {
   const [projects, setProjects] = useState<ContentProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [demoModal, setDemoModal] = useState<{ open: boolean; projectName: string; demoUrl: string }>({
+  const [demoModal, setDemoModal] = useState<{ open: boolean; projectId: string; projectName: string; demoUrl: string }>({
     open: false,
+    projectId: "",
     projectName: "",
     demoUrl: "",
   });
@@ -145,11 +146,7 @@ export function OpenSource() {
               <button
                 onClick={() => {
                   const demoUrl = project.repo;
-                  if (isDemoVerified()) {
-                    window.open(demoUrl, "_blank", "noopener,noreferrer");
-                  } else {
-                    setDemoModal({ open: true, projectName: project.name, demoUrl });
-                  }
+                  setDemoModal({ open: true, projectId: project.id, projectName: project.name, demoUrl });
                 }}
                 className="w-full rounded-lg bg-slate-100 py-3 text-[14px] font-medium text-[#009EFF] transition-all duration-300 hover:bg-[#009EFF] hover:text-white hover:shadow-md hover:shadow-[#009EFF]/20 dark:bg-slate-700/50 dark:text-[#33B1FF] dark:hover:bg-[#33B1FF] dark:hover:text-white dark:hover:shadow-[#33B1FF]/20">
                 获取 Demo 示例
@@ -163,6 +160,7 @@ export function OpenSource() {
       <DemoModal
         open={demoModal.open}
         onClose={() => setDemoModal((s) => ({ ...s, open: false }))}
+        projectId={demoModal.projectId}
         projectName={demoModal.projectName}
         demoUrl={demoModal.demoUrl}
       />

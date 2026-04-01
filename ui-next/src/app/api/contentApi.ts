@@ -86,6 +86,12 @@ interface BackendContentFeedback {
   my_rating?: number;
 }
 
+interface BackendCaptchaChallenge {
+  captcha_id?: string;
+  captcha_img?: string;
+  verify?: boolean;
+}
+
 export type ContentObjectType = "article" | "video" | "project";
 
 export interface ContentFeedback {
@@ -97,6 +103,12 @@ export interface ContentFeedback {
   likedByMe: boolean;
   ratedByMe: boolean;
   myRating: number;
+}
+
+export interface CaptchaChallenge {
+  captchaId: string;
+  captchaImg: string;
+  verify: boolean;
 }
 
 interface BackendHomepageBanner {
@@ -198,6 +210,13 @@ export interface FetchListParams {
   search?: string;
   order?: string;
   tag?: string;
+}
+
+export interface SubmitProjectDemoLeadPayload {
+  projectId: string;
+  phone: string;
+  captchaId: string;
+  captchaCode: string;
 }
 
 type FeedbackCarrier = {
@@ -649,6 +668,32 @@ export async function fetchProjectDetail(id: string) {
     `/answer/api/v1/project/info?id=${encodeURIComponent(id)}`,
   );
   return mapProject(resp);
+}
+
+export async function fetchDemoFormCaptcha(): Promise<CaptchaChallenge> {
+  const query = toQuery({
+    action: "demo_form",
+  });
+  const resp = await apiRequest<BackendCaptchaChallenge>(
+    `/answer/api/v1/user/action/record?${query}`,
+  );
+  return {
+    captchaId: resp.captcha_id || "",
+    captchaImg: resp.captcha_img || "",
+    verify: Boolean(resp.verify),
+  };
+}
+
+export async function submitProjectDemoLead(payload: SubmitProjectDemoLeadPayload) {
+  return apiRequest<{ success: boolean }>("/answer/api/v1/project/demo/lead", {
+    method: "POST",
+    body: JSON.stringify({
+      project_id: payload.projectId,
+      phone: payload.phone,
+      captcha_id: payload.captchaId,
+      captcha_code: payload.captchaCode,
+    }),
+  });
 }
 
 export async function fetchHomepageSettings(): Promise<ContentHomepageSettings> {

@@ -34,7 +34,7 @@ import (
 // false need captcha
 func (cs *CaptchaService) ValidationStrategy(ctx context.Context, unit, actionType string) bool {
 	// If the captcha is not enabled, the verification is passed directly
-	if !plugin.CaptchaEnabled() {
+	if actionType != entity.CaptchaActionDemoForm && !plugin.CaptchaEnabled() {
 		return true
 	}
 	info, err := cs.captchaRepo.GetActionType(ctx, unit, actionType)
@@ -67,6 +67,8 @@ func (cs *CaptchaService) ValidationStrategy(ctx context.Context, unit, actionTy
 		return cs.CaptchaActionDelete(ctx, unit, info)
 	case entity.CaptchaActionVote:
 		return cs.CaptchaActionVote(ctx, unit, info)
+	case entity.CaptchaActionDemoForm:
+		return cs.CaptchaActionDemoForm(ctx, unit, info)
 
 	}
 	//actionType not found
@@ -222,4 +224,8 @@ func (cs *CaptchaService) CaptchaActionVote(ctx context.Context, unit string, ac
 		return false
 	}
 	return true
+}
+
+func (cs *CaptchaService) CaptchaActionDemoForm(ctx context.Context, unit string, actionInfo *entity.ActionRecordInfo) bool {
+	return false
 }

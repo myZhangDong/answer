@@ -25,4 +25,7 @@ type ServiceConfig struct {
 	CleanOrphanUploadsPeriodHours int    `json:"clean_orphan_uploads_period_hours" mapstructure:"clean_orphan_uploads_period_hours" yaml:"clean_orphan_uploads_period_hours"`
 	PurgeDeletedFilesPeriodDays   int    `json:"purge_deleted_files_period_days" mapstructure:"purge_deleted_files_period_days" yaml:"purge_deleted_files_period_days"`
 	DisableContentReview          bool   `json:"disable_content_review" mapstructure:"disable_content_review" yaml:"disable_content_review"`
+	DemoLeadCRMURL                string `json:"demo_lead_crm_url" mapstructure:"demo_lead_crm_url" yaml:"demo_lead_crm_url"`
+	DemoLeadCRMUsername           string `json:"demo_lead_crm_username" mapstructure:"demo_lead_crm_username" yaml:"demo_lead_crm_username"`
+	DemoLeadCRMPassword           string `json:"demo_lead_crm_password" mapstructure:"demo_lead_crm_password" yaml:"demo_lead_crm_password"`
 }

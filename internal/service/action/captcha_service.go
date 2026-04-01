@@ -21,13 +21,17 @@ package action
 
 import (
 	"context"
+	"strings"
 
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/pkg/token"
 	"github.com/apache/answer/plugin"
+	"github.com/mojocn/base64Captcha"
 	"github.com/segmentfault/pacman/log"
 )
+
+var demoFormCaptchaDriver = base64Captcha.NewDriverDigit(44, 140, 4, 0.6, 48)
 
 // CaptchaRepo captcha repository
 type CaptchaRepo interface {
@@ -78,11 +82,13 @@ func (cs *CaptchaService) ActionRecord(ctx context.Context, req *schema.ActionRe
 		unit = req.UserID
 	case entity.CaptchaActionVote:
 		unit = req.UserID
+	case entity.CaptchaActionDemoForm:
+		unit = req.IP
 	}
 	verificationResult := cs.ValidationStrategy(ctx, unit, req.Action)
 	if !verificationResult {
 		resp.Verify = true
-		resp.CaptchaID, resp.CaptchaImg, err = cs.GenerateCaptcha(ctx)
+		resp.CaptchaID, resp.CaptchaImg, err = cs.GenerateCaptcha(ctx, req.Action)
 		if err != nil {
 			log.Errorf("GenerateCaptcha error: %v", err)
 		}
@@ -99,7 +105,7 @@ func (cs *CaptchaService) ActionRecordVerifyCaptcha(
 	if verificationResult {
 		return true
 	}
-	pass, err := cs.VerifyCaptcha(ctx, captchaID, captchaCode)
+	pass, err := cs.VerifyCaptcha(ctx, actionType, captchaID, captchaCode)
 	if err != nil {
 		return false
 	}
@@ -131,7 +137,11 @@ func (cs *CaptchaService) ActionRecordDel(ctx context.Context, actionType string
 }
 
 // GenerateCaptcha generate captcha
-func (cs *CaptchaService) GenerateCaptcha(ctx context.Context) (key, captchaBase64 string, err error) {
+func (cs *CaptchaService) GenerateCaptcha(ctx context.Context, actionType string) (key, captchaBase64 string, err error) {
+	if actionType == entity.CaptchaActionDemoForm {
+		return cs.generateDemoFormCaptcha(ctx)
+	}
+
 	realCaptcha := ""
 	key = token.GenerateToken()
 	_ = plugin.CallCaptcha(func(fn plugin.Captcha) error {
@@ -150,7 +160,11 @@ func (cs *CaptchaService) GenerateCaptcha(ctx context.Context) (key, captchaBase
 }
 
 // VerifyCaptcha generate captcha
-func (cs *CaptchaService) VerifyCaptcha(ctx context.Context, key, captcha string) (isCorrect bool, err error) {
+func (cs *CaptchaService) VerifyCaptcha(ctx context.Context, actionType string, key, captcha string) (isCorrect bool, err error) {
+	if actionType == entity.CaptchaActionDemoForm {
+		return cs.verifyDemoFormCaptcha(ctx, key, captcha)
+	}
+
 	realCaptcha, _ := cs.captchaRepo.GetCaptcha(ctx, key)
 
 	_ = plugin.CallCaptcha(func(fn plugin.Captcha) error {
@@ -160,4 +174,24 @@ func (cs *CaptchaService) VerifyCaptcha(ctx context.Context, key, captcha string
 
 	_ = cs.captchaRepo.DelCaptcha(ctx, key)
 	return isCorrect, nil
+}
+
+func (cs *CaptchaService) generateDemoFormCaptcha(ctx context.Context) (key, captchaBase64 string, err error) {
+	key, content, realCaptcha := demoFormCaptchaDriver.GenerateIdQuestionAnswer()
+	item, err := demoFormCaptchaDriver.DrawCaptcha(content)
+	if err != nil {
+		return "", "", err
+	}
+	captchaBase64 = item.EncodeB64string()
+	err = cs.captchaRepo.SetCaptcha(ctx, key, realCaptcha)
+	return key, captchaBase64, err
+}
+
+func (cs *CaptchaService) verifyDemoFormCaptcha(ctx context.Context, key, captcha string) (bool, error) {
+	realCaptcha, err := cs.captchaRepo.GetCaptcha(ctx, key)
+	if err != nil {
+		return false, err
+	}
+	_ = cs.captchaRepo.DelCaptcha(ctx, key)
+	return strings.EqualFold(strings.TrimSpace(realCaptcha), strings.TrimSpace(captcha)), nil
 }

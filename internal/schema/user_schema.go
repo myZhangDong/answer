@@ -336,7 +336,7 @@ func (u *UserRePassWordRequest) Check() (errFields []*validator.FormErrorField, 
 }
 
 type ActionRecordReq struct {
-	Action string `validate:"required,oneof=email password edit_userinfo question answer comment edit invitation_answer search report delete vote" form:"action"`
+	Action string `validate:"required,oneof=email password edit_userinfo question answer comment edit invitation_answer search report delete vote demo_form" form:"action"`
 	IP     string `json:"-"`
 	UserID string `json:"-"`
 }

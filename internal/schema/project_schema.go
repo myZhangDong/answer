@@ -99,6 +99,17 @@ type BatchRemoveProjectReq struct {
 	IDs []string `validate:"required,min=1" json:"ids"`
 }
 
+type SubmitProjectDemoLeadReq struct {
+	ProjectID   string `validate:"required" json:"project_id"`
+	Phone       string `validate:"required,len=11,numeric" json:"phone"`
+	CaptchaID   string `validate:"required" json:"captcha_id"`
+	CaptchaCode string `validate:"required" json:"captcha_code"`
+}
+
+type SubmitProjectDemoLeadResp struct {
+	Success bool `json:"success"`
+}
+
 // GetProjectRepoURLs 获取仓库地址
 func (r *CreateProjectReq) GetProjectRepoURLs() string {
 	if len(r.RepoURL) == 0 {

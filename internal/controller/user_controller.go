@@ -505,7 +505,7 @@ func (uc *UserController) ActionRecord(ctx *gin.Context) {
 	req.IP = ctx.ClientIP()
 	resp := &schema.ActionRecordResp{}
 	isAdmin := middleware.GetUserIsAdminModerator(ctx)
-	if isAdmin {
+	if isAdmin && req.Action != entity.CaptchaActionDemoForm {
 		resp.Verify = false
 		handler.HandleResponse(ctx, nil, resp)
 	} else {

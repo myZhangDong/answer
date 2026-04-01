@@ -223,6 +223,7 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	// project
 	r.GET("/project/info", a.projectController.GetProject)
 	r.GET("/project/page", a.projectController.GetProjectPage)
+	r.POST("/project/demo/lead", a.projectController.SubmitProjectDemoLead)
 
 	// content feedback
 	r.GET("/content/feedback", a.contentFeedbackController.GetFeedback)

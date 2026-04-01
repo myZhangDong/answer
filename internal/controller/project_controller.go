@@ -21,20 +21,28 @@ package controller
 
 import (
 	"github.com/apache/answer/internal/base/handler"
+	"github.com/apache/answer/internal/base/reason"
+	"github.com/apache/answer/internal/base/translator"
+	"github.com/apache/answer/internal/base/validator"
+	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
+	"github.com/apache/answer/internal/service/action"
 	projectcommon "github.com/apache/answer/internal/service/project_common"
 	"github.com/gin-gonic/gin"
+	"github.com/segmentfault/pacman/errors"
 )
 
 // ProjectController 项目控制器
 type ProjectController struct {
 	projectService *projectcommon.ProjectCommon
+	actionService  *action.CaptchaService
 }
 
 // NewProjectController 创建项目控制器
-func NewProjectController(projectService *projectcommon.ProjectCommon) *ProjectController {
+func NewProjectController(projectService *projectcommon.ProjectCommon, actionService *action.CaptchaService) *ProjectController {
 	return &ProjectController{
 		projectService: projectService,
+		actionService:  actionService,
 	}
 }
 
@@ -158,5 +166,34 @@ func (pc *ProjectController) GetProjectPage(ctx *gin.Context) {
 	}
 
 	resp, err := pc.projectService.GetProjectPage(ctx, req)
+	handler.HandleResponse(ctx, err, resp)
+}
+
+// SubmitProjectDemoLead 提交项目 Demo 线索
+// @Summary 提交项目 Demo 线索
+// @Description 提交项目 Demo 线索
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param data body schema.SubmitProjectDemoLeadReq true "project demo lead"
+// @Success 200 {object} handler.RespBody{data=schema.SubmitProjectDemoLeadResp}
+// @Router /answer/api/v1/project/demo/lead [post]
+func (pc *ProjectController) SubmitProjectDemoLead(ctx *gin.Context) {
+	req := &schema.SubmitProjectDemoLeadReq{}
+	if handler.BindAndCheck(ctx, req) {
+		return
+	}
+
+	captchaPass := pc.actionService.ActionRecordVerifyCaptcha(ctx, entity.CaptchaActionDemoForm, ctx.ClientIP(), req.CaptchaID, req.CaptchaCode)
+	if !captchaPass {
+		errFields := append([]*validator.FormErrorField{}, &validator.FormErrorField{
+			ErrorField: "captcha_code",
+			ErrorMsg:   translator.Tr(handler.GetLang(ctx), reason.CaptchaVerificationFailed),
+		})
+		handler.HandleResponse(ctx, errors.BadRequest(reason.CaptchaVerificationFailed), errFields)
+		return
+	}
+
+	resp, err := pc.projectService.SubmitDemoLead(ctx, req)
 	handler.HandleResponse(ctx, err, resp)
 }

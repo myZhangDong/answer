@@ -26,6 +26,7 @@ import (
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
+	"github.com/apache/answer/internal/service/service_config"
 	usercommon "github.com/apache/answer/internal/service/user_common"
 	"github.com/segmentfault/pacman/errors"
 	"github.com/segmentfault/pacman/log"
@@ -46,6 +47,7 @@ type ProjectCommon struct {
 	projectRepo  ProjectRepo
 	questionRepo questioncommon.QuestionRepo
 	userRepo     usercommon.UserRepo
+	serviceConf  *service_config.ServiceConfig
 }
 
 // NewProjectCommon new project service
@@ -53,11 +55,13 @@ func NewProjectCommon(
 	projectRepo ProjectRepo,
 	questionRepo questioncommon.QuestionRepo,
 	userRepo usercommon.UserRepo,
+	serviceConf *service_config.ServiceConfig,
 ) *ProjectCommon {
 	return &ProjectCommon{
 		projectRepo:  projectRepo,
 		questionRepo: questionRepo,
 		userRepo:     userRepo,
+		serviceConf:  serviceConf,
 	}
 }
 

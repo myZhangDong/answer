@@ -622,6 +622,32 @@
 - `CtaBanner` 需要从后台发布导向切换为平台注册导向
 - 旧 `ui/` 本轮不跟随改动，继续保持现状
 
+### D-035 `009` 开源项目列表 Demo 获取表单改为图片验证码直提 CRM
+
+状态：已确认
+
+已确认细节：
+
+- `ui-next` 开源项目列表卡片和项目详情页“获取 Demo 示例”入口都改为同一套弹窗，不再使用滑块验证和短信验证码
+- 第一阶段弹窗最小采集字段收口为 `phone`、`captcha_id`、`captcha_code`，不采集姓名
+- Demo 表单图片验证码协议复用现有 `captcha_id/captcha_code/captcha_img` 结构，但应新增独立 action，例如 `demo_form`
+- 前端不直接请求旧官网 `guestbook/addmsg`，也不直接请求 `crm.easemob.com`，改由 Answer 后端代理提交
+- 后端 CRM 写入口径参考 `specs/phpserver.md`，但 `sjly` 固定传 `community`
+- 当前阶段 Demo 放行链接继续使用项目的 `repo` 字段
+- 第一阶段每次打开弹窗都展示图片验证码
+- 第一阶段不保留前端“已验证直接放行”的缓存逻辑，每次点击都重新提交表单
+- 第一阶段 `full_name`、`email`、`company` 传空字符串，`msg` 固定为 `暂无需求，了解一下`
+- UTM、referrer、device、browser 等信息优先复用 `https://doc.easemob.com/utm_helper.js` 产生的 `utmParameters`
+- 只有当前这次后端提交成功后，前端才放行打开对应 `demoUrl`
+- `demo_form` 不继承统一 `ActionRecord` 中“管理员/版主直接跳过验证码”的旧特例，否则管理员登录态访问前台时会拿到空的 `captcha_id/captcha_img`
+- 当前项目未启用 captcha 插件，`demo_form` 改为后端内置 `github.com/mojocn/base64Captcha` 数字图片验证码，继续复用现有缓存仓储保存答案
+
+影响：
+
+- `ui-next/src/app/components/DemoModal.tsx` 需要改成表单 + 图片验证码形态，并复用到项目列表页和项目详情页
+- 后端需要新增 Demo 表单提交接口、独立 captcha action 和 CRM 代理服务
+- 本轮范围仅限 `ui-next` 开源项目列表卡片与项目详情页入口，不影响 `008` Console 注册 CTA
+
 ## 未决问题
 
 ### O-001 搜索是否作为前台正式能力保留

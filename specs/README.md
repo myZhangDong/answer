@@ -50,6 +50,10 @@
   - 用于单独跟踪 `ui-next` 前台注册环信 CTA 的文案收口、console 跳转参数统一和点击埋点接入
 - `specs/008-ui-next-console-register-cta-tasks.md`
   - 用于单独跟踪 `008` 规格的执行步骤、阶段验收，以及 Header 与详情页底部 CTA 的推进状态
+- `specs/009-ui-next-open-source-demo-form-spec.md`
+  - 用于单独跟踪 `ui-next` 开源项目列表卡片“获取 Demo 示例”从滑块+短信切换为图片验证码+直接提交 CRM 表单的范围、字段映射和前后端边界
+- `specs/009-ui-next-open-source-demo-form-tasks.md`
+  - 用于单独跟踪 `009` 规格的执行步骤、阶段验收，以及图片验证码、UTM 透传和 CRM 提交链路的推进状态
 
 ## 文件职责
 

@@ -4,6 +4,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { CtaBanner } from "../components/CtaBanner";
 import { HotDemosWidget } from "../components/SidebarWidgets";
 import { useEffect, useState } from "react";
+import { DemoModal } from "../components/DemoModal";
 import {
   ContentProject,
   fetchContentFeedback,
@@ -28,6 +29,7 @@ export function OpenSourceDetail() {
   const [loading, setLoading] = useState(true);
   const [hotProjectsLoading, setHotProjectsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -243,7 +245,10 @@ export function OpenSourceDetail() {
 
             <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">
               <div className="flex gap-4">
-                <button className="w-full py-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-[#009EFF] dark:text-[#33B1FF] text-[14px] font-medium hover:bg-[#009EFF] hover:text-white dark:hover:bg-[#33B1FF] dark:hover:text-white hover:shadow-md hover:shadow-[#009EFF]/20 dark:hover:shadow-[#33B1FF]/20 transition-all duration-300">
+                <button
+                  onClick={() => setDemoModalOpen(true)}
+                  className="w-full py-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-[#009EFF] dark:text-[#33B1FF] text-[14px] font-medium hover:bg-[#009EFF] hover:text-white dark:hover:bg-[#33B1FF] dark:hover:text-white hover:shadow-md hover:shadow-[#009EFF]/20 dark:hover:shadow-[#33B1FF]/20 transition-all duration-300"
+                >
                   获取 Demo 示例
                 </button>
               </div>
@@ -275,6 +280,14 @@ export function OpenSourceDetail() {
           <HotDemosWidget demos={hotProjects} loading={hotProjectsLoading} />
         </aside>
       </div>
+
+      <DemoModal
+        open={demoModalOpen}
+        onClose={() => setDemoModalOpen(false)}
+        projectId={project.id}
+        projectName={project.name}
+        demoUrl={project.repo}
+      />
     </div>
   );
 }
