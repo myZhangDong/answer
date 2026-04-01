@@ -89,7 +89,10 @@ func NewHTTPServer(debug bool,
 	adminauthV1.Use(authUserMiddleware.AdminAuth())
 	answerRouter.RegisterAnswerAdminAPIRouter(adminauthV1)
 
-	templateRouter.RegisterTemplateRouter(rootGroup, uiConf.BaseURL)
+	templateRouter.RegisterSharedTemplateRoutes(rootGroup, uiConf.BaseURL)
+	if !router.IsUINextFrontend() {
+		templateRouter.RegisterLegacyTemplateRoutes(rootGroup, uiConf.BaseURL)
+	}
 
 	// plugin routes
 	pluginAPIRouter.RegisterUnAuthConnectorRouter(mustUnAuthV1)

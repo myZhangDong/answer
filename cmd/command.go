@@ -22,9 +22,11 @@ package answercmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/answer/internal/base/conf"
+	"github.com/apache/answer/internal/base/constant"
 	"github.com/apache/answer/internal/cli"
 	"github.com/apache/answer/internal/install"
 	"github.com/apache/answer/internal/migrations"
@@ -79,6 +81,7 @@ func init() {
 	for _, cmd := range []*cobra.Command{initCmd, checkCmd, runCmd, dumpCmd, upgradeCmd, buildCmd, pluginCmd, configCmd, i18nCmd} {
 		rootCmd.AddCommand(cmd)
 	}
+	rootCmd.AddCommand(runUICmd, runUINextCmd)
 }
 
 var (
@@ -99,6 +102,45 @@ To run answer, use:
 			cli.FormatAllPath(dataDirPath)
 			fmt.Println("config file path: ", cli.GetConfigFilePath())
 			fmt.Println("Answer is starting..........................")
+			runApp()
+		},
+	}
+
+	runUICmd = &cobra.Command{
+		Use:   "run-ui",
+		Short: "Run Answer with embedded ui frontend",
+		Long:  `Start running Answer with the embedded legacy ui frontend`,
+		Run: func(_ *cobra.Command, _ []string) {
+			cli.FormatAllPath(dataDirPath)
+			_ = os.Unsetenv(constant.AnswerStaticPathEnv)
+			_ = os.Unsetenv(constant.AnswerFrontendEnv)
+			fmt.Println("config file path: ", cli.GetConfigFilePath())
+			fmt.Println("Answer is starting with embedded ui frontend..........................")
+			runApp()
+		},
+	}
+
+	runUINextCmd = &cobra.Command{
+		Use:   "run-ui-next",
+		Short: "Run Answer with ui-next static assets",
+		Long:  `Start running Answer with ui-next static assets from dist directory`,
+		Run: func(_ *cobra.Command, _ []string) {
+			cli.FormatAllPath(dataDirPath)
+			staticPath, err := filepath.Abs("./ui-next/dist")
+			if err != nil {
+				fmt.Println("resolve ui-next dist path failed: ", err.Error())
+				return
+			}
+			info, err := os.Stat(staticPath)
+			if err != nil || !info.IsDir() {
+				fmt.Println("ui-next dist not found, please run `make ui-next` first. path:", staticPath)
+				return
+			}
+			_ = os.Setenv(constant.AnswerStaticPathEnv, staticPath)
+			_ = os.Setenv(constant.AnswerFrontendEnv, constant.AnswerFrontendUINext)
+			fmt.Println("config file path: ", cli.GetConfigFilePath())
+			fmt.Println("ui-next static path: ", staticPath)
+			fmt.Println("Answer is starting with ui-next frontend..........................")
 			runApp()
 		},
 	}

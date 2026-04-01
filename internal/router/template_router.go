@@ -49,8 +49,8 @@ func NewTemplateRouter(
 	}
 }
 
-// RegisterTemplateRouter template router
-func (a *TemplateRouter) RegisterTemplateRouter(r *gin.RouterGroup, baseURLPath string) {
+// RegisterSharedTemplateRoutes registers routes shared by both frontends.
+func (a *TemplateRouter) RegisterSharedTemplateRoutes(r *gin.RouterGroup, baseURLPath string) {
 	seoNoAuth := r.Group(baseURLPath)
 	seoNoAuth.GET("/sitemap.xml", a.templateController.Sitemap)
 	seoNoAuth.GET("/sitemap/:page", a.templateController.SitemapPage)
@@ -61,7 +61,10 @@ func (a *TemplateRouter) RegisterTemplateRouter(r *gin.RouterGroup, baseURLPath 
 	seoNoAuth.GET("/404", a.templateController.Page404)
 
 	seoNoAuth.GET("/opensearch.xml", a.templateController.OpenSearch)
+}
 
+// RegisterLegacyTemplateRoutes registers legacy ui page routes.
+func (a *TemplateRouter) RegisterLegacyTemplateRoutes(r *gin.RouterGroup, baseURLPath string) {
 	seo := r.Group(baseURLPath)
 	seo.Use(a.authUserMiddleware.CheckPrivateMode())
 	seo.GET("/", a.templateController.Index)
@@ -72,4 +75,10 @@ func (a *TemplateRouter) RegisterTemplateRouter(r *gin.RouterGroup, baseURLPath 
 	seo.GET("/tags", a.templateController.TagList)
 	seo.GET("/tags/:tag", a.templateController.TagInfo)
 	seo.GET("/users/:username", a.templateController.UserInfo)
+}
+
+// RegisterTemplateRouter template router
+func (a *TemplateRouter) RegisterTemplateRouter(r *gin.RouterGroup, baseURLPath string) {
+	a.RegisterSharedTemplateRoutes(r, baseURLPath)
+	a.RegisterLegacyTemplateRoutes(r, baseURLPath)
 }
