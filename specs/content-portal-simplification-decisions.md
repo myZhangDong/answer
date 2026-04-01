@@ -752,6 +752,22 @@
 - 导入逻辑不能直接复用在线发文接口，否则会被审核、推荐标签和 Markdown 转换等在线规则干扰
 - 第一次验证只导入最新少量文章到本地环境，确认字段映射和页面展示后再扩大范围
 
+### D-039 `ui-next` 基础信息与 SEO 元信息分离
+
+状态：已确认
+
+原因：
+
+- `general` 当前不仅服务前台展示，还承载站点 URL、联系邮箱、版本检查等全站基础配置
+- 直接把 SEO title、keywords、og image 等能力继续塞进 `general`，会让字段语义越来越混乱
+- 当前 `ui-next` 仅把 `general.name/short_description/description` 作为运行时 fallback，不代表它们应长期承担完整 SEO 配置职责
+
+影响：
+
+- `general` 继续只承载站点基础资料：站点名称、简介、站点 URL、联系邮箱、检查更新
+- 内容门户真正的 SEO 元信息能力后续应继续放在 `SEO` 分组演进，而不是改写 `general`
+- 当前阶段先修正 `ui-next/index.html` 的静态默认 title / description，占位值不再保留 Figma 文案
+
 ## 未决问题
 
 ### O-001 搜索是否作为前台正式能力保留

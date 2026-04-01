@@ -144,6 +144,13 @@
    - permalink
    - robots
 
+说明：
+
+- 当前这一组配置仍主要复用旧后台 SEO 能力
+- `permalink` 和 `robots` 继续保留在这里
+- 但 `ui-next` 当前真正面向内容门户前台的 `title`、`meta description`、`keywords`、`og image` 等元信息能力，不应继续塞进 `general`
+- 后续如果补齐内容门户 SEO 元信息，应继续放在 SEO 分组下，而不是改写基础信息语义
+
 4. 首页运营位
    - 首页顶部 Banner
    - “周热门文章”上方广告位
@@ -216,6 +223,41 @@
 - 第一阶段不要求额外支持文案编辑，默认以图片直出为主
 
 ### 5.3 前台渲染策略
+
+#### 公共站点标题与描述
+
+当前已确认：
+
+- `general.name`、`general.short_description`、`general.description` 仍属于站点基础资料
+- 它们当前可以继续作为 `ui-next` 运行时默认标题和默认描述的 fallback
+- 但它们不等同于内容门户专用 SEO 元信息配置
+
+因此后续应区分两层语义：
+
+1. 基础信息
+   - 站点名称
+   - 站点简介
+   - 站点 URL
+   - 联系邮箱
+   - 检查更新
+
+2. SEO 元信息
+   - 默认 title
+   - title 模板
+   - 默认 meta description
+   - keywords
+   - og image
+   - canonical base URL
+
+第一阶段额外要求：
+
+- 至少修正 `ui-next/index.html` 中 Figma 遗留的静态占位 `<title>`
+- 至少补上静态默认 `<meta name="description">`
+
+说明：
+
+- 这一步仅解决“查看网页源代码仍显示占位 title、没有 description”的明显问题
+- 它不是完整的 SSR / 预渲染 SEO 方案，只是首屏静态 fallback 修正
 
 #### 首页顶部 Banner
 
@@ -324,12 +366,14 @@
 - `ui-next` 新增网站设置页面
 - 接通 `general/branding/seo` 旧接口
 - 后台导航改为左侧布局
+- 修正 `ui-next` 静态入口页的默认 title / description 占位值
 
 验收：
 
 - 管理员可以在 `ui-next` 修改站点基础信息、Square Icon、Favicon 等品牌资源
 - 管理员可以在 `ui-next` 修改 SEO 配置
 - 管理员可以通过左侧导航进入各个后台模块
+- `ui-next` 网页源代码不再保留 Figma 占位 title，且存在静态默认 description
 
 ### Phase B：首页运营位配置闭环
 
@@ -368,6 +412,7 @@
 - 管理员可在 `ui-next` 执行编辑资料、改角色、改状态、设置新密码等必要用户操作
 - 首页能够消费真实后台配置，而不是继续完全依赖硬编码
 - 浏览器标题和 favicon 能消费真实站点基础信息与图标类品牌配置
+- `ui-next` 静态入口页的默认 title / description 已从 Figma 占位值修正为可接受的站点 fallback
 - 顶部 Banner 未配置时不渲染默认 Hero 文案 Banner
 - 热门文章广告位未配置时直接隐藏
 - `ui-next` 管理后台导航已改为左侧布局
