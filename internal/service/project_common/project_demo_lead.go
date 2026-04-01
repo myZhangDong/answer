@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	projectDemoLeadCRMSource   = "community"
+	projectDemoLeadCRMSource   = "社区表单"
 	projectDemoLeadDefaultMsg  = "暂无需求，了解一下"
 	projectDemoLeadHTTPTimeout = 10 * time.Second
 )
@@ -63,10 +63,10 @@ type demoLeadCRMInsertResp struct {
 }
 
 func (ps *ProjectCommon) SubmitDemoLead(ctx context.Context, req *schema.SubmitProjectDemoLeadReq) (*schema.SubmitProjectDemoLeadResp, error) {
-	log.Infof("demo_lead submit request project_id=%s phone=%s captcha_id=%s referer=%s",
-		req.ProjectID, maskPhone(req.Phone), req.CaptchaID, getDemoLeadReferer(ctx))
+	log.Infof("demo_lead submit request project_id=%s full_name=%s phone=%s captcha_id=%s referer=%s",
+		req.ProjectID, strings.TrimSpace(req.FullName), maskPhone(req.Phone), req.CaptchaID, getDemoLeadReferer(ctx))
 
-	_, exist, err := ps.projectRepo.GetProject(ctx, req.ProjectID)
+	projectInfo, exist, err := ps.projectRepo.GetProject(ctx, req.ProjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (ps *ProjectCommon) SubmitDemoLead(ctx context.Context, req *schema.SubmitP
 		return nil, err
 	}
 
-	if err = ps.insertDemoLeadCRM(ctx, binding, req.Phone, utmParameters); err != nil {
+	if err = ps.insertDemoLeadCRM(ctx, binding, strings.TrimSpace(req.FullName), req.Phone, strings.TrimSpace(projectInfo.Title), utmParameters); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +117,7 @@ func (ps *ProjectCommon) loginDemoLeadCRM(ctx context.Context) (string, error) {
 	return resp.Binding, nil
 }
 
-func (ps *ProjectCommon) insertDemoLeadCRM(ctx context.Context, binding string, phone string, utmParameters demoLeadUTMParameters) error {
+func (ps *ProjectCommon) insertDemoLeadCRM(ctx context.Context, binding string, fullName string, phone string, projectName string, utmParameters demoLeadUTMParameters) error {
 	data := []map[string]string{
 		{
 			"fwly":    utmParameters.Referrer,
@@ -130,12 +130,12 @@ func (ps *ProjectCommon) insertDemoLeadCRM(ctx context.Context, binding string, 
 			"gggjc":   utmParameters.UTMTerm,
 			"email":   "",
 			"hangye":  "",
-			"name":    "",
+			"name":    fullName,
 			"dianhua": phone,
 			"company": "",
 			"sjly":    projectDemoLeadCRMSource,
 			"zcrq":    time.Now().Format("2006-01-02 15:04:05"),
-			"beizhu":  buildProjectDemoLeadRemark(ctx),
+			"beizhu":  buildProjectDemoLeadRemark(projectName),
 			"cplx":    "",
 		},
 	}
@@ -208,18 +208,12 @@ func parseDemoLeadUTMParameters(ctx context.Context) demoLeadUTMParameters {
 	return utmParameters
 }
 
-func buildProjectDemoLeadRemark(ctx context.Context) string {
-	ginCtx, ok := ctx.(*gin.Context)
-	if !ok {
-		return "意向情况: " + projectDemoLeadDefaultMsg
+func buildProjectDemoLeadRemark(projectName string) string {
+	projectName = strings.TrimSpace(projectName)
+	if projectName == "" {
+		return projectDemoLeadDefaultMsg
 	}
-
-	referer := strings.TrimSpace(ginCtx.GetHeader("Referer"))
-	if referer == "" {
-		return "意向情况: " + projectDemoLeadDefaultMsg
-	}
-
-	return fmt.Sprintf("访问页面:%s;意向情况: %s", referer, projectDemoLeadDefaultMsg)
+	return projectName
 }
 
 func getDemoLeadReferer(ctx context.Context) string {

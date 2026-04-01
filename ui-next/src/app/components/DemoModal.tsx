@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, LoaderCircle, Phone, RefreshCw, ShieldCheck, X } from "lucide-react";
+import { AlertCircle, LoaderCircle, Phone, RefreshCw, ShieldCheck, User, X } from "lucide-react";
 import { ApiError } from "../api/client";
 import { fetchDemoFormCaptcha, submitProjectDemoLead } from "../api/contentApi";
 import { ensureUtmHelperScript } from "../utils/utmHelper";
@@ -21,6 +21,8 @@ type FormErrorField = {
 };
 
 export function DemoModal({ open, onClose, projectId, projectName, demoUrl }: DemoModalProps) {
+  const [fullName, setFullName] = useState("");
+  const [fullNameError, setFullNameError] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [captchaID, setCaptchaID] = useState("");
@@ -67,6 +69,8 @@ export function DemoModal({ open, onClose, projectId, projectName, demoUrl }: De
     if (!open) {
       return;
     }
+    setFullName("");
+    setFullNameError("");
     setPhone("");
     setPhoneError("");
     setCaptchaID("");
@@ -80,12 +84,17 @@ export function DemoModal({ open, onClose, projectId, projectName, demoUrl }: De
     void loadCaptcha();
   }, [open]);
 
-  const canSubmit = Boolean(phone && captchaCode && captchaID && !captchaLoading);
+  const canSubmit = Boolean(fullName.trim() && phone && captchaCode && captchaID && !captchaLoading);
 
   const handleSubmit = async () => {
+    setFullNameError("");
     setPhoneError("");
     setCaptchaError("");
     setSubmitError("");
+    if (!fullName.trim()) {
+      setFullNameError("请输入姓名");
+      return;
+    }
     if (!PHONE_REG.test(phone)) {
       setPhoneError("请输入正确的11位中国手机号");
       return;
@@ -102,6 +111,7 @@ export function DemoModal({ open, onClose, projectId, projectName, demoUrl }: De
     try {
       await submitProjectDemoLead({
         projectId,
+        fullName: fullName.trim(),
         phone,
         captchaId: captchaID,
         captchaCode: captchaCode.trim(),
@@ -157,6 +167,34 @@ export function DemoModal({ open, onClose, projectId, projectName, demoUrl }: De
 
         {/* form */}
         <div className="px-6 pb-6 flex flex-col gap-4">
+          <div>
+            <label className="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1.5">姓名</label>
+            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 transition-colors ${
+              fullNameError
+                ? "border-red-400 dark:border-red-500 bg-red-50/50 dark:bg-red-500/5"
+                : "border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 focus-within:border-[#009EFF] dark:focus-within:border-[#33B1FF]"
+            }`}>
+              <User className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+              <input
+                type="text"
+                maxLength={100}
+                placeholder="请输入姓名"
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  if (fullNameError) setFullNameError("");
+                }}
+                className="flex-1 bg-transparent outline-none text-[14px] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              />
+            </div>
+            {fullNameError && (
+              <p className="flex items-center gap-1 mt-1.5 text-[12px] text-red-500 dark:text-red-400">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {fullNameError}
+              </p>
+            )}
+          </div>
+
           {/* phone */}
           <div>
             <label className="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1.5">手机号</label>

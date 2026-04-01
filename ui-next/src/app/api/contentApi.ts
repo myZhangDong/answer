@@ -214,6 +214,7 @@ export interface FetchListParams {
 
 export interface SubmitProjectDemoLeadPayload {
   projectId: string;
+  fullName: string;
   phone: string;
   captchaId: string;
   captchaCode: string;
@@ -689,6 +690,7 @@ export async function submitProjectDemoLead(payload: SubmitProjectDemoLeadPayloa
     method: "POST",
     body: JSON.stringify({
       project_id: payload.projectId,
+      full_name: payload.fullName,
       phone: payload.phone,
       captcha_id: payload.captchaId,
       captcha_code: payload.captchaCode,

@@ -101,6 +101,7 @@ type BatchRemoveProjectReq struct {
 
 type SubmitProjectDemoLeadReq struct {
 	ProjectID   string `validate:"required" json:"project_id"`
+	FullName    string `validate:"required,min=1,max=100" json:"full_name"`
 	Phone       string `validate:"required,len=11,numeric" json:"phone"`
 	CaptchaID   string `validate:"required" json:"captcha_id"`
 	CaptchaCode string `validate:"required" json:"captcha_code"`

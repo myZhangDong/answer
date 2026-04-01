@@ -629,14 +629,15 @@
 已确认细节：
 
 - `ui-next` 开源项目列表卡片和项目详情页“获取 Demo 示例”入口都改为同一套弹窗，不再使用滑块验证和短信验证码
-- 第一阶段弹窗最小采集字段收口为 `phone`、`captcha_id`、`captcha_code`，不采集姓名
+- 当前弹窗采集字段为 `full_name`、`phone`、`captcha_id`、`captcha_code`
 - Demo 表单图片验证码协议复用现有 `captcha_id/captcha_code/captcha_img` 结构，但应新增独立 action，例如 `demo_form`
 - 前端不直接请求旧官网 `guestbook/addmsg`，也不直接请求 `crm.easemob.com`，改由 Answer 后端代理提交
-- 后端 CRM 写入口径参考 `specs/phpserver.md`，但 `sjly` 固定传 `community`
+- 后端 CRM 写入口径参考 `specs/phpserver.md`，但 `sjly` 固定传 `社区表单`
 - 当前阶段 Demo 放行链接继续使用项目的 `repo` 字段
 - 第一阶段每次打开弹窗都展示图片验证码
 - 第一阶段不保留前端“已验证直接放行”的缓存逻辑，每次点击都重新提交表单
-- 第一阶段 `full_name`、`email`、`company` 传空字符串，`msg` 固定为 `暂无需求，了解一下`
+- 当前阶段 `email`、`company` 传空字符串，`msg` 固定为 `暂无需求，了解一下`，`name` 使用用户填写的 `full_name`
+- CRM `beizhu` 当前改为传项目名称，不再拼接固定意向说明
 - UTM、referrer、device、browser 等信息优先复用 `https://doc.easemob.com/utm_helper.js` 产生的 `utmParameters`
 - 只有当前这次后端提交成功后，前端才放行打开对应 `demoUrl`
 - `demo_form` 不继承统一 `ActionRecord` 中“管理员/版主直接跳过验证码”的旧特例，否则管理员登录态访问前台时会拿到空的 `captcha_id/captcha_img`
