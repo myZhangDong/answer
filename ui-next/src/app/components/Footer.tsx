@@ -1,7 +1,6 @@
 import { Link } from "react-router";
+import qrCodeImg from "@/assets/qrcode_for_gh.jpg";
 import { LogoSvg } from "./LogoSvg";
-
-const qrCodeImg = "/placeholder-image.svg";
 
 export function Footer() {
   return (
@@ -30,7 +29,7 @@ export function Footer() {
             <div className="flex flex-col gap-4 lg:items-end">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-[14px]">
                 <a
-                  href="https://www.easemob.com/"
+                  href="https://www.easemob.com/?from=community"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[15px] text-[#8792A2] transition-colors hover:text-[#009EFF] dark:text-slate-400 dark:hover:text-[#33B1FF] sm:text-[16px]"
@@ -41,7 +40,7 @@ export function Footer() {
                   |
                 </span>
                 <a
-                  href="https://www.easemob.com/download/im"
+                  href="https://www.easemob.com/download/im?from=community"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[15px] text-[#8792A2] transition-colors hover:text-[#009EFF] dark:text-slate-400 dark:hover:text-[#33B1FF] sm:text-[16px]"
@@ -52,7 +51,7 @@ export function Footer() {
                   |
                 </span>
                 <a
-                  href="https://doc.easemob.com/"
+                  href="https://doc.easemob.com/?from=community"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[15px] text-[#8792A2] transition-colors hover:text-[#009EFF] dark:text-slate-400 dark:hover:text-[#33B1FF] sm:text-[16px]"
@@ -71,7 +70,7 @@ export function Footer() {
             <div className="flex items-center gap-6 sm:gap-8">
               <div className="relative group">
                 <a
-                  href="https://github.com/Easemob-Community"
+                  href="https://github.com/easemob/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center text-[#8792A2] transition-opacity hover:opacity-70 dark:text-slate-400"
