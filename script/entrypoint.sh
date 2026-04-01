@@ -16,6 +16,26 @@
 # specific language governing permissions and limitations
 # under the License.
 
+set -e
+
+FRONTEND_MODE="${ANSWER_DOCKER_FRONTEND:-ui-next}"
+
 /usr/bin/answer init
 /usr/bin/answer upgrade
-/usr/bin/answer run -C /data/
+
+case "${FRONTEND_MODE}" in
+  ui-next)
+    exec /usr/bin/answer run-ui-next -C /data/
+    ;;
+  ui|legacy)
+    exec /usr/bin/answer run-ui -C /data/
+    ;;
+  backend)
+    exec /usr/bin/answer run -C /data/
+    ;;
+  *)
+    echo "unsupported ANSWER_DOCKER_FRONTEND: ${FRONTEND_MODE}" >&2
+    echo "supported values: ui-next, ui, legacy, backend" >&2
+    exit 1
+    ;;
+esac

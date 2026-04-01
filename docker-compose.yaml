@@ -18,7 +18,11 @@
 version: "3"
 services:
   answer:
-    image: apache/answer
+    build:
+      context: .
+    image: answer-ui-next:local
+    environment:
+      ANSWER_DOCKER_FRONTEND: ui-next
     ports:
       - '9080:80'
     restart: on-failure

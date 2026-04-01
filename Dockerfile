@@ -35,6 +35,7 @@ ARG CGO_EXTRA_CFLAGS
 COPY . ${BUILD_DIR}
 WORKDIR ${BUILD_DIR}
 RUN apk --no-cache add build-base git bash nodejs npm && npm install -g pnpm@9.7.0 \
+    && cd ui-next && npm ci && npm run build && cd - \
     && make clean build
 
 RUN chmod 755 answer
@@ -66,9 +67,11 @@ RUN apk update \
 
 COPY --from=golang-builder /usr/bin/answer /usr/bin/answer
 COPY --from=golang-builder /data /data
+COPY --from=golang-builder /go/src/github.com/apache/answer/ui-next/dist /ui-next/dist
 COPY /script/entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
 
+WORKDIR /
 VOLUME /data
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

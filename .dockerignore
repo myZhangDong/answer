@@ -1,0 +1,15 @@
+.git
+.github
+.idea
+.vscode
+
+answer
+data
+
+ui/node_modules
+ui/build
+ui-next/node_modules
+ui-next/dist
+
+tmp
+coverage

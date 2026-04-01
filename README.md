@@ -23,8 +23,14 @@ To learn more about the project, visit [answer.apache.org](https://answer.apache
 ### Running with docker
 
 ```bash
-docker run -d -p 9080:80 -v answer-data:/data --name answer apache/answer:1.5.1
+docker compose up -d --build
 ```
+
+Notes:
+
+- This workspace defaults Docker startup to `ui-next`
+- To switch the container back to legacy `ui/`, set `ANSWER_DOCKER_FRONTEND=ui`
+- Container data is still persisted via `/data`
 
 For more information, see [Installation](https://answer.apache.org/docs/installation).
 
