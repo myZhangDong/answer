@@ -163,9 +163,20 @@
 ```bash
 make generate
 make ui
+make ui-next
 make build
 make test
+./answer run-ui -C ./data
+./answer run-ui-next -C ./data
 ```
+
+说明：
+
+- `make ui` 构建旧前端 `ui/`
+- `make ui-next` 构建新前端 `ui-next/`
+- `./answer run-ui` 强制使用 embed 的旧前端
+- `./answer run-ui-next` 通过 `ANSWER_STATIC_PATH` 使用 `ui-next/dist`
+- 修改 Go 代码后，仅重启 `./answer` 不会生效，必须重新编译二进制
 
 前端常用：
 

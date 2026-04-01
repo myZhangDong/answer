@@ -193,6 +193,10 @@
 - [x] `ui-next` 前台 Header 已移除普通用户注册/假登录入口，只保留搜索和管理员后台入口
 - [x] `ui-next` 首页 Header 与详情页底部公开注册 CTA 已统一切到环信 Console 注册页，并补充 `from=community` 参数和前端点击埋点
 - [x] `ui-next` 开源项目列表卡片“获取 Demo 示例”已改为手机号 + 图片验证码 + 后端代理 CRM 提交链路，放行链接继续使用项目 `repo` 字段
+- [x] 保留双前端运行链路：继续支持 `make ui` + `./answer run-ui`，并新增 `make ui-next` + `./answer run-ui-next`
+- [x] 修复 `run-ui-next` 与旧模板路由冲突：仅 `ui-next` 模式跳过旧首页 SEO 路由，缺失静态资源不再回退成 HTML
+- [x] 新增历史文章试迁移命令 `./answer import-aws-article`，首轮按 `aws_article -> question(type=2) + meta + tag/tag_rel + revision` 导入
+- [x] 已在本地环境试迁最新 2 篇 `aws_article`，并验证重复执行会命中映射表跳过
 
 ## Phase 4：前端 service 白名单化
 

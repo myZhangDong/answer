@@ -274,6 +274,39 @@
 - 后端通过 `meta` 表以 `question.article.author` 保存文章展示作者，不改动 `question` 主表结构
 - 文章列表与文章详情优先展示该扩展作者；未填写或历史数据缺失时，继续回退到创建用户信息
 
+### D-037 保留 `ui` 与 `ui-next` 两套前端运行命令
+
+状态：已确认
+
+原因：
+
+- 当前默认 embed 与部署链路仍然基于旧 `ui/`
+- `ui-next` 已可独立构建，但产物目录结构为 `dist/assets`，不能直接等同于旧 `ui/build/static`
+- 迁移阶段需要保留旧前端 fallback，同时允许显式运行新前端进行联调和灰度验证
+
+影响：
+
+- 保留旧前端构建命令 `make ui`
+- 增加新前端构建命令 `make ui-next`
+- 后端增加 `./answer run-ui` 与 `./answer run-ui-next` 两个显式运行命令
+- `run-ui-next` 通过 `ANSWER_STATIC_PATH` 指向 `ui-next/dist`，并额外托管 `assets/` 与根目录静态文件
+
+### D-039 `run-ui-next` 显式切换为 `ui-next` 路由模式，避免和旧模板页冲突
+
+状态：已确认
+
+原因：
+
+- 旧前端首页 `/`、`/questions`、`/tags` 等 SEO 页面由 `TemplateRouter` 提前注册
+- 仅依赖 `ANSWER_STATIC_PATH` 托管 `ui-next/dist` 时，根路径可能仍命中旧模板 HTML
+- 一旦旧首页 HTML 再去请求缺失的旧 `static/js/*` 资源，SPA 回退会把这些请求返回成 `ui-next/index.html`，浏览器就会把 HTML 当 JS 执行
+
+影响：
+
+- `run-ui-next` 除了设置 `ANSWER_STATIC_PATH`，还要显式设置 `ANSWER_FRONTEND=ui-next`
+- 后端只在 `ui-next` 路由模式下跳过旧模板首页路由，`run-ui` 和默认旧前端链路保持不变
+- `ui-next` 缺失静态资源请求继续返回 `404`，不再把 HTML 回退给 JS/CSS 资源路径
+
 - 用户已确认“现在前端能支持的功能也有必要的就可以迁移”
 - 旧后台 `login`、`legal`、`custom-css-html` 属于纯表单配置，迁到 `ui-next` 的实现成本和联调风险更低
 - `write` 依赖标签选择、文件限制等专用交互，`themes` 依赖旧主题体系，当前都不适合直接硬搬到 `ui-next`
@@ -663,6 +696,26 @@
 - `ui-next/src/app/components/DemoModal.tsx` 需要改成表单 + 图片验证码形态，并复用到项目列表页和项目详情页
 - 后端需要新增 Demo 表单提交接口、独立 captcha action 和 CRM 代理服务
 - 本轮范围仅限 `ui-next` 开源项目列表卡片与项目详情页入口，不影响 `008` Console 注册 CTA
+
+### D-038 历史文章试迁移以 `aws_article` 为主源，并统一挂到本地管理员账号
+
+状态：已确认
+
+已确认细节：
+
+- ThinkCMF 历史库的文章试迁移主源表使用 `aws_article`，不使用 `club_portal_article_*`
+- 当前 Answer 文章模型仍是 `question(type=2)`，导入目标保持 `question + meta(question.article.author) + tag/tag_rel + revision`
+- 导入阶段只迁文章主体字段：标题、正文、作者展示名、发布时间、浏览量、分类、置顶、删除状态、评论计数
+- 旧站作者账号不直接映射到本地 `user`，所有导入文章统一挂到本地一个已存在管理员账号
+- 旧站作者展示名继续写入 `meta.key = question.article.author`，前台展示仍按旧作者名输出
+- 旧站分类第一阶段按标签处理，`aws_category.title/url_token` 映射为 `tag.display_name/slug_name`
+- 为避免重复导入，目标库增加命令自管理的映射表 `aws_article_import_record`
+
+影响：
+
+- 后端需要提供一个可执行导入命令，而不是只给字段映射说明
+- 导入逻辑不能直接复用在线发文接口，否则会被审核、推荐标签和 Markdown 转换等在线规则干扰
+- 第一次验证只导入最新少量文章到本地环境，确认字段映射和页面展示后再扩大范围
 
 ## 未决问题
 

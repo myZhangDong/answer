@@ -1,4 +1,4 @@
-.PHONY: build clean ui build-plugin-local
+.PHONY: build clean ui ui-next build-plugin-local
 
 VERSION=1.5.1
 BIN=answer
@@ -55,6 +55,9 @@ install-ui-packages:
 
 ui:
 	@cd ui && pnpm pre-install && pnpm build && cd -
+
+ui-next:
+	@cd ui-next && npm run build && cd -
 
 lint: generate
 	@bash ./script/check-asf-header.sh

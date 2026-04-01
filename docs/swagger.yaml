@@ -543,6 +543,8 @@ definitions:
         type: string
       answer_count:
         type: integer
+      author_name:
+        type: string
       collection_count:
         type: integer
       created_at:
@@ -1730,6 +1732,10 @@ definitions:
     type: object
   schema.QuestionAdd:
     properties:
+      author_name:
+        description: article author display name
+        maxLength: 100
+        type: string
       captcha_code:
         type: string
       captcha_id:
@@ -1898,6 +1904,9 @@ definitions:
     type: object
   schema.QuestionUpdate:
     properties:
+      author_name:
+        maxLength: 100
+        type: string
       captcha_code:
         type: string
       captcha_id:
@@ -2601,6 +2610,32 @@ definitions:
         type: string
     required:
     - slug_name
+    type: object
+  schema.SubmitProjectDemoLeadReq:
+    properties:
+      captcha_code:
+        type: string
+      captcha_id:
+        type: string
+      full_name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      phone:
+        type: string
+      project_id:
+        type: string
+    required:
+    - captcha_code
+    - captcha_id
+    - full_name
+    - phone
+    - project_id
+    type: object
+  schema.SubmitProjectDemoLeadResp:
+    properties:
+      success:
+        type: boolean
     type: object
   schema.TagItem:
     properties:
@@ -6127,6 +6162,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 批量删除项目
+      tags:
+      - Project
+  /answer/api/v1/project/demo/lead:
+    post:
+      consumes:
+      - application/json
+      description: 提交项目 Demo 线索
+      parameters:
+      - description: project demo lead
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/schema.SubmitProjectDemoLeadReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.SubmitProjectDemoLeadResp'
+              type: object
+      summary: 提交项目 Demo 线索
       tags:
       - Project
   /answer/api/v1/project/info:

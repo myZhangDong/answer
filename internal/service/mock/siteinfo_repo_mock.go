@@ -184,6 +184,21 @@ func (mr *MockSiteInfoCommonServiceMockRecorder) GetSiteGeneral(ctx any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSiteGeneral", reflect.TypeOf((*MockSiteInfoCommonService)(nil).GetSiteGeneral), ctx)
 }
 
+// GetSiteHomepage mocks base method.
+func (m *MockSiteInfoCommonService) GetSiteHomepage(ctx context.Context) (*schema.SiteHomepageResp, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSiteHomepage", ctx)
+	ret0, _ := ret[0].(*schema.SiteHomepageResp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSiteHomepage indicates an expected call of GetSiteHomepage.
+func (mr *MockSiteInfoCommonServiceMockRecorder) GetSiteHomepage(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSiteHomepage", reflect.TypeOf((*MockSiteInfoCommonService)(nil).GetSiteHomepage), ctx)
+}
+
 // GetSiteInfoByType mocks base method.
 func (m *MockSiteInfoCommonService) GetSiteInfoByType(ctx context.Context, siteType string, resp any) error {
 	m.ctrl.T.Helper()

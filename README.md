@@ -51,10 +51,72 @@ You can also check out the [plugins here](https://answer.apache.org/plugins).
 ```bash
 # Install wire and mockgen for building. You can run `make check` to check if they are installed.
 $ make generate
-# Install frontend dependencies and build
+# Build legacy frontend ui/
 $ make ui
-# Install backend dependencies and build
+# Or build new frontend ui-next/
+$ make ui-next
+# Build backend binary
 $ make build
+```
+
+### Run with different frontends
+
+This workspace currently keeps two frontend projects:
+
+- `ui/`: legacy frontend, still used by the default embed build chain
+- `ui-next/`: new frontend used for the content portal migration
+
+Build and run commands:
+
+```bash
+# Legacy frontend
+make ui
+./answer run-ui -C ./data
+
+# New frontend
+make ui-next
+./answer run-ui-next -C ./data
+```
+
+Notes:
+
+- `./answer run` only starts the current binary. It does not rebuild Go code or frontend assets.
+- After changing Go code, rebuild the binary before restarting:
+
+```bash
+go build -o ./answer ./cmd/answer
+```
+
+- After changing `ui/`, rebuild `ui/` and then rebuild `./answer`, because `ui/build` is embedded into the binary.
+- After changing `ui-next/`, rebuild `ui-next/` first. `run-ui-next` serves `ui-next/dist` via `ANSWER_STATIC_PATH`, and switches the backend to `ui-next` route mode with `ANSWER_FRONTEND=ui-next`.
+
+## Data migration
+
+This repository includes a CLI command for migrating legacy `aws_article` data into Answer articles.
+
+See:
+
+- [docs/aws-article-import.md](docs/aws-article-import.md)
+
+Quick examples:
+
+```bash
+# Import up to 500 articles for one legacy user, only when pv >= 100
+./answer import-aws-article \
+  -C /app/data \
+  --source-dsn 'root:thinkcmf@tcp(120.26.119.226:3306)/bbs2021' \
+  --target-user-id 12345 \
+  --source-user-id 36298 \
+  --min-views 100 \
+  --limit 500
+
+# Import all articles for another legacy user
+./answer import-aws-article \
+  -C /app/data \
+  --source-dsn 'root:thinkcmf@tcp(120.26.119.226:3306)/bbs2021' \
+  --target-user-id 12345 \
+  --source-user-id 33607 \
+  --limit 0
 ```
 
 ## Contributing

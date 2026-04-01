@@ -4469,6 +4469,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/answer/api/v1/project/demo/lead": {
+            "post": {
+                "description": "提交项目 Demo 线索",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "提交项目 Demo 线索",
+                "parameters": [
+                    {
+                        "description": "project demo lead",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.SubmitProjectDemoLeadReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.SubmitProjectDemoLeadResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/answer/api/v1/project/info": {
             "get": {
                 "description": "获取项目详情",
@@ -9014,6 +9060,9 @@ const docTemplate = `{
                 "answer_count": {
                     "type": "integer"
                 },
+                "author_name": {
+                    "type": "string"
+                },
                 "collection_count": {
                     "type": "integer"
                 },
@@ -10723,6 +10772,11 @@ const docTemplate = `{
                 "title"
             ],
             "properties": {
+                "author_name": {
+                    "description": "article author display name",
+                    "type": "string",
+                    "maxLength": 100
+                },
                 "captcha_code": {
                     "type": "string"
                 },
@@ -10961,6 +11015,10 @@ const docTemplate = `{
                 "title"
             ],
             "properties": {
+                "author_name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
                 "captcha_code": {
                     "type": "string"
                 },
@@ -11988,6 +12046,43 @@ const docTemplate = `{
                 },
                 "slug_name": {
                     "type": "string"
+                }
+            }
+        },
+        "schema.SubmitProjectDemoLeadReq": {
+            "type": "object",
+            "required": [
+                "captcha_code",
+                "captcha_id",
+                "full_name",
+                "phone",
+                "project_id"
+            ],
+            "properties": {
+                "captcha_code": {
+                    "type": "string"
+                },
+                "captcha_id": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "schema.SubmitProjectDemoLeadResp": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 }
             }
         },

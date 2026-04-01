@@ -37,6 +37,9 @@ service_config:
   clean_orphan_uploads_period_hours: 48
   purge_deleted_files_period_days: 30
   disable_content_review: true
+  demo_lead_crm_url: "http://crm.easemob.com/distributor.action"
+  demo_lead_crm_username: "api@easemob.com"
+  demo_lead_crm_password: "eilaakdfo_9QQGGGG"
 ui:
   public_url: "/"
   api_url: "/"

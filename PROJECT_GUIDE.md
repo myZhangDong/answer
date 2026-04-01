@@ -22,10 +22,16 @@
 
 ### 构建链路
 
-1. `make ui` 在 `ui/` 下构建前端静态资源
+1. `make ui` 在 `ui/` 下构建旧前端静态资源
 2. `ui/static.go` 通过 `go:embed` 嵌入 `ui/build`
-3. `make build` 编译后端二进制 `answer`
-4. `internal/router/ui.go` 负责把前端页面和静态资源挂到 Gin
+3. `make ui-next` 在 `ui-next/` 下构建新前端静态资源到 `ui-next/dist`
+4. `make build` 或 `go build -o ./answer ./cmd/answer` 编译后端二进制 `answer`
+5. `internal/router/ui.go` 负责把前端页面和静态资源挂到 Gin
+
+补充说明：
+
+- 默认 embed 链路仍然是旧前端 `ui/build`
+- `ui-next` 当前通过运行时静态目录方式托管，不会自动嵌入 `answer` 二进制
 
 ## 3. 目录结构
 
@@ -46,7 +52,7 @@
 
 - `cmd/answer/main.go`：主程序入口
 - `cmd/main.go`：启动应用、读取配置、装配 pacman application
-- `cmd/command.go`：CLI 命令定义，包含 `run/init/check/upgrade/dump/build/plugin/config/i18n`
+- `cmd/command.go`：CLI 命令定义，包含 `run/init/check/upgrade/dump/build/plugin/config/i18n/run-ui/run-ui-next`
 - `cmd/wire.go`：Wire 注入声明
 - `cmd/wire_gen.go`：Wire 生成文件
 - `cmd/insert_video_data/`：附加数据导入命令
@@ -177,6 +183,7 @@ CLI 默认使用 `-C /data/` 作为数据根目录，安装流程会在这个目
 
 - `LOG_LEVEL`
 - `LOG_PATH`
+- `ANSWER_FRONTEND`
 - `ANSWER_STATIC_PATH`
 - `SWAGGER_HOST`
 - `SWAGGER_ADDRESS_PORT`
@@ -185,6 +192,12 @@ CLI 默认使用 `-C /data/` 作为数据根目录，安装流程会在这个目
 
 前端构建环境变量主要由 `ui/scripts/env.js` 根据 `configs/config.yaml` 生成。
 
+补充：
+
+- `run-ui` 会清空 `ANSWER_STATIC_PATH`，强制使用 embed 的旧前端 `ui/build`
+- `run-ui-next` 会把 `ANSWER_STATIC_PATH` 指向 `ui-next/dist`，并设置 `ANSWER_FRONTEND=ui-next`
+- 如果运行结果和预期前端不一致，优先检查 `ANSWER_STATIC_PATH`、`ANSWER_FRONTEND` 和实际启动命令
+
 ## 6. 构建、运行与测试
 
 ### 根目录常用命令
@@ -192,6 +205,7 @@ CLI 默认使用 `-C /data/` 作为数据根目录，安装流程会在这个目
 ```bash
 make generate
 make ui
+make ui-next
 make build
 make test
 ```
@@ -199,9 +213,27 @@ make test
 说明：
 
 - `make generate` 会安装并执行 `swag`、`wire`、`mockgen`
-- `make ui` 会在 `ui/` 下安装依赖并构建前端
+- `make ui` 会在 `ui/` 下构建旧前端
+- `make ui-next` 会在 `ui-next/` 下构建新前端
 - `make build` 会生成 `answer` 二进制
 - `make test` 当前只跑 `./internal/repo/repo_test`
+
+### 运行命令
+
+```bash
+# 使用旧前端 ui/
+./answer run-ui -C ./data
+
+# 使用新前端 ui-next/
+./answer run-ui-next -C ./data
+```
+
+重要说明：
+
+- `./answer run` 或 `./answer run-ui*` 只是启动当前二进制，不会自动重新编译源码
+- 修改 Go 代码后，必须重新执行 `go build -o ./answer ./cmd/answer` 或 `make build`
+- 修改旧前端 `ui/` 后，必须先 `make ui`，再重新构建 `./answer`
+- 修改 `ui-next/` 后，必须先 `make ui-next`；`run-ui-next` 直接读取 `ui-next/dist`
 
 ### 前端常用命令
 
